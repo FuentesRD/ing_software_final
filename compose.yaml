@@ -1,0 +1,20 @@
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:?DB_NAME requerido}
+      MYSQL_USER: ${DB_USER:?DB_USER requerido}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD requerido}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD requerido}
+
+    ports:
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
