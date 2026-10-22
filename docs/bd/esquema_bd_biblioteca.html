@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Esquema BD Biblioteca</title>
+<style>
+  :root {
+    --bg: #ffffff; --bg-soft: #f6f8fb; --text: #1f2933; --muted: #52606d;
+    --primary: #1d4e89; --primary-soft: #e6eef8; --accent: #b5651d; --border: #d9e2ec;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: light; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6; font-size: 16px; }
+  .page { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; }
+  header.cover { border-bottom: 3px solid var(--primary); padding-bottom: 20px; margin-bottom: 28px; }
+  .kicker { color: var(--accent); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: .85rem; }
+  h1 { font-size: 2rem; margin: 6px 0 8px; color: var(--primary); line-height: 1.25; }
+  h2 { font-size: 1.45rem; color: var(--primary); margin: 48px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.15rem; margin: 28px 0 8px; color: #243b53; }
+  h3.modulo { font-size: 1.25rem; color: var(--primary); margin-top: 40px; }
+  h4 { font-size: .98rem; margin: 18px 0 6px; color: #334e68; }
+  p, li { max-width: 85ch; }
+  .meta { color: var(--muted); font-size: .93rem; }
+  .meta span { display: inline-block; margin-right: 18px; }
+  a { color: var(--primary); }
+  nav.toc { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 16px 22px; margin: 24px 0; }
+  nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
+  nav.toc ul { margin: 4px 0; padding-left: 18px; font-size: .93rem; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: #fff; }
+  .stat b { display: block; font-size: 1.5rem; color: var(--primary); line-height: 1.2; }
+  .stat span { color: var(--muted); font-size: .88rem; }
+  .note, .warn { border-left: 4px solid var(--primary); background: var(--primary-soft); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 14px 0; }
+  .warn { border-color: var(--accent); background: #fbf1e6; }
+  .table-wrap { overflow-x: auto; margin: 8px 0 16px; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { border: 1px solid var(--border); padding: 6px 9px; text-align: left; vertical-align: top; }
+  thead th { background: var(--primary); color: #fff; font-weight: 600; white-space: nowrap; }
+  tbody tr:nth-child(even) td { background: #fafbfd; }
+  table.resultado { width: auto; min-width: 50%; }
+  code, .mono { font-family: Consolas, "Cascadia Mono", "Courier New", monospace; font-size: .88em; }
+  code { background: #eef2f7; padding: 1px 5px; border-radius: 4px; }
+  td.mono { white-space: nowrap; }
+  .small { font-size: .78rem; color: var(--muted); }
+  pre { background: #f4f6f9; border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; overflow-x: auto; font-size: .86rem; line-height: 1.45; }
+  pre code { background: none; padding: 0; }
+  .pk { color: #9b1c1c; font-weight: 700; }
+  .fk { color: var(--primary); font-weight: 700; }
+  .uq { color: #2f7d4f; font-weight: 700; }
+  .extra { color: var(--muted); font-size: .8em; }
+  .valores { font-size: .82rem; }
+  .valores code { background: #f1f5f9; }
+  .tag { display: inline-block; font-size: .72rem; font-weight: 600; padding: 1px 8px; border-radius: 10px; background: var(--primary-soft); color: var(--primary); vertical-align: middle; }
+  .od { display: inline-block; font-size: .78rem; font-weight: 600; padding: 1px 8px; border-radius: 10px; }
+  .od-protect { background: #fde8e8; color: #9b1c1c; }
+  .od-cascade { background: #fdf3d7; color: #a15c07; }
+  .od-set_null { background: #e3f4ea; color: #2f7d4f; }
+  section.tabla { border: 1px solid var(--border); border-radius: 10px; padding: 4px 18px 10px; margin: 18px 0 26px; }
+  section.tabla h3 { margin-top: 16px; }
+  dl.ficha { display: flex; flex-wrap: wrap; gap: 6px 28px; margin: 6px 0 12px; font-size: .9rem; }
+  dl.ficha div { display: flex; gap: 6px; }
+  dl.ficha dt { color: var(--muted); }
+  dl.ficha dd { margin: 0; font-weight: 600; }
+  .mermaid { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow-x: auto; }
+  footer { margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: .88rem; }
+  @media (max-width: 700px) { h1 { font-size: 1.6rem; } }
+  @media print { .page { max-width: none; padding: 0; } section.tabla, pre { break-inside: avoid; } nav.toc { display: none; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="cover">
+  <div class="kicker">Ingeniería de Software · Proyecto Final</div>
+  <h1>Esquema de la base de datos <code>biblioteca</code></h1>
+  <div class="meta">
+    <span><strong>Servidor:</strong> MySQL 8.0.30</span>
+    <span><strong>Motor:</strong> InnoDB</span>
+    <span><strong>Codificación:</strong> utf8mb4 / utf8mb4_0900_ai_ci</span>
+    <span><strong>Generado:</strong> 21/10/2026 11:46</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <strong>Contenido</strong>
+  <ol>
+    <li><a href="#resumen">Resumen</a></li>
+    <li><a href="#convenciones">Convenciones del esquema</a></li>
+    <li><a href="#diagrama">Diagrama entidad-relación</a></li>
+    <li><a href="#relaciones">Relaciones</a></li>
+    <li><a href="#tablas">Diccionario de datos</a>
+      <ul><li><a href="#m-cuentas">Cuentas</a>: <a href="#t-usuario"><code>usuario</code></a>, <a href="#t-carrera"><code>carrera</code></a>, <a href="#t-departamento"><code>departamento</code></a>, <a href="#t-estudiante"><code>estudiante</code></a>, <a href="#t-profesor"><code>profesor</code></a></li><li><a href="#m-catalogo">Catálogo</a>: <a href="#t-categoria"><code>categoria</code></a>, <a href="#t-editorial"><code>editorial</code></a>, <a href="#t-autor"><code>autor</code></a>, <a href="#t-libro"><code>libro</code></a>, <a href="#t-libro_autor"><code>libro_autor</code></a>, <a href="#t-ejemplar"><code>ejemplar</code></a>, <a href="#t-sugerencia_adquisicion"><code>sugerencia_adquisicion</code></a></li><li><a href="#m-prestamos">Préstamos</a>: <a href="#t-politica_prestamo"><code>politica_prestamo</code></a>, <a href="#t-prestamo"><code>prestamo</code></a>, <a href="#t-reserva"><code>reserva</code></a></li><li><a href="#m-multas">Multas</a>: <a href="#t-multa"><code>multa</code></a>, <a href="#t-pago"><code>pago</code></a></li><li><a href="#m-notificaciones">Notificaciones</a>: <a href="#t-notificacion"><code>notificacion</code></a></li></ul></li>
+    <li><a href="#reglas">Reglas de negocio e integridad</a></li>
+    <li><a href="#framework">Tablas del framework Django</a></li>
+    <li><a href="#diferencias">Diferencias con el script SQL de diseño</a></li>
+    <li><a href="#consultas">Consultas de ejemplo</a></li>
+  </ol>
+</nav>
+
+<h2 id="resumen">1. Resumen</h2>
+<p>La base de datos <code>biblioteca</code> almacena el sistema de gestión de biblioteca escolar. Las tablas se generan con las
+migraciones de Django a partir de los modelos de cinco apps (<code>cuentas</code>, <code>catalogo</code>, <code>prestamos</code>,
+<code>multas</code> y <code>notificaciones</code>). Este documento se generó leyendo <code>information_schema</code> del servidor y los
+metadatos de los modelos, por lo que refleja el esquema tal como existe.</p>
+<div class="stats">
+  <div class="stat"><b>18</b><span>tablas del dominio</span></div>
+  <div class="stat"><b>9</b><span>tablas de Django</span></div>
+  <div class="stat"><b>32</b><span>llaves foráneas</span></div>
+  <div class="stat"><b>80</b><span>índices</span></div>
+  <div class="stat"><b>25</b><span>restricciones CHECK</span></div>
+  <div class="stat"><b>521</b><span>filas en tablas del dominio</span></div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Módulo</th><th>Tabla</th><th>Descripción</th><th>Columnas</th><th>Filas</th></tr></thead><tbody><tr><td>Cuentas</td><td><a href="#t-usuario"><code>usuario</code></a></td><td>Usuarios del sistema: estudiantes, profesores y bibliotecarios.</td><td>15</td><td>28</td></tr><tr><td>Cuentas</td><td><a href="#t-carrera"><code>carrera</code></a></td><td>Catálogo de carreras de la escuela a las que pertenecen los estudiantes.</td><td>3</td><td>6</td></tr><tr><td>Cuentas</td><td><a href="#t-departamento"><code>departamento</code></a></td><td>Catálogo de departamentos académicos a los que están adscritos los profesores.</td><td>2</td><td>5</td></tr><tr><td>Cuentas</td><td><a href="#t-estudiante"><code>estudiante</code></a></td><td>Perfil académico del estudiante.</td><td>4</td><td>20</td></tr><tr><td>Cuentas</td><td><a href="#t-profesor"><code>profesor</code></a></td><td>Perfil del profesor.</td><td>3</td><td>5</td></tr><tr><td>Catálogo</td><td><a href="#t-categoria"><code>categoria</code></a></td><td>Clasificación temática de los libros.</td><td>3</td><td>10</td></tr><tr><td>Catálogo</td><td><a href="#t-editorial"><code>editorial</code></a></td><td>Editoriales de los libros del acervo.</td><td>3</td><td>14</td></tr><tr><td>Catálogo</td><td><a href="#t-autor"><code>autor</code></a></td><td>Autores.</td><td>4</td><td>71</td></tr><tr><td>Catálogo</td><td><a href="#t-libro"><code>libro</code></a></td><td>Título u obra del catálogo.</td><td>14</td><td>50</td></tr><tr><td>Catálogo</td><td><a href="#t-libro_autor"><code>libro_autor</code></a></td><td>Tabla asociativa de la relación muchos a muchos entre libro y autor; guarda el orden en que aparece cada autor.</td><td>4</td><td>74</td></tr><tr><td>Catálogo</td><td><a href="#t-ejemplar"><code>ejemplar</code></a></td><td>Copia física de un libro, identificada por su código de inventario.</td><td>7</td><td>114</td></tr><tr><td>Catálogo</td><td><a href="#t-sugerencia_adquisicion"><code>sugerencia_adquisicion</code></a></td><td>Sugerencias de compra de libros enviadas por profesores y la respuesta del bibliotecario.</td><td>9</td><td>3</td></tr><tr><td>Préstamos</td><td><a href="#t-politica_prestamo"><code>politica_prestamo</code></a></td><td>Parámetros de préstamo por tipo de usuario lector (una fila por tipo).</td><td>9</td><td>2</td></tr><tr><td>Préstamos</td><td><a href="#t-prestamo"><code>prestamo</code></a></td><td>Préstamo de un ejemplar a un usuario lector.</td><td>13</td><td>91</td></tr><tr><td>Préstamos</td><td><a href="#t-reserva"><code>reserva</code></a></td><td>Reserva de un libro sin ejemplares disponibles.</td><td>7</td><td>6</td></tr><tr><td>Multas</td><td><a href="#t-multa"><code>multa</code></a></td><td>Multa generada por entrega tardía, daño o pérdida de un ejemplar.</td><td>10</td><td>7</td></tr><tr><td>Multas</td><td><a href="#t-pago"><code>pago</code></a></td><td>Pagos registrados en mostrador.</td><td>7</td><td>3</td></tr><tr><td>Notificaciones</td><td><a href="#t-notificacion"><code>notificacion</code></a></td><td>Avisos dentro de la aplicación para los usuarios: vencimientos, reservas disponibles y multas.</td><td>6</td><td>12</td></tr></tbody></table></div>
+
+<h2 id="convenciones">2. Convenciones del esquema</h2>
+<div class="table-wrap"><table><thead><tr><th>Aspecto</th><th>Convención</th></tr></thead><tbody>
+<tr><td>Llaves primarias</td><td><code>id BIGINT AUTO_INCREMENT</code> (<code>BigAutoField</code>). Excepción: <code>estudiante</code> y <code>profesor</code> usan <code>usuario_id</code> como llave primaria (relación uno a uno).</td></tr>
+<tr><td>Llaves foráneas</td><td>Columna <code>&lt;relación&gt;_id</code> de tipo <code>BIGINT</code>, con índice. Nombre de la restricción generado por Django: <code>&lt;tabla&gt;_&lt;columna&gt;_&lt;hash&gt;_fk_&lt;tabla_ref&gt;_id</code>.</td></tr>
+<tr><td>Comportamiento al borrar</td><td>En MySQL todas las llaves foráneas tienen <code>ON DELETE NO ACTION</code>. El comportamiento real lo aplica Django según <code>on_delete</code>:
+  <span class="od od-protect">PROTECT</span> impide el borrado, <span class="od od-cascade">CASCADE</span> borra en cascada y <span class="od od-set_null">SET_NULL</span> deja la columna en NULL.
+  Si se borra con SQL directo, MySQL rechaza el borrado de cualquier fila referenciada.</td></tr>
+<tr><td>Valores por defecto</td><td>Django aplica los valores por defecto al crear objetos; las columnas no tienen cláusula <code>DEFAULT</code> en MySQL. Al insertar con SQL directo hay que dar todos los valores obligatorios.</td></tr>
+<tr><td>Dominios (estados, tipos, motivos)</td><td><code>VARCHAR</code> con restricción <code>CHECK ... IN (...)</code> llamada <code>ck_&lt;tabla&gt;_&lt;campo&gt;</code>, que coincide con las <code>TextChoices</code> del modelo. Se prefirió a <code>ENUM</code> para poder cambiar valores con migraciones.</td></tr>
+<tr><td>Booleanos</td><td><code>TINYINT(1)</code>: 0 = falso, 1 = verdadero.</td></tr>
+<tr><td>Fechas y horas</td><td><code>DATETIME(6)</code> con microsegundos, guardado en <strong>UTC</strong> (<code>USE_TZ = True</code>); Django convierte a <code>America/Mexico_City</code> al mostrar. Las fechas sin hora (<code>fecha_vencimiento</code>, <code>fecha_adquisicion</code>) son <code>DATE</code>.</td></tr>
+<tr><td>Montos</td><td><code>DECIMAL(10,2)</code> u <code>DECIMAL(8,2)</code>; nunca <code>FLOAT</code>, para evitar errores de redondeo.</td></tr>
+<tr><td>Enteros no negativos</td><td>Los campos <code>PositiveSmallIntegerField</code> se crean como <code>SMALLINT UNSIGNED</code> con un CHECK <code>&gt;= 0</code> generado por Django (<code>&lt;tabla&gt;_chk_N</code>).</td></tr>
+<tr><td>Baja lógica</td><td><code>usuario.is_active</code> y <code>libro.activo</code>; los préstamos, multas y pagos nunca se borran (RN-16).</td></tr>
+</tbody></table></div>
+
+<h2 id="diagrama">3. Diagrama entidad-relación</h2>
+<p>Generado a partir de las llaves foráneas reales. <strong>PK</strong> llave primaria, <strong>FK</strong> llave foránea,
+<strong>UK</strong> única. La etiqueta de cada relación es la columna foránea. Las tablas del framework se omiten.</p>
+<div class="mermaid">
+erDiagram
+  usuario {
+    bigint id PK
+    varchar password
+    datetime last_login
+    tinyint is_superuser
+    varchar username UK
+    varchar first_name
+    varchar last_name
+    tinyint is_staff
+    tinyint is_active
+    datetime date_joined
+    varchar email UK
+    varchar tipo_usuario
+    varchar telefono
+    tinyint bloqueado
+    varchar motivo_bloqueo
+  }
+  carrera {
+    bigint id PK
+    varchar clave UK
+    varchar nombre
+  }
+  departamento {
+    bigint id PK
+    varchar nombre UK
+  }
+  estudiante {
+    bigint usuario_id PK, FK
+    varchar matricula UK
+    smallint semestre
+    bigint carrera_id FK
+  }
+  profesor {
+    bigint usuario_id PK, FK
+    varchar num_empleado UK
+    bigint departamento_id FK
+  }
+  categoria {
+    bigint id PK
+    varchar nombre UK
+    varchar descripcion
+  }
+  editorial {
+    bigint id PK
+    varchar nombre UK
+    varchar pais
+  }
+  autor {
+    bigint id PK
+    varchar nombre
+    varchar apellidos
+    varchar nacionalidad
+  }
+  libro {
+    bigint id PK
+    varchar isbn UK
+    varchar titulo
+    varchar subtitulo
+    smallint anio_publicacion
+    varchar edicion
+    varchar idioma
+    smallint num_paginas
+    longtext descripcion
+    varchar portada
+    decimal costo_reposicion
+    tinyint activo
+    bigint categoria_id FK
+    bigint editorial_id FK
+  }
+  libro_autor {
+    bigint id PK
+    smallint orden
+    bigint autor_id FK
+    bigint libro_id FK
+  }
+  ejemplar {
+    bigint id PK
+    varchar codigo_inventario UK
+    varchar ubicacion
+    varchar estado
+    date fecha_adquisicion
+    varchar observaciones
+    bigint libro_id FK
+  }
+  sugerencia_adquisicion {
+    bigint id PK
+    varchar titulo
+    varchar autores
+    varchar isbn
+    longtext justificacion
+    varchar estado
+    varchar respuesta
+    datetime fecha
+    bigint profesor_id FK
+  }
+  politica_prestamo {
+    bigint id PK
+    varchar tipo_usuario UK
+    smallint dias_prestamo
+    smallint max_libros
+    smallint max_renovaciones
+    decimal multa_por_dia
+    decimal multa_maxima
+    smallint horas_para_recoger
+    datetime actualizado_en
+  }
+  prestamo {
+    bigint id PK
+    varchar estado
+    datetime fecha_solicitud
+    datetime fecha_limite_recoger
+    datetime fecha_prestamo
+    date fecha_vencimiento
+    datetime fecha_devolucion
+    smallint num_renovaciones
+    varchar observaciones
+    bigint ejemplar_id FK
+    bigint entregado_por_id FK
+    bigint recibido_por_id FK
+    bigint usuario_id FK
+  }
+  reserva {
+    bigint id PK
+    varchar estado
+    datetime fecha_reserva
+    datetime fecha_expiracion
+    bigint ejemplar_asignado_id FK
+    bigint libro_id FK
+    bigint usuario_id FK
+  }
+  multa {
+    bigint id PK
+    varchar motivo
+    smallint dias_retraso
+    decimal monto
+    varchar estado
+    datetime fecha_generacion
+    varchar justificacion_condonacion
+    bigint condonada_por_id FK
+    bigint prestamo_id FK
+    bigint usuario_id FK
+  }
+  pago {
+    bigint id PK
+    decimal monto
+    varchar metodo
+    varchar folio_recibo UK
+    datetime fecha_pago
+    bigint multa_id FK
+    bigint registrado_por_id FK
+  }
+  notificacion {
+    bigint id PK
+    varchar tipo
+    varchar mensaje
+    tinyint leida
+    datetime fecha
+    bigint usuario_id FK
+  }
+  carrera ||--o{ estudiante : &quot;carrera_id&quot;
+  usuario ||--o| estudiante : &quot;usuario_id&quot;
+  departamento ||--o{ profesor : &quot;departamento_id&quot;
+  usuario ||--o| profesor : &quot;usuario_id&quot;
+  categoria ||--o{ libro : &quot;categoria_id&quot;
+  editorial ||--o{ libro : &quot;editorial_id&quot;
+  autor ||--o{ libro_autor : &quot;autor_id&quot;
+  libro ||--o{ libro_autor : &quot;libro_id&quot;
+  libro ||--o{ ejemplar : &quot;libro_id&quot;
+  profesor ||--o{ sugerencia_adquisicion : &quot;profesor_id&quot;
+  ejemplar ||--o{ prestamo : &quot;ejemplar_id&quot;
+  usuario |o--o{ prestamo : &quot;entregado_por_id&quot;
+  usuario |o--o{ prestamo : &quot;recibido_por_id&quot;
+  usuario ||--o{ prestamo : &quot;usuario_id&quot;
+  ejemplar |o--o{ reserva : &quot;ejemplar_asignado_id&quot;
+  libro ||--o{ reserva : &quot;libro_id&quot;
+  usuario ||--o{ reserva : &quot;usuario_id&quot;
+  usuario |o--o{ multa : &quot;condonada_por_id&quot;
+  prestamo ||--o{ multa : &quot;prestamo_id&quot;
+  usuario ||--o{ multa : &quot;usuario_id&quot;
+  multa ||--o{ pago : &quot;multa_id&quot;
+  usuario ||--o{ pago : &quot;registrado_por_id&quot;
+  usuario ||--o{ notificacion : &quot;usuario_id&quot;
+</div>
+
+<h2 id="relaciones">4. Relaciones</h2>
+<p>Cardinalidad expresada como <em>padre : hijos</em>. «0..1 : N» indica que la llave foránea admite NULL.</p>
+<div class="table-wrap"><table><thead><tr><th>Tabla padre</th><th>Tabla hija</th><th>Columna</th><th>Cardinalidad</th><th>Al borrar (Django)</th></tr></thead><tbody>
+<tr><td><a href="#t-carrera"><code>carrera</code></a></td><td><a href="#t-estudiante"><code>estudiante</code></a></td><td><code>carrera_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-estudiante"><code>estudiante</code></a></td><td><code>usuario_id</code></td><td>1 : 0..1</td><td>CASCADE</td></tr>
+<tr><td><a href="#t-departamento"><code>departamento</code></a></td><td><a href="#t-profesor"><code>profesor</code></a></td><td><code>departamento_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-profesor"><code>profesor</code></a></td><td><code>usuario_id</code></td><td>1 : 0..1</td><td>CASCADE</td></tr>
+<tr><td><a href="#t-categoria"><code>categoria</code></a></td><td><a href="#t-libro"><code>libro</code></a></td><td><code>categoria_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-editorial"><code>editorial</code></a></td><td><a href="#t-libro"><code>libro</code></a></td><td><code>editorial_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-autor"><code>autor</code></a></td><td><a href="#t-libro_autor"><code>libro_autor</code></a></td><td><code>autor_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-libro"><code>libro</code></a></td><td><a href="#t-libro_autor"><code>libro_autor</code></a></td><td><code>libro_id</code></td><td>1 : N</td><td>CASCADE</td></tr>
+<tr><td><a href="#t-libro"><code>libro</code></a></td><td><a href="#t-ejemplar"><code>ejemplar</code></a></td><td><code>libro_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-profesor"><code>profesor</code></a></td><td><a href="#t-sugerencia_adquisicion"><code>sugerencia_adquisicion</code></a></td><td><code>profesor_id</code></td><td>1 : N</td><td>CASCADE</td></tr>
+<tr><td><a href="#t-ejemplar"><code>ejemplar</code></a></td><td><a href="#t-prestamo"><code>prestamo</code></a></td><td><code>ejemplar_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-prestamo"><code>prestamo</code></a></td><td><code>entregado_por_id</code></td><td>0..1 : N</td><td>SET_NULL</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-prestamo"><code>prestamo</code></a></td><td><code>recibido_por_id</code></td><td>0..1 : N</td><td>SET_NULL</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-prestamo"><code>prestamo</code></a></td><td><code>usuario_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-ejemplar"><code>ejemplar</code></a></td><td><a href="#t-reserva"><code>reserva</code></a></td><td><code>ejemplar_asignado_id</code></td><td>0..1 : N</td><td>SET_NULL</td></tr>
+<tr><td><a href="#t-libro"><code>libro</code></a></td><td><a href="#t-reserva"><code>reserva</code></a></td><td><code>libro_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-reserva"><code>reserva</code></a></td><td><code>usuario_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-multa"><code>multa</code></a></td><td><code>condonada_por_id</code></td><td>0..1 : N</td><td>SET_NULL</td></tr>
+<tr><td><a href="#t-prestamo"><code>prestamo</code></a></td><td><a href="#t-multa"><code>multa</code></a></td><td><code>prestamo_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-multa"><code>multa</code></a></td><td><code>usuario_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-multa"><code>multa</code></a></td><td><a href="#t-pago"><code>pago</code></a></td><td><code>multa_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-pago"><code>pago</code></a></td><td><code>registrado_por_id</code></td><td>1 : N</td><td>PROTECT</td></tr>
+<tr><td><a href="#t-usuario"><code>usuario</code></a></td><td><a href="#t-notificacion"><code>notificacion</code></a></td><td><code>usuario_id</code></td><td>1 : N</td><td>CASCADE</td></tr>
+</tbody></table></div>
+<div class="note"><code>usuario</code> participa en varios roles dentro de una misma tabla: en <code>prestamo</code> es el lector
+(<code>usuario_id</code>), el bibliotecario que entrega (<code>entregado_por_id</code>) y el que recibe (<code>recibido_por_id</code>);
+en <code>multa</code> es el deudor y quien condona; en <code>pago</code>, quien registra el pago.</div>
+
+<h2 id="tablas">5. Diccionario de datos</h2>
+<h3 class="modulo" id="m-cuentas">5.1 Módulo Cuentas <span class="tag">app cuentas</span></h3><section class="tabla" id="t-usuario">
+<h3>5.1.1 <code>usuario</code></h3>
+<p>Usuarios del sistema: estudiantes, profesores y bibliotecarios. Extiende el usuario estándar de Django (AbstractUser) con el rol y los datos de bloqueo. Es el modelo indicado en AUTH_USER_MODEL.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>cuentas.Usuario</code></dd></div>
+<div><dt>Filas actuales</dt><dd>28</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-01 a CU-03, CU-07, CU-20, CU-22</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador del usuario.</td></tr>
+<tr><td><code>password</code></td><td class="mono">varchar(128)</td><td>No</td><td></td><td class="mono">—</td><td>Hash de la contraseña (algoritmo PBKDF2 de Django). Nunca se guarda la contraseña en claro.</td></tr>
+<tr><td><code>last_login</code></td><td class="mono">datetime(6)</td><td>Sí</td><td></td><td class="mono">—</td><td>Fecha y hora del último inicio de sesión.</td></tr>
+<tr><td><code>is_superuser</code></td><td class="mono">tinyint(1)</td><td>No</td><td></td><td class="mono">FALSE</td><td>Indica si tiene todos los permisos sin asignarlos explícitamente.</td></tr>
+<tr><td><code>username</code></td><td class="mono">varchar(150)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Nombre de usuario para iniciar sesión (matrícula, número de empleado o alias).</td></tr>
+<tr><td><code>first_name</code></td><td class="mono">varchar(150)</td><td>No</td><td></td><td class="mono">—</td><td>Nombre(s).</td></tr>
+<tr><td><code>last_name</code></td><td class="mono">varchar(150)</td><td>No</td><td></td><td class="mono">—</td><td>Apellidos.</td></tr>
+<tr><td><code>is_staff</code></td><td class="mono">tinyint(1)</td><td>No</td><td></td><td class="mono">FALSE</td><td>Indica si puede entrar al sitio de administración de Django.</td></tr>
+<tr><td><code>is_active</code></td><td class="mono">tinyint(1)</td><td>No</td><td></td><td class="mono">TRUE</td><td>Cuenta activa. Se usa para dar de baja lógica sin borrar el historial.</td></tr>
+<tr><td><code>date_joined</code></td><td class="mono">datetime(6)</td><td>No</td><td></td><td class="mono">timezone.now()</td><td>Fecha y hora de alta en el sistema.</td></tr>
+<tr><td><code>email</code></td><td class="mono">varchar(254)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Correo electrónico; único en el sistema.</td></tr>
+<tr><td><code>tipo_usuario</code></td><td class="mono">varchar(15)</td><td>No</td><td></td><td class="mono">—</td><td>Rol del usuario; determina permisos y la política de préstamo que le aplica.<br><span class="valores"><code>ESTUDIANTE</code> · <code>PROFESOR</code> · <code>BIBLIOTECARIO</code></span></td></tr>
+<tr><td><code>telefono</code></td><td class="mono">varchar(20)</td><td>Sí</td><td></td><td class="mono">—</td><td>Teléfono de contacto.</td></tr>
+<tr><td><code>bloqueado</code></td><td class="mono">tinyint(1)</td><td>No</td><td></td><td class="mono">FALSE</td><td>Bloqueo administrativo impuesto por el bibliotecario; impide préstamos (CU-22).</td></tr>
+<tr><td><code>motivo_bloqueo</code></td><td class="mono">varchar(255)</td><td>Sí</td><td></td><td class="mono">—</td><td>Justificación del bloqueo.</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">email</td><td><code>email</code></td><td>Único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+<tr><td class="mono small">username</td><td><code>username</code></td><td>Único</td></tr>
+<tr><td class="mono small">usuario_tipo_usuario_88cac358</td><td><code>tipo_usuario</code></td><td>No único</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_usuario_tipo</td><td><code>(tipo_usuario in (&#x27;ESTUDIANTE&#x27;,&#x27;PROFESOR&#x27;,&#x27;BIBLIOTECARIO&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+</tbody></table></div>
+<h4>Valores de <code>tipo_usuario</code></h4><div class="table-wrap"><table><thead><tr><th>Valor</th><th>Etiqueta</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>ESTUDIANTE</code></td><td>Estudiante</td><td>Alumno; préstamo corto.</td></tr>
+<tr><td><code>PROFESOR</code></td><td>Profesor</td><td>Docente; préstamo más largo y más libros.</td></tr>
+<tr><td><code>BIBLIOTECARIO</code></td><td>Bibliotecario</td><td>Administra la biblioteca; no es lector.</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-carrera">
+<h3>5.1.2 <code>carrera</code></h3>
+<p>Catálogo de carreras de la escuela a las que pertenecen los estudiantes.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>cuentas.Carrera</code></dd></div>
+<div><dt>Filas actuales</dt><dd>6</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-20</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>clave</code></td><td class="mono">varchar(10)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Clave corta de la carrera (p. ej. ISW).</td></tr>
+<tr><td><code>nombre</code></td><td class="mono">varchar(120)</td><td>No</td><td></td><td class="mono">—</td><td>Nombre completo de la carrera.</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">clave</td><td><code>clave</code></td><td>Único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-departamento">
+<h3>5.1.3 <code>departamento</code></h3>
+<p>Catálogo de departamentos académicos a los que están adscritos los profesores.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>cuentas.Departamento</code></dd></div>
+<div><dt>Filas actuales</dt><dd>5</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-20</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>nombre</code></td><td class="mono">varchar(120)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Nombre del departamento.</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">nombre</td><td><code>nombre</code></td><td>Único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-estudiante">
+<h3>5.1.4 <code>estudiante</code></h3>
+<p>Perfil académico del estudiante. Relación uno a uno con usuario: la llave primaria es a la vez llave foránea hacia usuario.id.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>cuentas.Estudiante</code></dd></div>
+<div><dt>Filas actuales</dt><dd>20</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-20, CU-21</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>usuario_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="pk">PK</span> <span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Llave primaria y foránea hacia usuario (relación uno a uno).</td></tr>
+<tr><td><code>matricula</code></td><td class="mono">varchar(20)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Matrícula escolar; única.</td></tr>
+<tr><td><code>semestre</code></td><td class="mono">smallint unsigned</td><td>No</td><td></td><td class="mono">—</td><td>Semestre que cursa (1 a 12).</td></tr>
+<tr><td><code>carrera_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-carrera">carrera</a></td><td class="mono">—</td><td>Carrera en la que está inscrito.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>carrera_id</code></td><td><a href="#t-carrera"><code>carrera.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">estudiante_carrera_id_0933109a_fk_carrera_id</td></tr>
+<tr><td><code>usuario_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-cascade" title="Al borrar el registro referenciado se borran también estas filas.">CASCADE</span></td><td class="mono">NO ACTION</td><td class="mono small">estudiante_usuario_id_5d3daafc_fk_usuario_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">estudiante_carrera_id_0933109a_fk_carrera_id</td><td><code>carrera_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">matricula</td><td><code>matricula</code></td><td>Único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>usuario_id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_estudiante_semestre</td><td><code>((semestre &gt;= 1) and (semestre &lt;= 12))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+<tr><td class="mono small">estudiante_chk_1</td><td><code>(semestre &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-profesor">
+<h3>5.1.5 <code>profesor</code></h3>
+<p>Perfil del profesor. Relación uno a uno con usuario, igual que estudiante.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>cuentas.Profesor</code></dd></div>
+<div><dt>Filas actuales</dt><dd>5</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-16, CU-20</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>usuario_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="pk">PK</span> <span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Llave primaria y foránea hacia usuario (relación uno a uno).</td></tr>
+<tr><td><code>num_empleado</code></td><td class="mono">varchar(20)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Número de empleado; único.</td></tr>
+<tr><td><code>departamento_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-departamento">departamento</a></td><td class="mono">—</td><td>Departamento de adscripción.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>departamento_id</code></td><td><a href="#t-departamento"><code>departamento.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">profesor_departamento_id_8fa3e510_fk_departamento_id</td></tr>
+<tr><td><code>usuario_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-cascade" title="Al borrar el registro referenciado se borran también estas filas.">CASCADE</span></td><td class="mono">NO ACTION</td><td class="mono small">profesor_usuario_id_88d13402_fk_usuario_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">num_empleado</td><td><code>num_empleado</code></td><td>Único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>usuario_id</code></td><td>Llave primaria</td></tr>
+<tr><td class="mono small">profesor_departamento_id_8fa3e510_fk_departamento_id</td><td><code>departamento_id</code></td><td>No único</td></tr>
+</tbody></table></div>
+</section><h3 class="modulo" id="m-catalogo">5.2 Módulo Catálogo <span class="tag">app catalogo</span></h3><section class="tabla" id="t-categoria">
+<h3>5.2.1 <code>categoria</code></h3>
+<p>Clasificación temática de los libros.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>catalogo.Categoria</code></dd></div>
+<div><dt>Filas actuales</dt><dd>10</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-04, CU-19</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>nombre</code></td><td class="mono">varchar(100)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Nombre de la categoría; único.</td></tr>
+<tr><td><code>descripcion</code></td><td class="mono">varchar(255)</td><td>Sí</td><td></td><td class="mono">—</td><td>Descripción opcional.</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">nombre</td><td><code>nombre</code></td><td>Único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-editorial">
+<h3>5.2.2 <code>editorial</code></h3>
+<p>Editoriales de los libros del acervo.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>catalogo.Editorial</code></dd></div>
+<div><dt>Filas actuales</dt><dd>14</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-19</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>nombre</code></td><td class="mono">varchar(150)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Nombre de la editorial; único.</td></tr>
+<tr><td><code>pais</code></td><td class="mono">varchar(60)</td><td>Sí</td><td></td><td class="mono">—</td><td>País de origen.</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">nombre</td><td><code>nombre</code></td><td>Único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-autor">
+<h3>5.2.3 <code>autor</code></h3>
+<p>Autores. Un autor puede tener varios libros y un libro varios autores (ver libro_autor).</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>catalogo.Autor</code></dd></div>
+<div><dt>Filas actuales</dt><dd>71</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-04, CU-19</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>nombre</code></td><td class="mono">varchar(100)</td><td>No</td><td></td><td class="mono">—</td><td>Nombre(s) del autor.</td></tr>
+<tr><td><code>apellidos</code></td><td class="mono">varchar(150)</td><td>No</td><td></td><td class="mono">—</td><td>Apellidos; indexado para búsquedas.</td></tr>
+<tr><td><code>nacionalidad</code></td><td class="mono">varchar(60)</td><td>Sí</td><td></td><td class="mono">—</td><td>Nacionalidad.</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">autor_apellidos_df3c325e</td><td><code>apellidos</code></td><td>No único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-libro">
+<h3>5.2.4 <code>libro</code></h3>
+<p>Título u obra del catálogo. No representa un objeto físico: las copias físicas se registran en ejemplar. Las reservas se hacen sobre el libro y los préstamos sobre el ejemplar.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>catalogo.Libro</code></dd></div>
+<div><dt>Filas actuales</dt><dd>50</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-04, CU-05, CU-17</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>isbn</code></td><td class="mono">varchar(13)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>ISBN-10 o ISBN-13 sin guiones; único. Validado en Django con expresión regular.</td></tr>
+<tr><td><code>titulo</code></td><td class="mono">varchar(255)</td><td>No</td><td></td><td class="mono">—</td><td>Título; indexado para búsquedas del catálogo.</td></tr>
+<tr><td><code>subtitulo</code></td><td class="mono">varchar(255)</td><td>Sí</td><td></td><td class="mono">—</td><td>Subtítulo.</td></tr>
+<tr><td><code>anio_publicacion</code></td><td class="mono">smallint unsigned</td><td>Sí</td><td></td><td class="mono">—</td><td>Año de publicación de la edición.</td></tr>
+<tr><td><code>edicion</code></td><td class="mono">varchar(30)</td><td>Sí</td><td></td><td class="mono">—</td><td>Número o descripción de la edición.</td></tr>
+<tr><td><code>idioma</code></td><td class="mono">varchar(30)</td><td>No</td><td></td><td class="mono">&#x27;Español&#x27;</td><td>Idioma del libro.</td></tr>
+<tr><td><code>num_paginas</code></td><td class="mono">smallint unsigned</td><td>Sí</td><td></td><td class="mono">—</td><td>Número de páginas.</td></tr>
+<tr><td><code>descripcion</code></td><td class="mono">longtext</td><td>Sí</td><td></td><td class="mono">—</td><td>Sinopsis.</td></tr>
+<tr><td><code>portada</code></td><td class="mono">varchar(100)</td><td>Sí</td><td></td><td class="mono">—</td><td>Ruta relativa (dentro de MEDIA_ROOT) de la imagen de portada.</td></tr>
+<tr><td><code>costo_reposicion</code></td><td class="mono">decimal(10,2)</td><td>No</td><td></td><td class="mono">0</td><td>Costo de reposición; se usa como monto de la multa por pérdida (RN-13).</td></tr>
+<tr><td><code>activo</code></td><td class="mono">tinyint(1)</td><td>No</td><td></td><td class="mono">TRUE</td><td>Baja lógica del título en el catálogo.</td></tr>
+<tr><td><code>categoria_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-categoria">categoria</a></td><td class="mono">—</td><td>Categoría temática.</td></tr>
+<tr><td><code>editorial_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-editorial">editorial</a></td><td class="mono">—</td><td>Editorial.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>categoria_id</code></td><td><a href="#t-categoria"><code>categoria.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">libro_categoria_id_f3d2070e_fk_categoria_id</td></tr>
+<tr><td><code>editorial_id</code></td><td><a href="#t-editorial"><code>editorial.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">libro_editorial_id_4edb2830_fk_editorial_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">isbn</td><td><code>isbn</code></td><td>Único</td></tr>
+<tr><td class="mono small">libro_categoria_id_f3d2070e_fk_categoria_id</td><td><code>categoria_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">libro_editorial_id_4edb2830_fk_editorial_id</td><td><code>editorial_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">libro_titulo_98488a16</td><td><code>titulo</code></td><td>No único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">libro_chk_1</td><td><code>(anio_publicacion &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+<tr><td class="mono small">libro_chk_2</td><td><code>(num_paginas &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-libro_autor">
+<h3>5.2.5 <code>libro_autor</code></h3>
+<p>Tabla asociativa de la relación muchos a muchos entre libro y autor; guarda el orden en que aparece cada autor.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>catalogo.LibroAutor</code></dd></div>
+<div><dt>Filas actuales</dt><dd>74</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-17</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>orden</code></td><td class="mono">smallint unsigned</td><td>No</td><td></td><td class="mono">1</td><td>Posición del autor en la portada (1 = primer autor).</td></tr>
+<tr><td><code>autor_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-autor">autor</a></td><td class="mono">—</td><td>Autor.</td></tr>
+<tr><td><code>libro_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-libro">libro</a></td><td class="mono">—</td><td>Libro.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>autor_id</code></td><td><a href="#t-autor"><code>autor.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">libro_autor_autor_id_c1bb0e75_fk_autor_id</td></tr>
+<tr><td><code>libro_id</code></td><td><a href="#t-libro"><code>libro.id</code></a></td><td><span class="od od-cascade" title="Al borrar el registro referenciado se borran también estas filas.">CASCADE</span></td><td class="mono">NO ACTION</td><td class="mono small">libro_autor_libro_id_efbd80c6_fk_libro_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">libro_autor_autor_id_c1bb0e75_fk_autor_id</td><td><code>autor_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+<tr><td class="mono small">uq_libro_autor</td><td><code>libro_id, autor_id</code></td><td>Único</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">libro_autor_chk_1</td><td><code>(orden &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-ejemplar">
+<h3>5.2.6 <code>ejemplar</code></h3>
+<p>Copia física de un libro, identificada por su código de inventario. Su estado indica si puede prestarse (RN-15).</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>catalogo.Ejemplar</code></dd></div>
+<div><dt>Filas actuales</dt><dd>114</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-06, CU-18, CU-23 a CU-27</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>codigo_inventario</code></td><td class="mono">varchar(30)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Código de barras o de inventario; único.</td></tr>
+<tr><td><code>ubicacion</code></td><td class="mono">varchar(50)</td><td>Sí</td><td></td><td class="mono">—</td><td>Estante o sección donde se guarda.</td></tr>
+<tr><td><code>estado</code></td><td class="mono">varchar(15)</td><td>No</td><td></td><td class="mono">&#x27;DISPONIBLE&#x27;</td><td>Estado físico y de disponibilidad del ejemplar.<br><span class="valores"><code>DISPONIBLE</code> · <code>RESERVADO</code> · <code>PRESTADO</code> · <code>EN_REPARACION</code> · <code>PERDIDO</code> · <code>BAJA</code></span></td></tr>
+<tr><td><code>fecha_adquisicion</code></td><td class="mono">date</td><td>Sí</td><td></td><td class="mono">—</td><td>Fecha en que se adquirió.</td></tr>
+<tr><td><code>observaciones</code></td><td class="mono">varchar(255)</td><td>Sí</td><td></td><td class="mono">—</td><td>Notas del bibliotecario (daños, motivo de baja, etc.).</td></tr>
+<tr><td><code>libro_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-libro">libro</a></td><td class="mono">—</td><td>Libro al que pertenece la copia.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>libro_id</code></td><td><a href="#t-libro"><code>libro.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">ejemplar_libro_id_65e09279_fk_libro_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">codigo_inventario</td><td><code>codigo_inventario</code></td><td>Único</td></tr>
+<tr><td class="mono small">ejemplar_estado_677fbbee</td><td><code>estado</code></td><td>No único</td></tr>
+<tr><td class="mono small">ejemplar_libro_id_65e09279_fk_libro_id</td><td><code>libro_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_ejemplar_estado</td><td><code>(estado in (&#x27;DISPONIBLE&#x27;,&#x27;RESERVADO&#x27;,&#x27;PRESTADO&#x27;,&#x27;EN_REPARACION&#x27;,&#x27;PERDIDO&#x27;,&#x27;BAJA&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+</tbody></table></div>
+<h4>Valores de <code>estado</code></h4><div class="table-wrap"><table><thead><tr><th>Valor</th><th>Etiqueta</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>DISPONIBLE</code></td><td>Disponible</td><td>En estante; se puede prestar.</td></tr>
+<tr><td><code>RESERVADO</code></td><td>Reservado</td><td>Apartado por una solicitud en línea o una reserva.</td></tr>
+<tr><td><code>PRESTADO</code></td><td>Prestado</td><td>En poder de un usuario.</td></tr>
+<tr><td><code>EN_REPARACION</code></td><td>En reparación</td><td>Dañado; no se puede prestar.</td></tr>
+<tr><td><code>PERDIDO</code></td><td>Perdido</td><td>Reportado como perdido.</td></tr>
+<tr><td><code>BAJA</code></td><td>Baja</td><td>Retirado del acervo.</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-sugerencia_adquisicion">
+<h3>5.2.7 <code>sugerencia_adquisicion</code></h3>
+<p>Sugerencias de compra de libros enviadas por profesores y la respuesta del bibliotecario.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>catalogo.SugerenciaAdquisicion</code></dd></div>
+<div><dt>Filas actuales</dt><dd>3</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-16, CU-33</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>titulo</code></td><td class="mono">varchar(255)</td><td>No</td><td></td><td class="mono">—</td><td>Título sugerido.</td></tr>
+<tr><td><code>autores</code></td><td class="mono">varchar(255)</td><td>No</td><td></td><td class="mono">—</td><td>Autores, en texto libre.</td></tr>
+<tr><td><code>isbn</code></td><td class="mono">varchar(13)</td><td>Sí</td><td></td><td class="mono">—</td><td>ISBN, si se conoce.</td></tr>
+<tr><td><code>justificacion</code></td><td class="mono">longtext</td><td>No</td><td></td><td class="mono">—</td><td>Motivo académico de la sugerencia.</td></tr>
+<tr><td><code>estado</code></td><td class="mono">varchar(10)</td><td>No</td><td></td><td class="mono">&#x27;PENDIENTE&#x27;</td><td>Estado de la sugerencia.<br><span class="valores"><code>PENDIENTE</code> · <code>APROBADA</code> · <code>RECHAZADA</code></span></td></tr>
+<tr><td><code>respuesta</code></td><td class="mono">varchar(255)</td><td>Sí</td><td></td><td class="mono">—</td><td>Respuesta del bibliotecario.</td></tr>
+<tr><td><code>fecha</code></td><td class="mono">datetime(6)</td><td>No</td><td></td><td class="mono">fecha y hora actual al crear (auto_now_add)</td><td>Fecha y hora en que se envió.</td></tr>
+<tr><td><code>profesor_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-profesor">profesor</a></td><td class="mono">—</td><td>Profesor que hizo la sugerencia (FK a profesor.usuario_id).</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>profesor_id</code></td><td><a href="#t-profesor"><code>profesor.usuario_id</code></a></td><td><span class="od od-cascade" title="Al borrar el registro referenciado se borran también estas filas.">CASCADE</span></td><td class="mono">NO ACTION</td><td class="mono small">sugerencia_adquisici_profesor_id_55555204_fk_profesor_</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+<tr><td class="mono small">sugerencia_adquisici_profesor_id_55555204_fk_profesor_</td><td><code>profesor_id</code></td><td>No único</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_sugerencia_estado</td><td><code>(estado in (&#x27;PENDIENTE&#x27;,&#x27;APROBADA&#x27;,&#x27;RECHAZADA&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+</tbody></table></div>
+</section><h3 class="modulo" id="m-prestamos">5.3 Módulo Préstamos <span class="tag">app prestamos</span></h3><section class="tabla" id="t-politica_prestamo">
+<h3>5.3.1 <code>politica_prestamo</code></h3>
+<p>Parámetros de préstamo por tipo de usuario lector (una fila por tipo). Permite cambiar plazos, límites y multas sin modificar código (RN-01 a RN-06).</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>prestamos.PoliticaPrestamo</code></dd></div>
+<div><dt>Filas actuales</dt><dd>2</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-31</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>tipo_usuario</code></td><td class="mono">varchar(15)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Tipo de usuario al que aplica; único (una política por tipo).<br><span class="valores"><code>ESTUDIANTE</code> · <code>PROFESOR</code></span></td></tr>
+<tr><td><code>dias_prestamo</code></td><td class="mono">smallint unsigned</td><td>No</td><td></td><td class="mono">—</td><td>Días naturales de préstamo (RN-01).</td></tr>
+<tr><td><code>max_libros</code></td><td class="mono">smallint unsigned</td><td>No</td><td></td><td class="mono">—</td><td>Máximo de préstamos vigentes simultáneos (RN-02).</td></tr>
+<tr><td><code>max_renovaciones</code></td><td class="mono">smallint unsigned</td><td>No</td><td></td><td class="mono">—</td><td>Renovaciones permitidas por préstamo (RN-03).</td></tr>
+<tr><td><code>multa_por_dia</code></td><td class="mono">decimal(8,2)</td><td>No</td><td></td><td class="mono">—</td><td>Monto de multa por cada día de retraso (RN-04).</td></tr>
+<tr><td><code>multa_maxima</code></td><td class="mono">decimal(8,2)</td><td>No</td><td></td><td class="mono">—</td><td>Tope de la multa por retraso de un préstamo (RN-05).</td></tr>
+<tr><td><code>horas_para_recoger</code></td><td class="mono">smallint unsigned</td><td>No</td><td></td><td class="mono">—</td><td>Horas para recoger un libro solicitado o reservado (RN-06).</td></tr>
+<tr><td><code>actualizado_en</code></td><td class="mono">datetime(6)</td><td>No</td><td></td><td class="mono">fecha y hora actual al guardar (auto_now)</td><td>Última modificación; Django la actualiza al guardar.</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+<tr><td class="mono small">tipo_usuario</td><td><code>tipo_usuario</code></td><td>Único</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_politica_multas</td><td><code>((multa_maxima &gt;= 0) and (multa_por_dia &gt;= 0))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+<tr><td class="mono small">ck_politica_tipo</td><td><code>(tipo_usuario in (&#x27;ESTUDIANTE&#x27;,&#x27;PROFESOR&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+<tr><td class="mono small">politica_prestamo_chk_1</td><td><code>(dias_prestamo &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+<tr><td class="mono small">politica_prestamo_chk_2</td><td><code>(max_libros &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+<tr><td class="mono small">politica_prestamo_chk_3</td><td><code>(max_renovaciones &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+<tr><td class="mono small">politica_prestamo_chk_4</td><td><code>(horas_para_recoger &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-prestamo">
+<h3>5.3.2 <code>prestamo</code></h3>
+<p>Préstamo de un ejemplar a un usuario lector. Registra todo su ciclo de vida: solicitud en línea, entrega, renovaciones, vencimiento y devolución.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>prestamos.Prestamo</code></dd></div>
+<div><dt>Filas actuales</dt><dd>91</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-06, CU-08 a CU-10, CU-13, CU-23 a CU-25, CU-34</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador; funciona como folio del préstamo.</td></tr>
+<tr><td><code>estado</code></td><td class="mono">varchar(12)</td><td>No</td><td></td><td class="mono">&#x27;SOLICITADO&#x27;</td><td>Estado del préstamo en su ciclo de vida.<br><span class="valores"><code>SOLICITADO</code> · <code>ACTIVO</code> · <code>VENCIDO</code> · <code>DEVUELTO</code> · <code>CANCELADO</code> · <code>EXPIRADO</code> · <code>PERDIDO</code></span></td></tr>
+<tr><td><code>fecha_solicitud</code></td><td class="mono">datetime(6)</td><td>No</td><td></td><td class="mono">timezone.now()</td><td>Momento en que se solicitó (en línea o en mostrador).</td></tr>
+<tr><td><code>fecha_limite_recoger</code></td><td class="mono">datetime(6)</td><td>Sí</td><td></td><td class="mono">—</td><td>Límite para recoger un préstamo SOLICITADO antes de que expire (RN-06).</td></tr>
+<tr><td><code>fecha_prestamo</code></td><td class="mono">datetime(6)</td><td>Sí</td><td></td><td class="mono">—</td><td>Momento de la entrega física del ejemplar. Nulo mientras está SOLICITADO.</td></tr>
+<tr><td><code>fecha_vencimiento</code></td><td class="mono">date</td><td>Sí</td><td></td><td class="mono">—</td><td>Fecha límite de devolución; indexada para detectar vencidos (CU-34).</td></tr>
+<tr><td><code>fecha_devolucion</code></td><td class="mono">datetime(6)</td><td>Sí</td><td></td><td class="mono">—</td><td>Momento real de la devolución.</td></tr>
+<tr><td><code>num_renovaciones</code></td><td class="mono">smallint unsigned</td><td>No</td><td></td><td class="mono">0</td><td>Renovaciones realizadas (RN-03).</td></tr>
+<tr><td><code>observaciones</code></td><td class="mono">varchar(255)</td><td>Sí</td><td></td><td class="mono">—</td><td>Notas de la entrega o devolución (p. ej. daños).</td></tr>
+<tr><td><code>ejemplar_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-ejemplar">ejemplar</a></td><td class="mono">—</td><td>Ejemplar prestado.</td></tr>
+<tr><td><code>entregado_por_id</code></td><td class="mono">bigint</td><td>Sí</td><td><span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Bibliotecario que entregó el ejemplar.</td></tr>
+<tr><td><code>recibido_por_id</code></td><td class="mono">bigint</td><td>Sí</td><td><span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Bibliotecario que recibió la devolución.</td></tr>
+<tr><td><code>usuario_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Usuario lector que recibe el préstamo.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>ejemplar_id</code></td><td><a href="#t-ejemplar"><code>ejemplar.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">prestamo_ejemplar_id_496bfda1_fk_ejemplar_id</td></tr>
+<tr><td><code>entregado_por_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-set_null" title="Al borrar el registro referenciado la columna queda en NULL.">SET_NULL</span></td><td class="mono">NO ACTION</td><td class="mono small">prestamo_entregado_por_id_419b413f_fk_usuario_id</td></tr>
+<tr><td><code>recibido_por_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-set_null" title="Al borrar el registro referenciado la columna queda en NULL.">SET_NULL</span></td><td class="mono">NO ACTION</td><td class="mono small">prestamo_recibido_por_id_4577de6c_fk_usuario_id</td></tr>
+<tr><td><code>usuario_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">prestamo_usuario_id_019b23d1_fk_usuario_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">prestamo_ejemplar_id_496bfda1_fk_ejemplar_id</td><td><code>ejemplar_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">prestamo_entregado_por_id_419b413f_fk_usuario_id</td><td><code>entregado_por_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">prestamo_estado_4d06d5c5</td><td><code>estado</code></td><td>No único</td></tr>
+<tr><td class="mono small">prestamo_fecha_vencimiento_4428e22d</td><td><code>fecha_vencimiento</code></td><td>No único</td></tr>
+<tr><td class="mono small">prestamo_recibido_por_id_4577de6c_fk_usuario_id</td><td><code>recibido_por_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">prestamo_usuario_id_019b23d1_fk_usuario_id</td><td><code>usuario_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_prestamo_estado</td><td><code>(estado in (&#x27;SOLICITADO&#x27;,&#x27;ACTIVO&#x27;,&#x27;VENCIDO&#x27;,&#x27;DEVUELTO&#x27;,&#x27;CANCELADO&#x27;,&#x27;EXPIRADO&#x27;,&#x27;PERDIDO&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+<tr><td class="mono small">prestamo_chk_1</td><td><code>(num_renovaciones &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+</tbody></table></div>
+<h4>Valores de <code>estado</code></h4><div class="table-wrap"><table><thead><tr><th>Valor</th><th>Etiqueta</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>SOLICITADO</code></td><td>Solicitado</td><td>Pedido en línea; esperando que el usuario lo recoja.</td></tr>
+<tr><td><code>ACTIVO</code></td><td>Activo</td><td>Entregado y dentro del plazo.</td></tr>
+<tr><td><code>VENCIDO</code></td><td>Vencido</td><td>Pasó la fecha de vencimiento sin devolverse.</td></tr>
+<tr><td><code>DEVUELTO</code></td><td>Devuelto</td><td>Devuelto; préstamo cerrado.</td></tr>
+<tr><td><code>CANCELADO</code></td><td>Cancelado</td><td>El usuario canceló la solicitud.</td></tr>
+<tr><td><code>EXPIRADO</code></td><td>Expirado</td><td>No se recogió dentro del plazo.</td></tr>
+<tr><td><code>PERDIDO</code></td><td>Perdido</td><td>El usuario perdió el ejemplar.</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-reserva">
+<h3>5.3.3 <code>reserva</code></h3>
+<p>Reserva de un libro sin ejemplares disponibles. Las reservas pendientes de un mismo libro forman una cola FIFO ordenada por fecha_reserva (RN-12).</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>prestamos.Reserva</code></dd></div>
+<div><dt>Filas actuales</dt><dd>6</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-11, CU-12, CU-30, CU-35</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>estado</code></td><td class="mono">varchar(12)</td><td>No</td><td></td><td class="mono">&#x27;PENDIENTE&#x27;</td><td>Estado de la reserva.<br><span class="valores"><code>PENDIENTE</code> · <code>DISPONIBLE</code> · <code>ATENDIDA</code> · <code>CANCELADA</code> · <code>EXPIRADA</code></span></td></tr>
+<tr><td><code>fecha_reserva</code></td><td class="mono">datetime(6)</td><td>No</td><td></td><td class="mono">timezone.now()</td><td>Momento de la reserva; define la posición en la cola FIFO.</td></tr>
+<tr><td><code>fecha_expiracion</code></td><td class="mono">datetime(6)</td><td>Sí</td><td></td><td class="mono">—</td><td>Límite para recoger el ejemplar apartado (cuando la reserva pasa a DISPONIBLE).</td></tr>
+<tr><td><code>ejemplar_asignado_id</code></td><td class="mono">bigint</td><td>Sí</td><td><span class="fk">FK</span> → <a href="#t-ejemplar">ejemplar</a></td><td class="mono">—</td><td>Ejemplar apartado para el usuario al devolverse una copia.</td></tr>
+<tr><td><code>libro_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-libro">libro</a></td><td class="mono">—</td><td>Libro reservado.</td></tr>
+<tr><td><code>usuario_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Usuario que reserva.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>ejemplar_asignado_id</code></td><td><a href="#t-ejemplar"><code>ejemplar.id</code></a></td><td><span class="od od-set_null" title="Al borrar el registro referenciado la columna queda en NULL.">SET_NULL</span></td><td class="mono">NO ACTION</td><td class="mono small">reserva_ejemplar_asignado_id_ee5b95bc_fk_ejemplar_id</td></tr>
+<tr><td><code>libro_id</code></td><td><a href="#t-libro"><code>libro.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">reserva_libro_id_c055b7a0_fk_libro_id</td></tr>
+<tr><td><code>usuario_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">reserva_usuario_id_89360636_fk_usuario_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">idx_reserva_libro_fecha</td><td><code>libro_id, fecha_reserva</code></td><td>No único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+<tr><td class="mono small">reserva_ejemplar_asignado_id_ee5b95bc_fk_ejemplar_id</td><td><code>ejemplar_asignado_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">reserva_estado_8775afcc</td><td><code>estado</code></td><td>No único</td></tr>
+<tr><td class="mono small">reserva_usuario_id_89360636_fk_usuario_id</td><td><code>usuario_id</code></td><td>No único</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_reserva_estado</td><td><code>(estado in (&#x27;PENDIENTE&#x27;,&#x27;DISPONIBLE&#x27;,&#x27;ATENDIDA&#x27;,&#x27;CANCELADA&#x27;,&#x27;EXPIRADA&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+</tbody></table></div>
+<h4>Valores de <code>estado</code></h4><div class="table-wrap"><table><thead><tr><th>Valor</th><th>Etiqueta</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>PENDIENTE</code></td><td>Pendiente</td><td>En la cola de espera.</td></tr>
+<tr><td><code>DISPONIBLE</code></td><td>Disponible para recoger</td><td>Se apartó un ejemplar; el usuario debe recogerlo.</td></tr>
+<tr><td><code>ATENDIDA</code></td><td>Atendida</td><td>Se convirtió en préstamo.</td></tr>
+<tr><td><code>CANCELADA</code></td><td>Cancelada</td><td>El usuario la canceló.</td></tr>
+<tr><td><code>EXPIRADA</code></td><td>Expirada</td><td>No se recogió a tiempo.</td></tr>
+</tbody></table></div>
+</section><h3 class="modulo" id="m-multas">5.4 Módulo Multas <span class="tag">app multas</span></h3><section class="tabla" id="t-multa">
+<h3>5.4.1 <code>multa</code></h3>
+<p>Multa generada por entrega tardía, daño o pérdida de un ejemplar. Un préstamo puede tener más de una multa (por ejemplo, retraso y daño).</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>multas.Multa</code></dd></div>
+<div><dt>Filas actuales</dt><dd>7</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-14, CU-26 a CU-29</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>motivo</code></td><td class="mono">varchar(10)</td><td>No</td><td></td><td class="mono">—</td><td>Causa de la multa.<br><span class="valores"><code>RETRASO</code> · <code>DANIO</code> · <code>PERDIDA</code></span></td></tr>
+<tr><td><code>dias_retraso</code></td><td class="mono">smallint unsigned</td><td>No</td><td></td><td class="mono">0</td><td>Días de retraso al devolver (solo motivo RETRASO).</td></tr>
+<tr><td><code>monto</code></td><td class="mono">decimal(10,2)</td><td>No</td><td></td><td class="mono">—</td><td>Importe de la multa: min(días × multa_por_día, multa_máxima) por retraso (RN-07) o costo de reposición (RN-13).</td></tr>
+<tr><td><code>estado</code></td><td class="mono">varchar(10)</td><td>No</td><td></td><td class="mono">&#x27;PENDIENTE&#x27;</td><td>Estado de la multa. Una multa PENDIENTE impide nuevos préstamos (RN-08).<br><span class="valores"><code>PENDIENTE</code> · <code>PAGADA</code> · <code>CONDONADA</code></span></td></tr>
+<tr><td><code>fecha_generacion</code></td><td class="mono">datetime(6)</td><td>No</td><td></td><td class="mono">timezone.now()</td><td>Momento en que se generó.</td></tr>
+<tr><td><code>justificacion_condonacion</code></td><td class="mono">varchar(255)</td><td>Sí</td><td></td><td class="mono">—</td><td>Obligatoria cuando el estado es CONDONADA (RN-14, validado en Django).</td></tr>
+<tr><td><code>condonada_por_id</code></td><td class="mono">bigint</td><td>Sí</td><td><span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Bibliotecario que condonó la multa.</td></tr>
+<tr><td><code>prestamo_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-prestamo">prestamo</a></td><td class="mono">—</td><td>Préstamo que originó la multa.</td></tr>
+<tr><td><code>usuario_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Usuario deudor. Redundancia controlada (se puede obtener de prestamo) para consultar rápido las multas de un usuario.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>condonada_por_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-set_null" title="Al borrar el registro referenciado la columna queda en NULL.">SET_NULL</span></td><td class="mono">NO ACTION</td><td class="mono small">multa_condonada_por_id_f5f82c5f_fk_usuario_id</td></tr>
+<tr><td><code>prestamo_id</code></td><td><a href="#t-prestamo"><code>prestamo.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">multa_prestamo_id_b48137ed_fk_prestamo_id</td></tr>
+<tr><td><code>usuario_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">multa_usuario_id_4b5b79eb_fk_usuario_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">idx_multa_usuario_estado</td><td><code>usuario_id, estado</code></td><td>No único</td></tr>
+<tr><td class="mono small">multa_condonada_por_id_f5f82c5f_fk_usuario_id</td><td><code>condonada_por_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">multa_estado_a55f7bd0</td><td><code>estado</code></td><td>No único</td></tr>
+<tr><td class="mono small">multa_prestamo_id_b48137ed_fk_prestamo_id</td><td><code>prestamo_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_multa_estado</td><td><code>(estado in (&#x27;PENDIENTE&#x27;,&#x27;PAGADA&#x27;,&#x27;CONDONADA&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+<tr><td class="mono small">ck_multa_monto</td><td><code>(monto &gt; 0)</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+<tr><td class="mono small">ck_multa_motivo</td><td><code>(motivo in (&#x27;RETRASO&#x27;,&#x27;DANIO&#x27;,&#x27;PERDIDA&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+<tr><td class="mono small">multa_chk_1</td><td><code>(dias_retraso &gt;= 0)</code></td><td>Django: campo Positive*Field</td></tr>
+</tbody></table></div>
+<h4>Valores de <code>motivo</code></h4><div class="table-wrap"><table><thead><tr><th>Valor</th><th>Etiqueta</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>RETRASO</code></td><td>Entrega tardía</td><td>Entrega tardía (RN-07).</td></tr>
+<tr><td><code>DANIO</code></td><td>Daño del ejemplar</td><td>Daño del ejemplar (RN-13).</td></tr>
+<tr><td><code>PERDIDA</code></td><td>Pérdida del ejemplar</td><td>Pérdida del ejemplar (RN-13).</td></tr>
+</tbody></table></div>
+<h4>Valores de <code>estado</code></h4><div class="table-wrap"><table><thead><tr><th>Valor</th><th>Etiqueta</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>PENDIENTE</code></td><td>Pendiente</td><td>Sin liquidar; bloquea préstamos.</td></tr>
+<tr><td><code>PAGADA</code></td><td>Pagada</td><td>Liquidada.</td></tr>
+<tr><td><code>CONDONADA</code></td><td>Condonada</td><td>Perdonada con justificación.</td></tr>
+</tbody></table></div>
+</section><section class="tabla" id="t-pago">
+<h3>5.4.2 <code>pago</code></h3>
+<p>Pagos registrados en mostrador. Una multa puede liquidarse con varios pagos parciales.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>multas.Pago</code></dd></div>
+<div><dt>Filas actuales</dt><dd>3</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-28</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>monto</code></td><td class="mono">decimal(10,2)</td><td>No</td><td></td><td class="mono">—</td><td>Importe pagado.</td></tr>
+<tr><td><code>metodo</code></td><td class="mono">varchar(15)</td><td>No</td><td></td><td class="mono">—</td><td>Forma de pago.<br><span class="valores"><code>EFECTIVO</code> · <code>TARJETA</code> · <code>TRANSFERENCIA</code></span></td></tr>
+<tr><td><code>folio_recibo</code></td><td class="mono">varchar(30)</td><td>No</td><td><span class="uq">UQ</span></td><td class="mono">—</td><td>Folio del recibo entregado; único.</td></tr>
+<tr><td><code>fecha_pago</code></td><td class="mono">datetime(6)</td><td>No</td><td></td><td class="mono">timezone.now()</td><td>Momento del pago.</td></tr>
+<tr><td><code>multa_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-multa">multa</a></td><td class="mono">—</td><td>Multa que se paga.</td></tr>
+<tr><td><code>registrado_por_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Bibliotecario que registró el pago.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>multa_id</code></td><td><a href="#t-multa"><code>multa.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">pago_multa_id_e33b89b2_fk_multa_id</td></tr>
+<tr><td><code>registrado_por_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-protect" title="No permite borrar el registro referenciado mientras existan filas que lo usen.">PROTECT</span></td><td class="mono">NO ACTION</td><td class="mono small">pago_registrado_por_id_0dd2a989_fk_usuario_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">folio_recibo</td><td><code>folio_recibo</code></td><td>Único</td></tr>
+<tr><td class="mono small">pago_multa_id_e33b89b2_fk_multa_id</td><td><code>multa_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">pago_registrado_por_id_0dd2a989_fk_usuario_id</td><td><code>registrado_por_id</code></td><td>No único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_pago_metodo</td><td><code>(metodo in (&#x27;EFECTIVO&#x27;,&#x27;TARJETA&#x27;,&#x27;TRANSFERENCIA&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+<tr><td class="mono small">ck_pago_monto</td><td><code>(monto &gt; 0)</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+</tbody></table></div>
+</section><h3 class="modulo" id="m-notificaciones">5.5 Módulo Notificaciones <span class="tag">app notificaciones</span></h3><section class="tabla" id="t-notificacion">
+<h3>5.5.1 <code>notificacion</code></h3>
+<p>Avisos dentro de la aplicación para los usuarios: vencimientos, reservas disponibles y multas.</p>
+<dl class="ficha">
+<div><dt>Modelo Django</dt><dd><code>notificaciones.Notificacion</code></dd></div>
+<div><dt>Filas actuales</dt><dd>12</dd></div>
+<div><dt>Casos de uso</dt><dd>CU-15, CU-36</dd></div>
+</dl>
+<div class="table-wrap"><table><thead><tr><th>Columna</th><th>Tipo MySQL</th><th>Nulo</th><th>Llave</th><th>Valor por defecto (Django)</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">bigint <span class="extra">auto_increment</span></td><td>No</td><td><span class="pk">PK</span></td><td class="mono">—</td><td>Identificador.</td></tr>
+<tr><td><code>tipo</code></td><td class="mono">varchar(20)</td><td>No</td><td></td><td class="mono">&#x27;GENERAL&#x27;</td><td>Tipo de aviso.<br><span class="valores"><code>VENCE_PRONTO</code> · <code>VENCIDO</code> · <code>RESERVA_DISPONIBLE</code> · <code>MULTA</code> · <code>GENERAL</code></span></td></tr>
+<tr><td><code>mensaje</code></td><td class="mono">varchar(500)</td><td>No</td><td></td><td class="mono">—</td><td>Texto mostrado al usuario.</td></tr>
+<tr><td><code>leida</code></td><td class="mono">tinyint(1)</td><td>No</td><td></td><td class="mono">FALSE</td><td>Indica si el usuario ya la vio.</td></tr>
+<tr><td><code>fecha</code></td><td class="mono">datetime(6)</td><td>No</td><td></td><td class="mono">timezone.now()</td><td>Momento de creación.</td></tr>
+<tr><td><code>usuario_id</code></td><td class="mono">bigint</td><td>No</td><td><span class="fk">FK</span> → <a href="#t-usuario">usuario</a></td><td class="mono">—</td><td>Destinatario.</td></tr>
+</tbody></table></div>
+<h4>Llaves foráneas</h4><div class="table-wrap"><table><thead><tr><th>Columna</th><th>Referencia</th><th>Al borrar (Django)</th><th>Regla en MySQL</th><th>Nombre de la restricción</th></tr></thead><tbody>
+<tr><td><code>usuario_id</code></td><td><a href="#t-usuario"><code>usuario.id</code></a></td><td><span class="od od-cascade" title="Al borrar el registro referenciado se borran también estas filas.">CASCADE</span></td><td class="mono">NO ACTION</td><td class="mono small">notificacion_usuario_id_f4323849_fk_usuario_id</td></tr>
+</tbody></table></div>
+<h4>Índices</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Columnas</th><th>Tipo</th></tr></thead><tbody>
+<tr><td class="mono small">idx_notificacion_usuario_leida</td><td><code>usuario_id, leida</code></td><td>No único</td></tr>
+<tr><td class="mono small">PRIMARY</td><td><code>id</code></td><td>Llave primaria</td></tr>
+</tbody></table></div>
+<h4>Restricciones CHECK</h4><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Condición</th><th>Origen</th></tr></thead><tbody>
+<tr><td class="mono small">ck_notificacion_tipo</td><td><code>(tipo in (&#x27;VENCE_PRONTO&#x27;,&#x27;VENCIDO&#x27;,&#x27;RESERVA_DISPONIBLE&#x27;,&#x27;MULTA&#x27;,&#x27;GENERAL&#x27;))</code></td><td>Regla de negocio (Meta.constraints)</td></tr>
+</tbody></table></div>
+</section>
+
+<h2 id="reglas">6. Reglas de negocio e integridad</h2>
+<p>Dónde se garantiza cada regla del documento de requerimientos: en la base de datos (restricciones e índices) o en los modelos de Django.</p>
+<div class="table-wrap"><table><thead><tr><th>Regla</th><th>Descripción</th><th>En la base de datos</th><th>En Django</th></tr></thead><tbody><tr><td>RN-01 a RN-06</td><td>Parámetros de préstamo por tipo de usuario</td><td>Tabla politica_prestamo (una fila por tipo, UNIQUE tipo_usuario)</td><td>Usuario.politica</td></tr><tr><td>RN-02</td><td>Máximo de libros simultáneos</td><td>—</td><td>Usuario.motivos_no_elegible() cuenta préstamos SOLICITADO, ACTIVO y VENCIDO</td></tr><tr><td>RN-03</td><td>Máximo de renovaciones</td><td>CHECK num_renovaciones ≥ 0</td><td>Prestamo.renovaciones_restantes()</td></tr><tr><td>RN-05 / RN-07</td><td>Cálculo y tope de la multa por retraso</td><td>CHECK ck_multa_monto (monto &gt; 0)</td><td>Prestamo.dias_retraso() y Prestamo.calcular_multa()</td></tr><tr><td>RN-08</td><td>Multas pendientes o préstamos vencidos bloquean préstamos</td><td>Índice idx_multa_usuario_estado para consultarlo rápido</td><td>Usuario.tiene_multas_pendientes(), tiene_prestamos_vencidos()</td></tr><tr><td>RN-12</td><td>Cola FIFO de reservas</td><td>Índice idx_reserva_libro_fecha (libro_id, fecha_reserva)</td><td>Reserva.Meta.ordering = fecha_reserva</td></tr><tr><td>RN-13</td><td>Multa por pérdida igual al costo de reposición</td><td>Columna libro.costo_reposicion</td><td>Lógica de la devolución (a cargo de los equipos)</td></tr><tr><td>RN-14</td><td>Condonar requiere justificación</td><td>Columna justificacion_condonacion</td><td>Multa.clean()</td></tr><tr><td>RN-15</td><td>Solo se prestan ejemplares DISPONIBLES</td><td>CHECK ck_ejemplar_estado</td><td>Ejemplar.se_puede_prestar</td></tr><tr><td>RN-16</td><td>No se borra el historial</td><td>FK en prestamo, multa y pago con PROTECT en Django</td><td>on_delete=models.PROTECT</td></tr><tr><td>Dominios</td><td>Valores válidos de estados, tipos y motivos</td><td>CHECK ck_* con IN (…)</td><td>TextChoices en cada modelo</td></tr></tbody></table></div>
+
+<h2 id="framework">7. Tablas del framework Django</h2>
+<p>Creadas por las apps <code>auth</code>, <code>admin</code>, <code>contenttypes</code> y <code>sessions</code>. No forman parte del diseño
+del dominio, pero son necesarias para autenticación, permisos y el sitio de administración.</p>
+<div class="table-wrap"><table><thead><tr><th>Tabla</th><th>Función</th><th>Filas</th></tr></thead><tbody><tr><td><code>auth_group</code></td><td>Grupos de permisos (p. ej. «Bibliotecarios»).</td><td>1</td></tr><tr><td><code>auth_group_permissions</code></td><td>Permisos asignados a cada grupo (muchos a muchos).</td><td>72</td></tr><tr><td><code>auth_permission</code></td><td>Permisos por modelo: add, change, delete y view.</td><td>92</td></tr><tr><td><code>usuario_groups</code></td><td>Grupos a los que pertenece cada usuario (muchos a muchos).</td><td>2</td></tr><tr><td><code>usuario_user_permissions</code></td><td>Permisos asignados directamente a un usuario.</td><td>0</td></tr><tr><td><code>django_admin_log</code></td><td>Bitácora de acciones realizadas en el sitio de administración.</td><td>0</td></tr><tr><td><code>django_content_type</code></td><td>Registro de los modelos instalados; lo usan los permisos y el admin.</td><td>23</td></tr><tr><td><code>django_migrations</code></td><td>Migraciones aplicadas a la base de datos.</td><td>25</td></tr><tr><td><code>django_session</code></td><td>Sesiones de usuarios autenticados.</td><td>3</td></tr></tbody></table></div>
+
+<h2 id="diferencias">8. Diferencias con el script SQL de diseño</h2>
+<p>El archivo <code>biblioteca_modelo_er.sql</code> describe el mismo modelo, pero la base creada por Django difiere en estos detalles:</p>
+<div class="table-wrap"><table><thead><tr><th>Aspecto</th><th>Script de diseño</th><th>Base creada por Django</th></tr></thead><tbody>
+<tr><td>Nombres de llaves foráneas e índices</td><td><code>fk_prestamo_usuario</code>, <code>idx_prestamo_estado</code></td><td>Generados con hash, p. ej. <code>prestamo_usuario_id_019b23d1_fk_usuario_id</code>. Los índices compuestos y las restricciones CHECK sí conservan el nombre del diseño.</td></tr>
+<tr><td>ON DELETE</td><td><code>RESTRICT</code>, <code>CASCADE</code> o <code>SET NULL</code> en MySQL</td><td><code>NO ACTION</code> en MySQL; el comportamiento lo aplica Django.</td></tr>
+<tr><td>Valores DEFAULT</td><td>Definidos en las columnas</td><td>Aplicados por Django al crear objetos.</td></tr>
+<tr><td>Tablas adicionales</td><td>Solo las 18 del dominio</td><td>Además, las 9 tablas del framework, incluidas <code>usuario_groups</code> y <code>usuario_user_permissions</code>.</td></tr>
+<tr><td>CHECK de enteros</td><td>Solo <code>UNSIGNED</code></td><td><code>UNSIGNED</code> más CHECK <code>&gt;= 0</code> generado por Django.</td></tr>
+</tbody></table></div>
+
+<h2 id="consultas">9. Consultas de ejemplo</h2>
+<p>Consultas SQL que muestran cómo se recorren las relaciones. Se ejecutaron sobre la base al generar este documento.
+Las columnas <code>DATETIME</code> aparecen en UTC, tal como están guardadas (6 horas más que la hora de Ciudad de México).</p>
+<h3>9.1 Disponibilidad de ejemplares por libro</h3><p>Libros con menos ejemplares disponibles. Útil para CU-04 (buscar en el catálogo) y para decidir compras.</p><pre><code>SELECT l.titulo,
+       COUNT(e.id)                  AS total,
+       SUM(e.estado = &#x27;DISPONIBLE&#x27;) AS disponibles
+FROM libro l
+JOIN ejemplar e ON e.libro_id = l.id
+GROUP BY l.id, l.titulo
+ORDER BY disponibles, total DESC, l.titulo
+LIMIT 6;</code></pre>
+<p class="meta">Resultado con los datos de prueba actuales:</p>
+<div class="table-wrap"><table class="resultado"><thead><tr><th>titulo</th><th>total</th><th>disponibles</th></tr></thead><tbody>
+<tr><td>Clean Code</td><td>2</td><td>0</td></tr>
+<tr><td>The Mythical Man-Month</td><td>1</td><td>0</td></tr>
+<tr><td>Deep Learning</td><td>2</td><td>1</td></tr>
+<tr><td>Designing Data-Intensive Applications</td><td>2</td><td>1</td></tr>
+<tr><td>Domain-Driven Design</td><td>2</td><td>1</td></tr>
+<tr><td>Fluent Python</td><td>2</td><td>1</td></tr>
+</tbody></table></div>
+<h3>9.2 Préstamos vencidos y días de retraso</h3><p>Lo que mostraría el bibliotecario en CU-34. Los días de retraso coinciden con Prestamo.dias_retraso().</p><pre><code>SELECT p.id, u.username, l.titulo, p.fecha_vencimiento,
+       DATEDIFF(CURDATE(), p.fecha_vencimiento) AS dias_retraso
+FROM prestamo p
+JOIN usuario  u ON u.id = p.usuario_id
+JOIN ejemplar e ON e.id = p.ejemplar_id
+JOIN libro    l ON l.id = e.libro_id
+WHERE p.estado = &#x27;VENCIDO&#x27;
+ORDER BY dias_retraso DESC;</code></pre>
+<p class="meta">Resultado con los datos de prueba actuales:</p>
+<div class="table-wrap"><table class="resultado"><thead><tr><th>id</th><th>username</th><th>titulo</th><th>fecha_vencimiento</th><th>dias_retraso</th></tr></thead><tbody>
+<tr><td>78</td><td>a260006</td><td>Cálculo: trascendentes tempranas</td><td>2026-10-01</td><td>20</td></tr>
+<tr><td>77</td><td>a260005</td><td>Fundamentos de bases de datos</td><td>2026-10-16</td><td>5</td></tr>
+<tr><td>79</td><td>p1003</td><td>Redes de computadoras</td><td>2026-10-16</td><td>5</td></tr>
+</tbody></table></div>
+<h3>9.3 Saldo de multas pendientes</h3><p>Monto, pagos parciales y saldo de cada multa pendiente (CU-14, CU-28). Equivale a Multa.saldo().</p><pre><code>SELECT u.username, m.motivo, m.monto,
+       COALESCE(pg.pagado, 0)            AS pagado,
+       m.monto - COALESCE(pg.pagado, 0)  AS saldo
+FROM multa m
+JOIN usuario u ON u.id = m.usuario_id
+LEFT JOIN (SELECT multa_id, SUM(monto) AS pagado
+           FROM pago GROUP BY multa_id) pg ON pg.multa_id = m.id
+WHERE m.estado = &#x27;PENDIENTE&#x27;
+ORDER BY saldo DESC;</code></pre>
+<p class="meta">Resultado con los datos de prueba actuales:</p>
+<div class="table-wrap"><table class="resultado"><thead><tr><th>username</th><th>motivo</th><th>monto</th><th>pagado</th><th>saldo</th></tr></thead><tbody>
+<tr><td>a260013</td><td>PERDIDA</td><td>420.00</td><td>0.00</td><td>420.00</td></tr>
+<tr><td>a260012</td><td>DANIO</td><td>250.00</td><td>0.00</td><td>250.00</td></tr>
+<tr><td>a260010</td><td>RETRASO</td><td>300.00</td><td>100.00</td><td>200.00</td></tr>
+<tr><td>a260008</td><td>RETRASO</td><td>30.00</td><td>0.00</td><td>30.00</td></tr>
+</tbody></table></div>
+<h3>9.4 Préstamos vigentes contra el límite de la política</h3><p>Comprueba RN-02 directamente en SQL uniendo usuario con politica_prestamo por tipo_usuario.</p><pre><code>SELECT u.username, u.tipo_usuario,
+       COUNT(p.id)   AS vigentes,
+       pp.max_libros
+FROM usuario u
+JOIN politica_prestamo pp ON pp.tipo_usuario = u.tipo_usuario
+LEFT JOIN prestamo p ON p.usuario_id = u.id
+                    AND p.estado IN (&#x27;SOLICITADO&#x27;, &#x27;ACTIVO&#x27;, &#x27;VENCIDO&#x27;)
+GROUP BY u.id, u.username, u.tipo_usuario, pp.max_libros
+HAVING vigentes &gt; 0
+ORDER BY vigentes DESC, u.username
+LIMIT 6;</code></pre>
+<p class="meta">Resultado con los datos de prueba actuales:</p>
+<div class="table-wrap"><table class="resultado"><thead><tr><th>username</th><th>tipo_usuario</th><th>vigentes</th><th>max_libros</th></tr></thead><tbody>
+<tr><td>p1001</td><td>PROFESOR</td><td>4</td><td>10</td></tr>
+<tr><td>a260003</td><td>ESTUDIANTE</td><td>3</td><td>3</td></tr>
+<tr><td>a260001</td><td>ESTUDIANTE</td><td>2</td><td>3</td></tr>
+<tr><td>p1002</td><td>PROFESOR</td><td>2</td><td>10</td></tr>
+<tr><td>a260002</td><td>ESTUDIANTE</td><td>1</td><td>3</td></tr>
+<tr><td>a260004</td><td>ESTUDIANTE</td><td>1</td><td>3</td></tr>
+</tbody></table></div>
+<h3>9.5 Cola de reservas</h3><p>Posición de cada usuario en la cola FIFO de un libro (RN-12), con función de ventana de MySQL 8.</p><pre><code>SELECT l.titulo, u.username, r.fecha_reserva,
+       ROW_NUMBER() OVER (PARTITION BY r.libro_id
+                          ORDER BY r.fecha_reserva) AS posicion
+FROM reserva r
+JOIN libro   l ON l.id = r.libro_id
+JOIN usuario u ON u.id = r.usuario_id
+WHERE r.estado = &#x27;PENDIENTE&#x27;
+ORDER BY l.titulo, posicion;</code></pre>
+<p class="meta">Resultado con los datos de prueba actuales:</p>
+<div class="table-wrap"><table class="resultado"><thead><tr><th>titulo</th><th>username</th><th>fecha_reserva</th><th>posicion</th></tr></thead><tbody>
+<tr><td>Clean Code</td><td>a260017</td><td>2026-10-19 17:00:00</td><td>1</td></tr>
+<tr><td>Clean Code</td><td>a260018</td><td>2026-10-20 22:00:00</td><td>2</td></tr>
+</tbody></table></div>
+<h3>9.6 Libros más prestados</h3><p>Base del reporte de libros más solicitados (CU-32).</p><pre><code>SELECT l.titulo, COUNT(*) AS prestamos
+FROM prestamo p
+JOIN ejemplar e ON e.id = p.ejemplar_id
+JOIN libro    l ON l.id = e.libro_id
+WHERE p.estado IN (&#x27;ACTIVO&#x27;, &#x27;VENCIDO&#x27;, &#x27;DEVUELTO&#x27;, &#x27;PERDIDO&#x27;)
+GROUP BY l.id, l.titulo
+ORDER BY prestamos DESC, l.titulo
+LIMIT 5;</code></pre>
+<p class="meta">Resultado con los datos de prueba actuales:</p>
+<div class="table-wrap"><table class="resultado"><thead><tr><th>titulo</th><th>prestamos</th></tr></thead><tbody>
+<tr><td>Álgebra lineal y sus aplicaciones</td><td>5</td></tr>
+<tr><td>Cien años de soledad</td><td>4</td></tr>
+<tr><td>Django 5 By Example</td><td>4</td></tr>
+<tr><td>Física para ciencias e ingeniería</td><td>4</td></tr>
+<tr><td>Historia mínima de México</td><td>4</td></tr>
+</tbody></table></div>
+
+<footer>
+  Documento generado automáticamente desde la base de datos <code>biblioteca</code> (MySQL 8.0.30) el 21/10/2026 11:46.
+  Para regenerarlo después de cambiar los modelos: aplicar las migraciones y ejecutar <code>biblioteca/scripts/generar_esquema.py</code> (ver instrucciones en el propio archivo).
+</footer>
+</div>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "default", securityLevel: "strict", er: { useMaxWidth: false } });
+</script>
+</body>
+</html>

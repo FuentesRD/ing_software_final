@@ -1,0 +1,14 @@
+# Normaliza saltos de línea a LF (estilo Linux) para todo el equipo
+* text=auto eol=lf
+
+# Scripts propios de Windows conservan CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Archivos binarios
+*.vpp binary
+*.mwb binary
+*.png binary
+*.jpg binary
+*.pdf binary

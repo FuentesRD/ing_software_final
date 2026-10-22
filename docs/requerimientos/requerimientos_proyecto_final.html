@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecto Final · Sistema de Biblioteca</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f6f8fb;
+    --text: #1f2933;
+    --muted: #52606d;
+    --primary: #1d4e89;
+    --primary-soft: #e6eef8;
+    --accent: #b5651d;
+    --border: #d9e2ec;
+    --ok: #2f7d4f;
+    --warn: #a15c07;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: light; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  .page { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  header.cover {
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+  }
+  header.cover .kicker { color: var(--accent); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: .85rem; }
+  h1 { font-size: 2rem; margin: 6px 0 8px; color: var(--primary); line-height: 1.25; }
+  h2 {
+    font-size: 1.45rem; color: var(--primary);
+    margin: 48px 0 12px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 { font-size: 1.15rem; margin: 28px 0 8px; color: #243b53; }
+  h4 { font-size: 1rem; margin: 20px 0 6px; color: #334e68; }
+  p, li { max-width: 80ch; }
+  .meta { color: var(--muted); font-size: .95rem; }
+  .meta span { display: inline-block; margin-right: 18px; }
+  nav.toc {
+    background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 22px; margin: 24px 0;
+  }
+  nav.toc ol { margin: 6px 0 0; padding-left: 20px; columns: 2; column-gap: 32px; }
+  nav.toc li { break-inside: avoid; }
+  a { color: var(--primary); }
+  .note, .warn {
+    border-left: 4px solid var(--primary); background: var(--primary-soft);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 14px 0;
+  }
+  .warn { border-color: var(--accent); background: #fbf1e6; }
+  .table-wrap { overflow-x: auto; margin: 12px 0 18px; }
+  table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  thead th { background: var(--primary); color: #fff; font-weight: 600; }
+  tbody tr:nth-child(even) td { background: #fafbfd; }
+  table.uc th[scope="row"] { background: var(--primary-soft); width: 22%; color: #102a43; }
+  table.uc td ol, table.uc td ul { margin: 0; padding-left: 20px; }
+  code, .mono { font-family: Consolas, "Cascadia Mono", "Courier New", monospace; font-size: .9em; }
+  code { background: #eef2f7; padding: 1px 5px; border-radius: 4px; }
+  pre {
+    background: #f4f6f9; border: 1px solid var(--border); border-radius: 6px;
+    padding: 12px 14px; overflow-x: auto; font-size: .88rem; line-height: 1.45;
+  }
+  pre code { background: none; padding: 0; }
+  .actors { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 14px 0; }
+  .card { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; background: #fff; }
+  .card h4 { margin-top: 0; color: var(--primary); }
+  .card ul { padding-left: 18px; margin: 6px 0 0; }
+  .tag { display: inline-block; font-size: .75rem; font-weight: 600; padding: 1px 8px; border-radius: 10px; background: var(--primary-soft); color: var(--primary); margin-left: 6px; }
+  .tag.alta { background: #fde8e8; color: #9b1c1c; }
+  .tag.media { background: #fdf3d7; color: var(--warn); }
+  .tag.baja { background: #e3f4ea; color: var(--ok); }
+  .pk { color: #9b1c1c; font-weight: 700; }
+  .fk { color: var(--primary); font-weight: 700; }
+  .mermaid { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow-x: auto; }
+  footer { margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: .9rem; }
+  @media (max-width: 700px) {
+    h1 { font-size: 1.6rem; }
+    nav.toc ol { columns: 1; }
+  }
+  @media print {
+    .page { max-width: none; padding: 0; }
+    h2 { break-after: avoid; }
+    table, pre, .card { break-inside: avoid; }
+    nav.toc { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="cover">
+  <div class="kicker">Ingeniería de Software · Proyecto Final</div>
+  <h1>Sistema de Gestión de Biblioteca Escolar</h1>
+  <div class="meta">
+    <span><strong>Licenciatura:</strong> Ingeniería de Software</span>
+    <span><strong>Periodo:</strong> Agosto – Diciembre 2026</span>
+    <span><strong>Tecnologías:</strong> Python · Django · MySQL · Visual Paradigm</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <strong>Contenido</strong>
+  <ol>
+    <li><a href="#objetivo">Objetivo y alcance</a></li>
+    <li><a href="#tecnologia">Plataforma tecnológica</a></li>
+    <li><a href="#actores">Actores del sistema</a></li>
+    <li><a href="#reglas">Reglas de negocio</a></li>
+    <li><a href="#rf">Requerimientos funcionales</a></li>
+    <li><a href="#rnf">Requerimientos no funcionales</a></li>
+    <li><a href="#cu">Catálogo de casos de uso</a></li>
+    <li><a href="#plantilla">Plantilla estándar de caso de uso</a></li>
+    <li><a href="#ejemplos">Casos de uso descritos (ejemplos)</a></li>
+    <li><a href="#bd">Diseño de la base de datos</a></li>
+    <li><a href="#uml">Diagramas UML en Visual Paradigm</a></li>
+    <li><a href="#django">Estructura del proyecto Django</a></li>
+    <li><a href="#entregables">Entregables</a></li>
+    <li><a href="#evaluacion">Criterios de evaluación</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="objetivo">1. Objetivo y alcance</h2>
+<p>
+  Los equipos desarrollarán una aplicación web con <strong>Django</strong> y <strong>MySQL</strong> que automatice
+  la operación de la biblioteca de una escuela: catálogo de libros, préstamos, devoluciones, reservas,
+  multas por entrega tardía y administración general. El proyecto integra el ciclo completo de ingeniería de software:
+  especificación de requerimientos, modelado UML, diseño de base de datos, implementación y pruebas.
+</p>
+<h3>Dentro del alcance</h3>
+<ul>
+  <li>Consulta del catálogo y búsqueda de libros.</li>
+  <li>Solicitud de préstamos en línea por estudiantes y profesores, con periodos distintos para cada tipo de usuario.</li>
+  <li>Entrega y devolución de ejemplares registradas por el bibliotecario.</li>
+  <li>Cálculo automático de multas por entrega tardía.</li>
+  <li>Reservas de libros sin ejemplares disponibles.</li>
+  <li>Administración del acervo, de los usuarios, de las políticas de préstamo y reportes.</li>
+</ul>
+<h3>Fuera del alcance</h3>
+<ul>
+  <li>Cobro de multas con pasarela de pago en línea (el pago se registra en mostrador).</li>
+  <li>Préstamo de material digital (e-books) y préstamo interbibliotecario.</li>
+  <li>Integración con el sistema escolar real (los usuarios se dan de alta en el propio sistema o por carga CSV).</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="tecnologia">2. Plataforma tecnológica</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Componente</th><th>Tecnología requerida</th><th>Notas</th></tr></thead>
+  <tbody>
+    <tr><td>Lenguaje</td><td>Python 3.12 o superior</td><td>Usar entorno virtual (<code>venv</code>) y <code>requirements.txt</code>.</td></tr>
+    <tr><td>Framework web</td><td>Django 5.x</td><td>Usar el ORM, migraciones, sistema de autenticación y Django Admin.</td></tr>
+    <tr><td>Base de datos</td><td>MySQL 8.x</td><td>Motor InnoDB, codificación <code>utf8mb4</code>. Conector <code>mysqlclient</code>.</td></tr>
+    <tr><td>Interfaz</td><td>Plantillas de Django + Bootstrap 5 (u otro framework CSS)</td><td>Diseño adaptable (responsive).</td></tr>
+    <tr><td>Modelado</td><td>Visual Paradigm</td><td>Entregar el archivo <code>.vpp</code> y las imágenes exportadas.</td></tr>
+    <tr><td>Control de versiones</td><td>Git + GitHub/GitLab</td><td>Repositorio compartido con el profesor; commits de todos los integrantes.</td></tr>
+    <tr><td>Pruebas</td><td><code>django.test</code> / <code>pytest-django</code></td><td>Pruebas unitarias de modelos y reglas de negocio.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Configuración mínima esperada en <code>settings.py</code>:</p>
+<pre><code>DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "biblioteca",
+        "USER": os.environ["DB_USER"],
+        "PASSWORD": os.environ["DB_PASSWORD"],
+        "HOST": "localhost",
+        "PORT": "3306",
+        "OPTIONS": {"charset": "utf8mb4"},
+    }
+}
+AUTH_USER_MODEL = "cuentas.Usuario"
+TIME_ZONE = "America/Mexico_City"
+LANGUAGE_CODE = "es-mx"</code></pre>
+<div class="warn">Las credenciales de la base de datos <strong>no</strong> deben subirse al repositorio. Usen variables de entorno o un archivo <code>.env</code> incluido en <code>.gitignore</code>.</div>
+
+<!-- ============================================================ -->
+<h2 id="actores">3. Actores del sistema</h2>
+<div class="actors">
+  <div class="card">
+    <h4>Estudiante</h4>
+    <p>Alumno inscrito. Consulta el catálogo, solicita préstamos por un periodo corto, renueva, reserva y consulta sus multas.</p>
+  </div>
+  <div class="card">
+    <h4>Profesor</h4>
+    <p>Docente de la escuela. Tiene las mismas funciones que el estudiante, pero con un <strong>periodo de préstamo mayor</strong>, más libros simultáneos y la posibilidad de sugerir adquisiciones.</p>
+  </div>
+  <div class="card">
+    <h4>Bibliotecario</h4>
+    <p>Personal que administra la biblioteca: acervo, usuarios, entrega y recepción de ejemplares, multas, políticas y reportes.</p>
+  </div>
+  <div class="card">
+    <h4>Reloj del sistema <span class="tag">secundario</span></h4>
+    <p>Actor temporal que dispara procesos programados: marcar préstamos vencidos, expirar reservas y enviar recordatorios.</p>
+  </div>
+</div>
+<p>
+  En el diagrama de casos de uso se recomienda modelar un actor abstracto <strong>Usuario lector</strong> del cual
+  heredan <em>Estudiante</em> y <em>Profesor</em> (generalización de actores), para no duplicar asociaciones.
+</p>
+
+<!-- ============================================================ -->
+<h2 id="reglas">4. Reglas de negocio</h2>
+<p>Los valores numéricos son los predeterminados y deben poder modificarse desde el sistema (tabla <code>politica_prestamo</code>), sin cambiar código.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Regla</th><th>Estudiante</th><th>Profesor</th></tr></thead>
+  <tbody>
+    <tr><td>RN-01</td><td>Días de préstamo (naturales)</td><td>7 días</td><td>30 días</td></tr>
+    <tr><td>RN-02</td><td>Máximo de libros prestados simultáneamente</td><td>3</td><td>10</td></tr>
+    <tr><td>RN-03</td><td>Renovaciones permitidas por préstamo</td><td>1</td><td>2</td></tr>
+    <tr><td>RN-04</td><td>Multa por día de retraso, por ejemplar</td><td>$10.00 MXN</td><td>$10.00 MXN</td></tr>
+    <tr><td>RN-05</td><td>Multa máxima por préstamo (por retraso)</td><td>$300.00 MXN</td><td>$300.00 MXN</td></tr>
+    <tr><td>RN-06</td><td>Horas para recoger un libro solicitado o reservado antes de que la solicitud expire</td><td>48 h</td><td>48 h</td></tr>
+  </tbody>
+</table>
+</div>
+<ul>
+  <li><strong>RN-07.</strong> La multa por retraso se calcula como <code>monto = min(días_retraso × multa_por_día, multa_máxima)</code>, donde <code>días_retraso = fecha_devolución − fecha_vencimiento</code> (si es positivo).</li>
+  <li><strong>RN-08.</strong> Un usuario con multas en estado <em>PENDIENTE</em> o con algún préstamo vencido <strong>no puede</strong> solicitar, renovar ni reservar libros hasta regularizar su situación.</li>
+  <li><strong>RN-09.</strong> No se puede renovar un préstamo vencido ni un préstamo de un libro que tenga reservas pendientes de otros usuarios.</li>
+  <li><strong>RN-10.</strong> La renovación extiende la fecha de vencimiento por el número de días de préstamo del tipo de usuario, contados a partir de la fecha de renovación.</li>
+  <li><strong>RN-11.</strong> Un usuario no puede tener dos préstamos activos del mismo título.</li>
+  <li><strong>RN-12.</strong> Las reservas se atienden en orden de llegada (FIFO). Al devolverse un ejemplar de un libro reservado, éste se aparta para el primer usuario en la cola y se le notifica.</li>
+  <li><strong>RN-13.</strong> En caso de pérdida o daño del ejemplar, el bibliotecario registra una multa adicional cuyo monto es el costo de reposición del libro.</li>
+  <li><strong>RN-14.</strong> Solo el bibliotecario puede condonar una multa, y debe registrar una justificación.</li>
+  <li><strong>RN-15.</strong> Un ejemplar con estado <em>EN_REPARACION</em>, <em>PERDIDO</em> o <em>BAJA</em> no puede prestarse.</li>
+  <li><strong>RN-16.</strong> Los registros de préstamos y multas no se eliminan físicamente; se conservan para el historial y los reportes.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="rf">5. Requerimientos funcionales</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Requerimiento</th><th>Prioridad</th></tr></thead>
+  <tbody>
+    <tr><td>RF-01</td><td>El sistema permitirá autenticarse con usuario y contraseña, y restringirá las funciones según el rol (estudiante, profesor, bibliotecario).</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-02</td><td>El sistema permitirá buscar libros por título, autor, ISBN, categoría y editorial, y mostrará la disponibilidad de ejemplares.</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-03</td><td>El estudiante y el profesor podrán solicitar en línea el préstamo de un libro disponible.</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-04</td><td>El sistema calculará la fecha de vencimiento según el tipo de usuario (RN-01).</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-05</td><td>El bibliotecario registrará la entrega física del ejemplar y su devolución.</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-06</td><td>Al registrar una devolución tardía, el sistema generará automáticamente la multa correspondiente (RN-07).</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-07</td><td>El usuario lector podrá consultar sus préstamos activos, su historial y sus multas.</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-08</td><td>El usuario lector podrá renovar un préstamo respetando RN-03 y RN-09.</td><td><span class="tag media">Media</span></td></tr>
+    <tr><td>RF-09</td><td>El usuario lector podrá reservar un libro sin ejemplares disponibles y cancelar su reserva.</td><td><span class="tag media">Media</span></td></tr>
+    <tr><td>RF-10</td><td>El bibliotecario podrá dar de alta, modificar, consultar y dar de baja libros, ejemplares, autores, editoriales y categorías.</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-11</td><td>El bibliotecario podrá administrar usuarios (alta, edición, bloqueo y carga masiva desde CSV).</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-12</td><td>El bibliotecario podrá registrar el pago de una multa o condonarla con justificación.</td><td><span class="tag alta">Alta</span></td></tr>
+    <tr><td>RF-13</td><td>El bibliotecario podrá configurar las políticas de préstamo por tipo de usuario.</td><td><span class="tag media">Media</span></td></tr>
+    <tr><td>RF-14</td><td>El sistema generará reportes: préstamos por periodo, libros más solicitados, préstamos vencidos, multas cobradas y pendientes.</td><td><span class="tag media">Media</span></td></tr>
+    <tr><td>RF-15</td><td>El sistema enviará notificaciones (dentro de la aplicación y opcionalmente por correo) de vencimiento próximo, préstamo vencido y reserva disponible.</td><td><span class="tag baja">Baja</span></td></tr>
+    <tr><td>RF-16</td><td>El profesor podrá enviar sugerencias de adquisición de libros, que el bibliotecario aprobará o rechazará.</td><td><span class="tag baja">Baja</span></td></tr>
+    <tr><td>RF-17</td><td>Un proceso programado (comando de Django) marcará préstamos vencidos y expirará solicitudes y reservas no atendidas.</td><td><span class="tag media">Media</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="rnf">6. Requerimientos no funcionales</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Categoría</th><th>Requerimiento</th></tr></thead>
+  <tbody>
+    <tr><td>RNF-01</td><td>Seguridad</td><td>Contraseñas almacenadas con el hash de Django; protección CSRF activa; vistas protegidas con <code>@login_required</code> y verificación de rol.</td></tr>
+    <tr><td>RNF-02</td><td>Seguridad</td><td>Un usuario solo puede ver sus propios préstamos y multas; el bibliotecario puede ver todos.</td></tr>
+    <tr><td>RNF-03</td><td>Integridad</td><td>Las operaciones de préstamo, devolución y multa se ejecutan dentro de transacciones (<code>transaction.atomic</code>) para evitar prestar dos veces el mismo ejemplar.</td></tr>
+    <tr><td>RNF-04</td><td>Usabilidad</td><td>Interfaz en español, adaptable a dispositivos móviles; mensajes de error claros.</td></tr>
+    <tr><td>RNF-05</td><td>Rendimiento</td><td>Las búsquedas del catálogo responden en menos de 2 segundos con 10,000 libros; listados paginados.</td></tr>
+    <tr><td>RNF-06</td><td>Mantenibilidad</td><td>Código organizado en apps de Django, siguiendo PEP 8; reglas de negocio en modelos o servicios, no en plantillas.</td></tr>
+    <tr><td>RNF-07</td><td>Calidad</td><td>Pruebas automatizadas que cubran al menos las reglas RN-01 a RN-11.</td></tr>
+    <tr><td>RNF-08</td><td>Portabilidad</td><td>El proyecto se instala siguiendo el <code>README.md</code> con <code>requirements.txt</code>, migraciones y datos de prueba (<em>fixtures</em> o script de carga).</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="cu">7. Catálogo de casos de uso</h2>
+<p>Este es el conjunto mínimo de casos de uso. Los equipos pueden agregar otros, justificándolos.</p>
+
+<h3>7.1 Casos de uso comunes</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Caso de uso</th><th>Actores</th><th>Relaciones</th></tr></thead>
+  <tbody>
+    <tr><td>CU-01</td><td>Iniciar sesión</td><td>Todos</td><td>—</td></tr>
+    <tr><td>CU-02</td><td>Cerrar sesión</td><td>Todos</td><td>—</td></tr>
+    <tr><td>CU-03</td><td>Recuperar contraseña</td><td>Todos</td><td>—</td></tr>
+    <tr><td>CU-04</td><td>Buscar libros en el catálogo</td><td>Todos</td><td>—</td></tr>
+    <tr><td>CU-05</td><td>Consultar detalle de libro</td><td>Todos</td><td>&laquo;extend&raquo; CU-04</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>7.2 Usuario lector (Estudiante y Profesor)</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Caso de uso</th><th>Actores</th><th>Relaciones</th></tr></thead>
+  <tbody>
+    <tr><td>CU-06</td><td>Solicitar préstamo de libro</td><td>Estudiante, Profesor</td><td>&laquo;include&raquo; CU-07; &laquo;extend&raquo; CU-05</td></tr>
+    <tr><td>CU-07</td><td>Verificar elegibilidad del usuario</td><td>(incluido)</td><td>Valida RN-02, RN-08, RN-11</td></tr>
+    <tr><td>CU-08</td><td>Cancelar solicitud de préstamo</td><td>Estudiante, Profesor</td><td>—</td></tr>
+    <tr><td>CU-09</td><td>Consultar mis préstamos</td><td>Estudiante, Profesor</td><td>—</td></tr>
+    <tr><td>CU-10</td><td>Renovar préstamo</td><td>Estudiante, Profesor</td><td>&laquo;extend&raquo; CU-09; &laquo;include&raquo; CU-07</td></tr>
+    <tr><td>CU-11</td><td>Reservar libro no disponible</td><td>Estudiante, Profesor</td><td>&laquo;extend&raquo; CU-05; &laquo;include&raquo; CU-07</td></tr>
+    <tr><td>CU-12</td><td>Cancelar reserva</td><td>Estudiante, Profesor</td><td>—</td></tr>
+    <tr><td>CU-13</td><td>Consultar historial de préstamos</td><td>Estudiante, Profesor</td><td>—</td></tr>
+    <tr><td>CU-14</td><td>Consultar mis multas</td><td>Estudiante, Profesor</td><td>—</td></tr>
+    <tr><td>CU-15</td><td>Consultar notificaciones</td><td>Estudiante, Profesor</td><td>—</td></tr>
+    <tr><td>CU-16</td><td>Sugerir adquisición de libro</td><td>Profesor</td><td>—</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>7.3 Bibliotecario</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Caso de uso</th><th>Actores</th><th>Relaciones</th></tr></thead>
+  <tbody>
+    <tr><td>CU-17</td><td>Gestionar libros (alta, consulta, modificación, baja)</td><td>Bibliotecario</td><td>—</td></tr>
+    <tr><td>CU-18</td><td>Gestionar ejemplares</td><td>Bibliotecario</td><td>&laquo;extend&raquo; CU-17</td></tr>
+    <tr><td>CU-19</td><td>Gestionar autores, editoriales y categorías</td><td>Bibliotecario</td><td>—</td></tr>
+    <tr><td>CU-20</td><td>Gestionar usuarios</td><td>Bibliotecario</td><td>—</td></tr>
+    <tr><td>CU-21</td><td>Importar usuarios desde CSV</td><td>Bibliotecario</td><td>&laquo;extend&raquo; CU-20</td></tr>
+    <tr><td>CU-22</td><td>Bloquear / desbloquear usuario</td><td>Bibliotecario</td><td>&laquo;extend&raquo; CU-20</td></tr>
+    <tr><td>CU-23</td><td>Entregar préstamo (atender solicitud)</td><td>Bibliotecario</td><td>&laquo;include&raquo; CU-07</td></tr>
+    <tr><td>CU-24</td><td>Registrar préstamo en mostrador</td><td>Bibliotecario</td><td>&laquo;include&raquo; CU-07</td></tr>
+    <tr><td>CU-25</td><td>Registrar devolución</td><td>Bibliotecario</td><td>&laquo;include&raquo; CU-26 (si hay retraso: &laquo;extend&raquo;)</td></tr>
+    <tr><td>CU-26</td><td>Generar multa por retraso</td><td>(sistema)</td><td>&laquo;extend&raquo; CU-25</td></tr>
+    <tr><td>CU-27</td><td>Registrar pérdida o daño de ejemplar</td><td>Bibliotecario</td><td>&laquo;extend&raquo; CU-25</td></tr>
+    <tr><td>CU-28</td><td>Registrar pago de multa</td><td>Bibliotecario</td><td>—</td></tr>
+    <tr><td>CU-29</td><td>Condonar multa</td><td>Bibliotecario</td><td>—</td></tr>
+    <tr><td>CU-30</td><td>Gestionar reservas</td><td>Bibliotecario</td><td>—</td></tr>
+    <tr><td>CU-31</td><td>Configurar políticas de préstamo</td><td>Bibliotecario</td><td>—</td></tr>
+    <tr><td>CU-32</td><td>Generar reportes</td><td>Bibliotecario</td><td>—</td></tr>
+    <tr><td>CU-33</td><td>Atender sugerencias de adquisición</td><td>Bibliotecario</td><td>—</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>7.4 Reloj del sistema</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Caso de uso</th><th>Actores</th><th>Relaciones</th></tr></thead>
+  <tbody>
+    <tr><td>CU-34</td><td>Marcar préstamos vencidos</td><td>Reloj del sistema</td><td>—</td></tr>
+    <tr><td>CU-35</td><td>Expirar solicitudes y reservas no atendidas</td><td>Reloj del sistema</td><td>—</td></tr>
+    <tr><td>CU-36</td><td>Enviar recordatorios de vencimiento</td><td>Reloj del sistema</td><td>—</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="plantilla">8. Plantilla estándar para describir casos de uso</h2>
+<p>
+  Cada caso de uso del catálogo debe describirse con la siguiente plantilla, basada en el formato
+  de Alistair Cockburn (<em>Writing Effective Use Cases</em>) y en las prácticas de UML/RUP.
+  Los flujos se redactan en pasos numerados, alternando acciones del actor y respuestas del sistema.
+  Los flujos alternativos se numeran con referencia al paso del flujo básico del que parten (p. ej. <em>4a</em>).
+</p>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>Identificador único (CU-XX) y nombre en forma <em>verbo + objeto</em>.</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>Control de cambios del documento.</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Quien inicia el caso de uso para lograr un objetivo.</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Otros actores o sistemas que participan.</td></tr>
+    <tr><th scope="row">Descripción</th><td>Resumen de una o dos oraciones del objetivo.</td></tr>
+    <tr><th scope="row">Disparador</th><td>Evento que inicia el caso de uso.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>Condiciones que deben cumplirse antes de iniciar.</td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>Estado del sistema al terminar exitosamente.</td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>Lo que el sistema asegura aun si el caso de uso falla.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>Escenario principal de éxito, en pasos numerados.</td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>Variantes válidas del flujo básico.</td></tr>
+    <tr><th scope="row">Excepciones</th><td>Errores y cómo los maneja el sistema.</td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>Referencias a RN-XX que aplican.</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>Requerimientos no funcionales específicos del caso de uso.</td></tr>
+    <tr><th scope="row">Relaciones</th><td>&laquo;include&raquo;, &laquo;extend&raquo;, generalización.</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Cuántas veces se espera que ocurra y su importancia.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="ejemplos">9. Casos de uso descritos (ejemplos)</h2>
+<p>Los siguientes casos de uso sirven como referencia del nivel de detalle esperado. Los equipos deben describir <strong>todos</strong> los casos de uso del catálogo con la misma plantilla.</p>
+
+<h3>CU-06 Solicitar préstamo de libro</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">Actor principal</th><td>Estudiante o Profesor (Usuario lector)</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Bibliotecario (atiende la solicitud en CU-23)</td></tr>
+    <tr><th scope="row">Descripción</th><td>El usuario lector solicita en línea el préstamo de un libro con ejemplares disponibles; el sistema aparta un ejemplar para que lo recoja en la biblioteca.</td></tr>
+    <tr><th scope="row">Disparador</th><td>El usuario selecciona «Solicitar préstamo» en el detalle de un libro.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>El usuario inició sesión (CU-01) y su cuenta está activa y no bloqueada.</li>
+        <li>El libro existe en el catálogo.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>Se crea un registro en <code>prestamo</code> con estado <em>SOLICITADO</em> y fecha límite para recoger (RN-06).</li>
+        <li>El ejemplar asignado cambia a estado <em>RESERVADO</em>.</li>
+        <li>Se genera una notificación para el usuario.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>Si la solicitud falla, ningún ejemplar cambia de estado y no se crea ningún préstamo.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El usuario busca un libro (CU-04) y consulta su detalle (CU-05).</li>
+        <li>El sistema muestra los datos del libro y el número de ejemplares disponibles.</li>
+        <li>El usuario selecciona «Solicitar préstamo».</li>
+        <li>El sistema verifica la elegibilidad del usuario (&laquo;include&raquo; CU-07).</li>
+        <li>El sistema obtiene la política del tipo de usuario y muestra un resumen: título, días de préstamo, fecha estimada de vencimiento y plazo para recoger.</li>
+        <li>El usuario confirma la solicitud.</li>
+        <li>El sistema asigna un ejemplar disponible, lo marca como <em>RESERVADO</em> y registra el préstamo en estado <em>SOLICITADO</em>, dentro de una transacción.</li>
+        <li>El sistema muestra un mensaje de confirmación con el folio y el código de inventario del ejemplar.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>2a. No hay ejemplares disponibles:</strong> el sistema oculta «Solicitar préstamo» y ofrece «Reservar» (&laquo;extend&raquo; CU-11). Fin del caso de uso.</li>
+        <li><strong>6a. El usuario cancela:</strong> el sistema regresa al detalle del libro sin registrar cambios.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>4a. Usuario con multas pendientes o préstamos vencidos (RN-08):</strong> el sistema informa el motivo y el monto adeudado, y termina el caso de uso.</li>
+        <li><strong>4b. Usuario alcanzó el máximo de libros (RN-02):</strong> el sistema muestra el límite y sus préstamos activos.</li>
+        <li><strong>4c. El usuario ya tiene ese título prestado (RN-11):</strong> el sistema lo indica y termina.</li>
+        <li><strong>7a. El último ejemplar fue tomado por otro usuario al mismo tiempo:</strong> la transacción se revierte y el sistema ofrece reservar el libro.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-01, RN-02, RN-06, RN-08, RN-11, RN-15</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-03 (transacción con bloqueo de fila: <code>select_for_update()</code>).</td></tr>
+    <tr><th scope="row">Relaciones</th><td>&laquo;include&raquo; CU-07; extiende CU-05; es extendido por CU-11.</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Alta: decenas de veces al día. Prioridad alta.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>CU-25 Registrar devolución</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">Actor principal</th><td>Bibliotecario</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Usuario lector (entrega físicamente el libro)</td></tr>
+    <tr><th scope="row">Descripción</th><td>El bibliotecario registra la devolución de un ejemplar. Si la entrega es tardía, el sistema genera la multa correspondiente.</td></tr>
+    <tr><th scope="row">Disparador</th><td>Un usuario entrega un libro en el mostrador.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>El bibliotecario inició sesión.</li>
+        <li>Existe un préstamo en estado <em>ACTIVO</em> o <em>VENCIDO</em> para el ejemplar.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>El préstamo queda en estado <em>DEVUELTO</em> con fecha de devolución y bibliotecario que recibe.</li>
+        <li>El ejemplar queda <em>DISPONIBLE</em>, o <em>RESERVADO</em> si hay reservas pendientes del título (RN-12).</li>
+        <li>Si hubo retraso, existe una multa <em>PENDIENTE</em> asociada al préstamo.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>El préstamo no se cierra si no se pudo registrar la multa correspondiente (operación atómica).</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El bibliotecario selecciona «Registrar devolución».</li>
+        <li>El bibliotecario captura o escanea el código de inventario del ejemplar.</li>
+        <li>El sistema muestra el préstamo: usuario, título, fecha de préstamo, fecha de vencimiento y días de retraso.</li>
+        <li>El bibliotecario revisa el estado físico del libro y confirma la devolución.</li>
+        <li>El sistema registra la fecha de devolución y cambia el préstamo a <em>DEVUELTO</em>.</li>
+        <li>El sistema cambia el ejemplar a <em>DISPONIBLE</em>.</li>
+        <li>El sistema muestra el comprobante de devolución.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>5a. Devolución tardía:</strong> el sistema calcula los días de retraso y el monto (RN-07), crea la multa en estado <em>PENDIENTE</em> (&laquo;extend&raquo; CU-26), notifica al usuario y continúa en el paso 6. Opcionalmente el bibliotecario puede registrar el pago en ese momento (CU-28).</li>
+        <li><strong>4a. Libro dañado:</strong> el bibliotecario registra el daño (&laquo;extend&raquo; CU-27); el ejemplar pasa a <em>EN_REPARACION</em> y se genera la multa por daño (RN-13).</li>
+        <li><strong>6a. Hay reservas pendientes del título:</strong> el sistema marca el ejemplar como <em>RESERVADO</em>, asigna la reserva más antigua y notifica a ese usuario (RN-12).</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>3a. No existe préstamo activo para el ejemplar:</strong> el sistema muestra un error y permite capturar otro código.</li>
+        <li><strong>5b. Falla al guardar:</strong> se revierte la transacción y se informa al bibliotecario.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-04, RN-05, RN-07, RN-12, RN-13, RN-16</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-03. El cálculo de la multa debe tener pruebas unitarias con casos límite (0, 1 y más días; tope máximo).</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Extendido por CU-26 y CU-27.</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Alta. Prioridad alta.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>CU-10 Renovar préstamo</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">Actor principal</th><td>Estudiante o Profesor</td></tr>
+    <tr><th scope="row">Descripción</th><td>El usuario extiende la fecha de vencimiento de un préstamo activo.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>Sesión iniciada; el préstamo pertenece al usuario y está <em>ACTIVO</em>.</td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>Se incrementa <code>num_renovaciones</code> y se actualiza <code>fecha_vencimiento</code> (RN-10).</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El usuario consulta sus préstamos (CU-09).</li>
+        <li>El usuario selecciona «Renovar» en un préstamo.</li>
+        <li>El sistema verifica la elegibilidad (&laquo;include&raquo; CU-07), las renovaciones restantes (RN-03) y que no haya reservas del título (RN-09).</li>
+        <li>El sistema muestra la nueva fecha de vencimiento.</li>
+        <li>El usuario confirma.</li>
+        <li>El sistema actualiza el préstamo y muestra la confirmación.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>3a.</strong> Se alcanzó el máximo de renovaciones: el sistema lo indica.</li>
+        <li><strong>3b.</strong> El préstamo está vencido o el usuario tiene multas: el sistema rechaza la renovación (RN-08, RN-09).</li>
+        <li><strong>3c.</strong> Otro usuario reservó el título: el sistema rechaza la renovación.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-03, RN-08, RN-09, RN-10</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="bd">10. Diseño de la base de datos (MySQL)</h2>
+<p>
+  El diseño está normalizado a tercera forma normal. Todas las tablas usan motor InnoDB, <code>utf8mb4</code> y llaves
+  primarias <code>BIGINT AUTO_INCREMENT</code> (equivalente al <code>BigAutoField</code> de Django).
+  Los nombres de tabla se fijan en Django con <code>class Meta: db_table = "..."</code>.
+  Leyenda: <span class="pk">PK</span> llave primaria, <span class="fk">FK</span> llave foránea, <strong>UQ</strong> único.
+</p>
+<div class="note">
+  El modelo completo está en <a href="biblioteca_modelo_er.sql"><code>biblioteca_modelo_er.sql</code></a>. Para verlo como diagrama en
+  MySQL Workbench: <em>File › New Model</em>, luego <em>File › Import › Reverse Engineer MySQL Create Script…</em>, seleccionar el archivo
+  y marcar <em>Place imported objects on a diagram</em>. Después se puede guardar como <code>.mwb</code>.
+</div>
+
+<h3>10.1 Diagrama entidad-relación</h3>
+<div class="mermaid">
+erDiagram
+  usuario ||--o| estudiante : "es"
+  usuario ||--o| profesor : "es"
+  carrera ||--o{ estudiante : "inscribe"
+  departamento ||--o{ profesor : "adscribe"
+  editorial ||--o{ libro : "publica"
+  categoria ||--o{ libro : "clasifica"
+  libro ||--o{ libro_autor : ""
+  autor ||--o{ libro_autor : ""
+  libro ||--o{ ejemplar : "tiene"
+  usuario ||--o{ prestamo : "solicita"
+  ejemplar ||--o{ prestamo : "se presta en"
+  usuario ||--o{ reserva : "realiza"
+  libro ||--o{ reserva : "se reserva"
+  ejemplar |o--o{ reserva : "asignado a"
+  prestamo ||--o{ multa : "genera"
+  usuario ||--o{ multa : "adeuda"
+  multa ||--o{ pago : "se liquida con"
+  usuario ||--o{ notificacion : "recibe"
+  profesor ||--o{ sugerencia_adquisicion : "propone"
+</div>
+<p class="meta">Además, <code>prestamo</code>, <code>multa</code> y <code>pago</code> tienen llaves foráneas hacia <code>usuario</code> para registrar al bibliotecario que realizó la operación. <code>politica_prestamo</code> no tiene llaves foráneas: se relaciona con <code>usuario</code> por el valor de <code>tipo_usuario</code>.</p>
+
+<h3>10.2 Tablas</h3>
+
+<h4>usuario</h4>
+<p class="meta">Modelo de usuario personalizado (hereda de <code>AbstractUser</code>). Incluye los campos estándar de Django (<code>password</code>, <code>last_login</code>, <code>is_superuser</code>, <code>is_staff</code>, <code>date_joined</code>).</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span> id</td><td>BIGINT</td><td>AUTO_INCREMENT</td><td>Identificador</td></tr>
+    <tr><td>username</td><td>VARCHAR(150)</td><td>UQ, NOT NULL</td><td>Nombre de usuario (matrícula o número de empleado)</td></tr>
+    <tr><td>password</td><td>VARCHAR(128)</td><td>NOT NULL</td><td>Hash de la contraseña</td></tr>
+    <tr><td>first_name</td><td>VARCHAR(150)</td><td>NOT NULL</td><td>Nombre(s)</td></tr>
+    <tr><td>last_name</td><td>VARCHAR(150)</td><td>NOT NULL</td><td>Apellidos</td></tr>
+    <tr><td>email</td><td>VARCHAR(254)</td><td>UQ, NOT NULL</td><td>Correo institucional</td></tr>
+    <tr><td>tipo_usuario</td><td>VARCHAR(15)</td><td>NOT NULL, CHECK IN ('ESTUDIANTE','PROFESOR','BIBLIOTECARIO')</td><td>Rol del usuario</td></tr>
+    <tr><td>telefono</td><td>VARCHAR(20)</td><td>NULL</td><td>Teléfono de contacto</td></tr>
+    <tr><td>bloqueado</td><td>BOOLEAN</td><td>DEFAULT FALSE</td><td>Bloqueo administrativo</td></tr>
+    <tr><td>motivo_bloqueo</td><td>VARCHAR(255)</td><td>NULL</td><td>Justificación del bloqueo</td></tr>
+    <tr><td>is_active</td><td>BOOLEAN</td><td>DEFAULT TRUE</td><td>Cuenta activa (baja lógica)</td></tr>
+  </tbody>
+</table></div>
+
+<h4>estudiante</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span><span class="fk"> FK</span> usuario_id</td><td>BIGINT</td><td>→ usuario.id, ON DELETE CASCADE</td><td>Relación uno a uno con usuario</td></tr>
+    <tr><td>matricula</td><td>VARCHAR(20)</td><td>UQ, NOT NULL</td><td>Matrícula escolar</td></tr>
+    <tr><td><span class="fk">FK</span> carrera_id</td><td>BIGINT</td><td>→ carrera.id, ON DELETE PROTECT</td><td>Carrera</td></tr>
+    <tr><td>semestre</td><td>TINYINT UNSIGNED</td><td>CHECK 1–12</td><td>Semestre actual</td></tr>
+  </tbody>
+</table></div>
+
+<h4>profesor</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span><span class="fk"> FK</span> usuario_id</td><td>BIGINT</td><td>→ usuario.id, ON DELETE CASCADE</td><td>Relación uno a uno con usuario</td></tr>
+    <tr><td>num_empleado</td><td>VARCHAR(20)</td><td>UQ, NOT NULL</td><td>Número de empleado</td></tr>
+    <tr><td><span class="fk">FK</span> departamento_id</td><td>BIGINT</td><td>→ departamento.id, ON DELETE PROTECT</td><td>Departamento académico</td></tr>
+  </tbody>
+</table></div>
+
+<h4>carrera · departamento</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Tabla</th><th>Columnas</th></tr></thead>
+  <tbody>
+    <tr><td>carrera</td><td><span class="pk">PK</span> id BIGINT · clave VARCHAR(10) UQ · nombre VARCHAR(120) NOT NULL</td></tr>
+    <tr><td>departamento</td><td><span class="pk">PK</span> id BIGINT · nombre VARCHAR(120) UQ NOT NULL</td></tr>
+  </tbody>
+</table></div>
+
+<h4>politica_prestamo</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span> id</td><td>BIGINT</td><td>AUTO_INCREMENT</td><td></td></tr>
+    <tr><td>tipo_usuario</td><td>VARCHAR(15)</td><td>UQ, CHECK IN ('ESTUDIANTE','PROFESOR')</td><td>Tipo al que aplica</td></tr>
+    <tr><td>dias_prestamo</td><td>SMALLINT UNSIGNED</td><td>NOT NULL</td><td>RN-01</td></tr>
+    <tr><td>max_libros</td><td>SMALLINT UNSIGNED</td><td>NOT NULL</td><td>RN-02</td></tr>
+    <tr><td>max_renovaciones</td><td>SMALLINT UNSIGNED</td><td>NOT NULL</td><td>RN-03</td></tr>
+    <tr><td>multa_por_dia</td><td>DECIMAL(8,2)</td><td>NOT NULL, ≥ 0</td><td>RN-04</td></tr>
+    <tr><td>multa_maxima</td><td>DECIMAL(8,2)</td><td>NOT NULL, ≥ 0</td><td>RN-05</td></tr>
+    <tr><td>horas_para_recoger</td><td>SMALLINT UNSIGNED</td><td>NOT NULL</td><td>RN-06</td></tr>
+    <tr><td>actualizado_en</td><td>DATETIME</td><td>NOT NULL</td><td>Última modificación</td></tr>
+  </tbody>
+</table></div>
+
+<h4>autor · editorial · categoria</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Tabla</th><th>Columnas</th></tr></thead>
+  <tbody>
+    <tr><td>autor</td><td><span class="pk">PK</span> id BIGINT · nombre VARCHAR(100) NOT NULL · apellidos VARCHAR(150) NOT NULL · nacionalidad VARCHAR(60) NULL</td></tr>
+    <tr><td>editorial</td><td><span class="pk">PK</span> id BIGINT · nombre VARCHAR(150) UQ NOT NULL · pais VARCHAR(60) NULL</td></tr>
+    <tr><td>categoria</td><td><span class="pk">PK</span> id BIGINT · nombre VARCHAR(100) UQ NOT NULL · descripcion VARCHAR(255) NULL</td></tr>
+  </tbody>
+</table></div>
+
+<h4>libro</h4>
+<p class="meta">Representa el título (la obra). Los objetos físicos se registran en <code>ejemplar</code>.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span> id</td><td>BIGINT</td><td>AUTO_INCREMENT</td><td></td></tr>
+    <tr><td>isbn</td><td>VARCHAR(13)</td><td>UQ, NOT NULL</td><td>ISBN-10 o ISBN-13 sin guiones</td></tr>
+    <tr><td>titulo</td><td>VARCHAR(255)</td><td>NOT NULL, INDEX</td><td>Título</td></tr>
+    <tr><td>subtitulo</td><td>VARCHAR(255)</td><td>NULL</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> editorial_id</td><td>BIGINT</td><td>→ editorial.id, ON DELETE PROTECT</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> categoria_id</td><td>BIGINT</td><td>→ categoria.id, ON DELETE PROTECT</td><td></td></tr>
+    <tr><td>anio_publicacion</td><td>SMALLINT UNSIGNED</td><td>NULL</td><td></td></tr>
+    <tr><td>edicion</td><td>VARCHAR(30)</td><td>NULL</td><td></td></tr>
+    <tr><td>idioma</td><td>VARCHAR(30)</td><td>DEFAULT 'Español'</td><td></td></tr>
+    <tr><td>num_paginas</td><td>SMALLINT UNSIGNED</td><td>NULL</td><td></td></tr>
+    <tr><td>descripcion</td><td>TEXT</td><td>NULL</td><td>Sinopsis</td></tr>
+    <tr><td>portada</td><td>VARCHAR(255)</td><td>NULL</td><td>Ruta de imagen (<code>ImageField</code>)</td></tr>
+    <tr><td>costo_reposicion</td><td>DECIMAL(10,2)</td><td>NOT NULL, DEFAULT 0</td><td>RN-13</td></tr>
+    <tr><td>activo</td><td>BOOLEAN</td><td>DEFAULT TRUE</td><td>Baja lógica</td></tr>
+  </tbody>
+</table></div>
+
+<h4>libro_autor</h4>
+<p class="meta">Relación muchos a muchos entre libro y autor (<code>ManyToManyField</code> con <code>through</code>).</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span> id</td><td>BIGINT</td><td>AUTO_INCREMENT</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> libro_id</td><td>BIGINT</td><td>→ libro.id, ON DELETE CASCADE</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> autor_id</td><td>BIGINT</td><td>→ autor.id, ON DELETE PROTECT</td><td></td></tr>
+    <tr><td>orden</td><td>TINYINT UNSIGNED</td><td>DEFAULT 1</td><td>Orden de aparición del autor</td></tr>
+    <tr><td colspan="4">UQ (libro_id, autor_id)</td></tr>
+  </tbody>
+</table></div>
+
+<h4>ejemplar</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span> id</td><td>BIGINT</td><td>AUTO_INCREMENT</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> libro_id</td><td>BIGINT</td><td>→ libro.id, ON DELETE PROTECT</td><td></td></tr>
+    <tr><td>codigo_inventario</td><td>VARCHAR(30)</td><td>UQ, NOT NULL</td><td>Código de barras</td></tr>
+    <tr><td>ubicacion</td><td>VARCHAR(50)</td><td>NULL</td><td>Estante / sección</td></tr>
+    <tr><td>estado</td><td>VARCHAR(15)</td><td>CHECK IN ('DISPONIBLE','RESERVADO','PRESTADO','EN_REPARACION','PERDIDO','BAJA'), INDEX</td><td>Estado actual</td></tr>
+    <tr><td>fecha_adquisicion</td><td>DATE</td><td>NULL</td><td></td></tr>
+    <tr><td>observaciones</td><td>VARCHAR(255)</td><td>NULL</td><td></td></tr>
+  </tbody>
+</table></div>
+
+<h4>prestamo</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span> id</td><td>BIGINT</td><td>AUTO_INCREMENT</td><td>Folio</td></tr>
+    <tr><td><span class="fk">FK</span> usuario_id</td><td>BIGINT</td><td>→ usuario.id, ON DELETE PROTECT</td><td>Lector</td></tr>
+    <tr><td><span class="fk">FK</span> ejemplar_id</td><td>BIGINT</td><td>→ ejemplar.id, ON DELETE PROTECT</td><td></td></tr>
+    <tr><td>estado</td><td>VARCHAR(12)</td><td>CHECK IN ('SOLICITADO','ACTIVO','VENCIDO','DEVUELTO','CANCELADO','EXPIRADO','PERDIDO'), INDEX</td><td>Ver diagrama de estados</td></tr>
+    <tr><td>fecha_solicitud</td><td>DATETIME</td><td>NOT NULL</td><td>Momento de la solicitud</td></tr>
+    <tr><td>fecha_limite_recoger</td><td>DATETIME</td><td>NULL</td><td>RN-06</td></tr>
+    <tr><td>fecha_prestamo</td><td>DATETIME</td><td>NULL</td><td>Entrega física</td></tr>
+    <tr><td>fecha_vencimiento</td><td>DATE</td><td>NULL, INDEX</td><td>Fecha límite de devolución</td></tr>
+    <tr><td>fecha_devolucion</td><td>DATETIME</td><td>NULL</td><td>Devolución real</td></tr>
+    <tr><td>num_renovaciones</td><td>SMALLINT UNSIGNED</td><td>DEFAULT 0</td><td>RN-03</td></tr>
+    <tr><td><span class="fk">FK</span> entregado_por_id</td><td>BIGINT</td><td>→ usuario.id, NULL, ON DELETE SET NULL</td><td>Bibliotecario que entregó</td></tr>
+    <tr><td><span class="fk">FK</span> recibido_por_id</td><td>BIGINT</td><td>→ usuario.id, NULL, ON DELETE SET NULL</td><td>Bibliotecario que recibió</td></tr>
+    <tr><td>observaciones</td><td>VARCHAR(255)</td><td>NULL</td><td></td></tr>
+  </tbody>
+</table></div>
+
+<h4>reserva</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span> id</td><td>BIGINT</td><td>AUTO_INCREMENT</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> usuario_id</td><td>BIGINT</td><td>→ usuario.id, ON DELETE PROTECT</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> libro_id</td><td>BIGINT</td><td>→ libro.id, ON DELETE PROTECT</td><td>Se reserva el título, no un ejemplar</td></tr>
+    <tr><td><span class="fk">FK</span> ejemplar_asignado_id</td><td>BIGINT</td><td>→ ejemplar.id, NULL, ON DELETE SET NULL</td><td>Se llena al apartar un ejemplar devuelto</td></tr>
+    <tr><td>estado</td><td>VARCHAR(12)</td><td>CHECK IN ('PENDIENTE','DISPONIBLE','ATENDIDA','CANCELADA','EXPIRADA'), INDEX</td><td></td></tr>
+    <tr><td>fecha_reserva</td><td>DATETIME</td><td>NOT NULL</td><td>Determina el orden FIFO (RN-12)</td></tr>
+    <tr><td>fecha_expiracion</td><td>DATETIME</td><td>NULL</td><td>Se calcula al pasar a DISPONIBLE (RN-06)</td></tr>
+  </tbody>
+</table></div>
+
+<h4>multa</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span> id</td><td>BIGINT</td><td>AUTO_INCREMENT</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> prestamo_id</td><td>BIGINT</td><td>→ prestamo.id, ON DELETE PROTECT</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> usuario_id</td><td>BIGINT</td><td>→ usuario.id, ON DELETE PROTECT</td><td>Deudor (redundancia controlada para consultas rápidas)</td></tr>
+    <tr><td>motivo</td><td>VARCHAR(10)</td><td>CHECK IN ('RETRASO','DANIO','PERDIDA')</td><td></td></tr>
+    <tr><td>dias_retraso</td><td>SMALLINT UNSIGNED</td><td>DEFAULT 0</td><td>Solo para RETRASO</td></tr>
+    <tr><td>monto</td><td>DECIMAL(10,2)</td><td>NOT NULL, &gt; 0</td><td>RN-07 / RN-13</td></tr>
+    <tr><td>estado</td><td>VARCHAR(10)</td><td>CHECK IN ('PENDIENTE','PAGADA','CONDONADA'), INDEX</td><td></td></tr>
+    <tr><td>fecha_generacion</td><td>DATETIME</td><td>NOT NULL</td><td></td></tr>
+    <tr><td>justificacion_condonacion</td><td>VARCHAR(255)</td><td>NULL</td><td>Obligatoria si CONDONADA (RN-14)</td></tr>
+    <tr><td><span class="fk">FK</span> condonada_por_id</td><td>BIGINT</td><td>→ usuario.id, NULL, ON DELETE SET NULL</td><td></td></tr>
+  </tbody>
+</table></div>
+
+<h4>pago</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pk">PK</span> id</td><td>BIGINT</td><td>AUTO_INCREMENT</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> multa_id</td><td>BIGINT</td><td>→ multa.id, ON DELETE PROTECT</td><td>Permite pagos parciales</td></tr>
+    <tr><td>monto</td><td>DECIMAL(10,2)</td><td>NOT NULL, &gt; 0</td><td></td></tr>
+    <tr><td>metodo</td><td>VARCHAR(15)</td><td>CHECK IN ('EFECTIVO','TARJETA','TRANSFERENCIA')</td><td></td></tr>
+    <tr><td>folio_recibo</td><td>VARCHAR(30)</td><td>UQ</td><td></td></tr>
+    <tr><td>fecha_pago</td><td>DATETIME</td><td>NOT NULL</td><td></td></tr>
+    <tr><td><span class="fk">FK</span> registrado_por_id</td><td>BIGINT</td><td>→ usuario.id, ON DELETE PROTECT</td><td>Bibliotecario</td></tr>
+  </tbody>
+</table></div>
+
+<h4>notificacion · sugerencia_adquisicion</h4>
+<div class="table-wrap"><table>
+  <thead><tr><th>Tabla</th><th>Columnas</th></tr></thead>
+  <tbody>
+    <tr><td>notificacion</td><td><span class="pk">PK</span> id BIGINT · <span class="fk">FK</span> usuario_id → usuario · tipo VARCHAR(20) CHECK IN ('VENCE_PRONTO','VENCIDO','RESERVA_DISPONIBLE','MULTA','GENERAL') · mensaje VARCHAR(500) · leida BOOLEAN DEFAULT FALSE · fecha DATETIME</td></tr>
+    <tr><td>sugerencia_adquisicion</td><td><span class="pk">PK</span> id BIGINT · <span class="fk">FK</span> profesor_id → profesor.usuario_id · titulo VARCHAR(255) · autores VARCHAR(255) · isbn VARCHAR(13) NULL · justificacion TEXT · estado VARCHAR(10) CHECK IN ('PENDIENTE','APROBADA','RECHAZADA') · respuesta VARCHAR(255) NULL · fecha DATETIME</td></tr>
+  </tbody>
+</table></div>
+
+<h3>10.3 Estados del préstamo</h3>
+<div class="mermaid">
+stateDiagram-v2
+  [*] --> SOLICITADO : usuario solicita (CU-06)
+  [*] --> ACTIVO : préstamo en mostrador (CU-24)
+  SOLICITADO --> ACTIVO : bibliotecario entrega (CU-23)
+  SOLICITADO --> CANCELADO : usuario cancela (CU-08)
+  SOLICITADO --> EXPIRADO : no se recoge a tiempo (CU-35)
+  ACTIVO --> ACTIVO : renovación (CU-10)
+  ACTIVO --> VENCIDO : pasa fecha_vencimiento (CU-34)
+  ACTIVO --> DEVUELTO : devolución a tiempo (CU-25)
+  VENCIDO --> DEVUELTO : devolución tardía + multa (CU-25, CU-26)
+  ACTIVO --> PERDIDO : reporte de pérdida (CU-27)
+  VENCIDO --> PERDIDO : reporte de pérdida (CU-27)
+  DEVUELTO --> [*]
+  CANCELADO --> [*]
+  EXPIRADO --> [*]
+  PERDIDO --> [*]
+</div>
+
+<h3>10.4 Ejemplo de implementación de la regla de multa</h3>
+<p>Referencia de cómo ubicar la regla de negocio en el modelo (los equipos pueden organizarlo en una capa de servicios):</p>
+<pre><code>class Prestamo(models.Model):
+    # ... campos ...
+
+    def dias_retraso(self, fecha=None):
+        fecha = fecha or timezone.localdate()
+        if self.fecha_vencimiento is None:
+            return 0
+        return max((fecha - self.fecha_vencimiento).days, 0)
+
+    def calcular_multa(self, politica):
+        dias = self.dias_retraso(self.fecha_devolucion.date())
+        return min(dias * politica.multa_por_dia, politica.multa_maxima)</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="uml">11. Diagramas UML en Visual Paradigm</h2>
+<p>Todos los diagramas se elaboran en <strong>Visual Paradigm</strong> dentro de un mismo proyecto (<code>.vpp</code>), y se exportan como PNG o PDF para incluirlos en el documento final. Deben ser consistentes entre sí: los nombres de actores, casos de uso, clases y métodos deben coincidir en todos los diagramas y en el código.</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Diagrama</th><th>Contenido mínimo requerido</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Casos de uso</strong></td>
+      <td>
+        <ul>
+          <li>Un diagrama general con la frontera del sistema y todos los actores.</li>
+          <li>Un diagrama por paquete: <em>Préstamos y reservas</em>, <em>Administración del acervo</em>, <em>Multas</em>, <em>Usuarios y reportes</em>.</li>
+          <li>Uso correcto de &laquo;include&raquo;, &laquo;extend&raquo; (con punto de extensión) y generalización de actores (Usuario lector → Estudiante, Profesor).</li>
+          <li>Cada caso de uso enlazado a su descripción textual (en Visual Paradigm: <em>Use Case Details</em> / <em>Flow of Events</em>).</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Clases</strong></td>
+      <td>
+        <ul>
+          <li><em>Modelo de dominio</em> (análisis): clases conceptuales, asociaciones con multiplicidades, sin detalles de implementación.</li>
+          <li><em>Modelo de diseño</em>: clases que corresponden a los modelos de Django, con atributos tipados, métodos (p. ej. <code>calcular_multa()</code>, <code>puede_solicitar()</code>), enumeraciones de estados, herencia y composición.</li>
+          <li>Opcional: clases de vistas/servicios con estereotipos &laquo;boundary&raquo;, &laquo;control&raquo; y &laquo;entity&raquo;.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Secuencia</strong></td>
+      <td>
+        Al menos cuatro diagramas, con objetos de tipo vista, formulario/servicio, modelo y base de datos:
+        <ul>
+          <li>CU-06 Solicitar préstamo (incluyendo el fragmento <code>alt</code> para usuario no elegible).</li>
+          <li>CU-25 Registrar devolución con generación de multa (fragmento <code>opt</code> para retraso).</li>
+          <li>CU-10 Renovar préstamo.</li>
+          <li>CU-11 Reservar libro, o CU-34 Marcar préstamos vencidos (fragmento <code>loop</code>).</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Actividades</strong></td>
+      <td>
+        Al menos tres diagramas:
+        <ul>
+          <li>Proceso completo de préstamo y devolución con <strong>carriles</strong> (Usuario lector, Sistema, Bibliotecario).</li>
+          <li>Cálculo y cobro de multas (decisiones: retraso, tope máximo, pago o condonación).</li>
+          <li>Atención de reservas en cola FIFO al devolverse un ejemplar.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Estados</strong> <span class="tag">recomendado</span></td>
+      <td>Ciclo de vida de <em>Préstamo</em> y de <em>Ejemplar</em> (ver sección 10.3).</td>
+    </tr>
+    <tr>
+      <td><strong>Entidad-relación</strong></td>
+      <td>Diagrama ER físico en Visual Paradigm (<em>Entity Relationship Diagram</em>) que coincida con las tablas generadas por las migraciones en MySQL.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="django">12. Estructura sugerida del proyecto Django</h2>
+<pre><code>biblioteca/                  # proyecto
+├── manage.py
+├── requirements.txt
+├── README.md
+├── .env.example
+├── biblioteca/              # configuración (settings, urls, wsgi)
+├── cuentas/                 # Usuario, Estudiante, Profesor, Carrera, Departamento, login
+├── catalogo/                # Autor, Editorial, Categoria, Libro, LibroAutor, Ejemplar
+├── prestamos/               # PoliticaPrestamo, Prestamo, Reserva
+│   └── management/commands/procesar_vencimientos.py   # CU-34, CU-35, CU-36
+├── multas/                  # Multa, Pago
+├── notificaciones/          # Notificacion
+├── reportes/                # vistas de reportes
+├── templates/
+└── static/</code></pre>
+<ul>
+  <li>Usar decoradores o <em>mixins</em> para restringir vistas por rol (p. ej. <code>BibliotecarioRequiredMixin</code>).</li>
+  <li>Registrar los modelos en Django Admin, pero las funciones principales del bibliotecario deben tener vistas propias.</li>
+  <li>Incluir un comando o <em>fixtures</em> para cargar datos de prueba: al menos 50 libros, 100 ejemplares, 20 estudiantes, 5 profesores y 2 bibliotecarios.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="entregables">13. Entregables</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Entrega</th><th>Contenido</th></tr></thead>
+  <tbody>
+    <tr><td><strong>1. Especificación</strong></td><td>Documento de requerimientos (funcionales, no funcionales, reglas de negocio), diagramas de casos de uso y descripción completa de todos los casos de uso con la plantilla de la sección 8.</td></tr>
+    <tr><td><strong>2. Diseño</strong></td><td>Diagramas de clases (dominio y diseño), secuencia, actividades y estados; diseño de la base de datos (diagrama ER y diccionario de datos); prototipo de pantallas (bocetos o wireframes).</td></tr>
+    <tr><td><strong>3. Implementación</strong></td><td>Repositorio con el proyecto Django funcionando sobre MySQL, pruebas automatizadas, <code>README.md</code> con instrucciones de instalación y datos de prueba.</td></tr>
+    <tr><td><strong>4. Presentación final</strong></td><td>Demostración en vivo de los casos de uso principales por cada actor, archivo <code>.vpp</code> final, y documento integrado (PDF) con todos los artefactos actualizados.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note">Las fechas de cada entrega se publicarán en la plataforma del curso. Los equipos serán de 3 a 4 integrantes.</div>
+
+<!-- ============================================================ -->
+<h2 id="evaluacion">14. Criterios de evaluación</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Criterio</th><th>Peso</th></tr></thead>
+  <tbody>
+    <tr><td>Especificación de requerimientos y descripción de casos de uso (completitud, formato estándar, claridad)</td><td>20%</td></tr>
+    <tr><td>Diagramas UML en Visual Paradigm (corrección de la notación y consistencia entre diagramas)</td><td>20%</td></tr>
+    <tr><td>Diseño de la base de datos (normalización, integridad referencial, correspondencia con los modelos)</td><td>15%</td></tr>
+    <tr><td>Implementación en Django: funcionalidad de los casos de uso y reglas de negocio</td><td>30%</td></tr>
+    <tr><td>Calidad del código, pruebas automatizadas y uso de Git</td><td>10%</td></tr>
+    <tr><td>Presentación y demostración final</td><td>5%</td></tr>
+  </tbody>
+</table>
+</div>
+
+<footer>
+  Proyecto Final · Ingeniería de Software · Sistema de Gestión de Biblioteca Escolar.
+</footer>
+
+</div>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "default", securityLevel: "strict" });
+</script>
+</body>
+</html>
