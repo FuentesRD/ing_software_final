@@ -12,6 +12,7 @@ Equipo de 4 integrantes. Documentos de referencia en `docs/`:
 
 ## Forma de trabajar
 
+- Antes de escribir código, lee `PLAN_DE_TRABAJO.md`: pregunta a qué integrante ayudas y trabaja solo en las apps de su sección.
 - Responde y comenta siempre en **español**. Identificadores de código en español (como en los requerimientos).
 - Quien te usa está aprendiendo Django: antes de cambios grandes explica el plan y el **por qué**; después, resume qué archivos tocaste.
 - Cuando el usuario deba ejecutar algo él mismo, indica en qué terminal (PowerShell en Windows o bash en WSL/Linux) y recuérdale que debe estar en la raíz del repo con el entorno virtual activo (el prompt empieza con `(.venv)`).- Trabaja en pasos pequeños y verificables. Después de cada cambio de modelos: `makemigrations` → `migrate` → pruebas.
