@@ -3,10 +3,10 @@
 Proyecto final de Ingeniería de Software · Agosto–Diciembre 2026
 
 ## Equipo
-- Diego ...
-- ...
-- ...
-- ...
+- Diego
+- Alvaro
+- Samanta
+- Ricardo
 
 ## Stack
 Python 3.12 · Django 5.2 · MySQL 8.4 (Docker) · Bootstrap 5 · Visual Paradigm
@@ -20,6 +20,9 @@ docker/          Configuración de MySQL en Docker        (Fase 1)
 biblioteca/      Configuración de Django                  (Fase 2)
 cuentas/, catalogo/, prestamos/, multas/, ...  Apps        (Fase 3+)
 ```
+## Plan de trabajo
+El reparto de tareas, los contratos entre apps y el calendario están en
+[`PLAN_DE_TRABAJO.md`](PLAN_DE_TRABAJO.md).
 
 ## Flujo de trabajo con Git
 | Rama | Uso |
