@@ -9,7 +9,7 @@ Proyecto final de Ingeniería de Software · Agosto–Diciembre 2026
 - Ricardo
 
 ## Stack
-Python 3.12 · Django 5.2 · MySQL 8.4 (Docker) · Bootstrap 5 · Visual Paradigm
+Python 3.13 · Django 5.2 · MySQL 8.4 (Docker) · Bootstrap 5 · Visual Paradigm
 
 ## Estructura del repositorio
 ```
@@ -91,3 +91,75 @@ No subir el archivo .env al repositorio.
 
 No ejecutar docker compose down -v si se desean
 conservar los datos de MySQL.
+
+### Requisitos
+
+- Python 3.13.
+- Docker Desktop funcionando.
+- Herramientas para instalar mysqlclient.
+
+En macOS:
+
+    brew install mysql-client pkg-config
+    export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig"
+
+En WSL/Linux (Ubuntu/Debian):
+
+    sudo apt install python3-dev default-libmysqlclient-dev build-essential pkg-config
+
+### Entorno virtual
+
+Desde la raíz del repositorio, en macOS:
+
+    python3.13 -m venv .venv
+    source .venv/bin/activate
+
+En Windows PowerShell:
+
+    py -3.13 -m venv .venv
+    .venv\Scripts\Activate.ps1
+
+En WSL/Linux, con Python 3.13 instalado:
+
+    python3.13 -m venv .venv
+    source .venv/bin/activate
+
+Con el entorno activo:
+
+    python -m pip install -r requirements.txt
+
+### Variables de entorno
+
+Copiar .env.example como .env, si todavía no existe.
+En macOS o WSL/Linux:
+
+    cp .env.example .env
+
+En PowerShell:
+
+    Copy-Item .env.example .env
+
+Configurar las contraseñas y el puerto de MySQL.
+Generar una SECRET_KEY y copiar el resultado al .env:
+
+    python -c "import secrets; print(secrets.token_urlsafe(50))"
+
+Para desarrollo, usar DEBUG=True. No subir .env a Git.
+
+### Iniciar el proyecto
+
+    docker compose up -d
+    docker compose ps
+
+Esperar a que MySQL aparezca saludable y ejecutar:
+
+    python manage.py migrate
+    python manage.py runserver
+
+Abrir http://127.0.0.1:8000/.
+Detener el servidor con Ctrl+C.
+
+El proyecto usa cuentas.Usuario como usuario personalizado.
+Las apps catalogo, prestamos, multas, notificaciones y reportes
+se incluyen vacías para el desarrollo de cada integrante.
+Los correos de desarrollo se muestran en la terminal.
