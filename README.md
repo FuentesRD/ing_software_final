@@ -36,3 +36,55 @@ cuentas/, catalogo/, prestamos/, multas/, ...  Apps        (Fase 3+)
 
 ## Instalación
 *(Se completa en la Fase 1 y 2)*
+
+## Levantar la base de datos con Docker
+
+### Requisitos
+
+- Docker Desktop instalado y funcionando.
+- Docker Compose.
+- Archivo `.env` configurado.
+
+### Configuración
+
+1. Copiar las variables de entorno:
+
+   cp .env.example .env
+
+2. Abrir `.env` y configurar DB_PASSWORD y
+   DB_ROOT_PASSWORD con contraseñas seguras.
+
+3. Iniciar MySQL:
+
+   docker compose up -d
+
+4. Verificar el contenedor:
+
+   docker compose ps
+
+5. Conectarse a MySQL:
+
+   docker compose exec db mysql -u biblioteca_app -p biblioteca
+
+### Bases de datos
+
+- biblioteca: base principal para migraciones de Django.
+- biblioteca_modelo: referencia del profesor con 18 tablas.
+- test_biblioteca: base que Django crea durante las pruebas.
+
+### Scripts de inicialización
+
+Los archivos de docker/mysql/init/ configuran:
+
+- 01_permisos.sql: permisos para pruebas y lectura.
+- 02_modelo_referencia.sql: modelo SQL del profesor.
+
+Los scripts se ejecutan automáticamente solo cuando
+MySQL inicializa un volumen de datos vacío.
+
+### Importante
+
+No subir el archivo .env al repositorio.
+
+No ejecutar docker compose down -v si se desean
+conservar los datos de MySQL.
