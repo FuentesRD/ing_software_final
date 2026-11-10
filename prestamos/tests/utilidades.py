@@ -24,5 +24,11 @@ def crear_libro(isbn="9780000000001", titulo="Libro de prueba"):
     return Libro.objects.create(isbn=isbn, titulo=titulo, categoria=categoria, editorial=editorial)
 
 
-def crear_ejemplar(libro, codigo_inventario):
-    return Ejemplar.objects.create(libro=libro, codigo_inventario=codigo_inventario)
+def crear_ejemplar(libro, codigo_inventario, estado="DISPONIBLE"):
+    return Ejemplar.objects.create(libro=libro, codigo_inventario=codigo_inventario, estado=estado)
+
+
+def estado_de(ejemplar):
+    """Estado actual del ejemplar, leído de la base."""
+    ejemplar.refresh_from_db()
+    return ejemplar.estado
