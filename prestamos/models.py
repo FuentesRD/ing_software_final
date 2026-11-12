@@ -210,6 +210,21 @@ class Prestamo(models.Model):
         self.estado = self.Estado.EXPIRADO
         self.save(update_fields=["estado"])
 
+    def renovar(self):
+        """CU-10: ACTIVO → ACTIVO con nueva fecha de vencimiento.
+
+        RN-03: debe quedarle al menos una renovación.
+        RN-10: la nueva fecha cuenta desde hoy, con los días de préstamo de la política.
+        Las demás condiciones (RN-08, RN-09) las revisa prestamos.services.renovar_prestamo.
+        """
+        _validar_transicion(self, [self.Estado.ACTIVO], self.Estado.ACTIVO)
+        if self.renovaciones_restantes() == 0:
+            raise TransicionInvalida("Este préstamo ya no tiene renovaciones disponibles.")
+        politica = PoliticaPrestamo.para(self.usuario)
+        self.fecha_vencimiento = timezone.localdate() + timedelta(days=politica.dias_prestamo)
+        self.num_renovaciones += 1
+        self.save(update_fields=["fecha_vencimiento", "num_renovaciones"])
+
 
 class Reserva(models.Model):
     """Reserva de un libro sin ejemplares disponibles; cola FIFO por fecha_reserva (RN-12)."""
