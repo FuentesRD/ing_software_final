@@ -5,6 +5,7 @@ Las otras apps se usan solo a través de los contratos de PLAN_DE_TRABAJO.md (se
 """
 
 from datetime import timedelta
+from decimal import Decimal
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -51,15 +52,33 @@ class PoliticaPrestamo(models.Model):
             models.CheckConstraint(
                 condition=models.Q(multa_maxima__gte=0, multa_por_dia__gte=0),
                 name="ck_politica_multas",
+                violation_error_message="Las multas no pueden ser negativas.",
             ),
             models.CheckConstraint(
                 condition=models.Q(tipo_usuario__in=["ESTUDIANTE", "PROFESOR"]),
                 name="ck_politica_tipo",
+                violation_error_message="La política solo puede ser de estudiante o de profesor.",
             ),
         ]
 
     def __str__(self):
         return f"Política {self.get_tipo_usuario_display()}"
+
+    def clean(self):
+        """Validaciones extra en Python (no existen en MySQL): valores que impedirían prestar."""
+        errores = {}
+        for campo in ("dias_prestamo", "max_libros", "horas_para_recoger"):
+            valor = getattr(self, campo)
+            if isinstance(valor, int) and valor < 1:
+                errores[campo] = "Debe ser al menos 1."
+        if (
+            isinstance(self.multa_por_dia, (int, Decimal))
+            and isinstance(self.multa_maxima, (int, Decimal))
+            and self.multa_maxima < self.multa_por_dia
+        ):
+            errores["multa_maxima"] = "No puede ser menor que la multa por día."
+        if errores:
+            raise ValidationError(errores)
 
     @classmethod
     def para(cls, usuario):

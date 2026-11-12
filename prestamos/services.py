@@ -76,9 +76,9 @@ def _bloquear_usuario(usuario):
     return get_user_model().objects.select_for_update().get(pk=usuario.pk)
 
 
-def _validar_bibliotecario(usuario):
+def _validar_bibliotecario(usuario, accion="registrar la entrega de un préstamo"):
     if usuario is None or usuario.tipo_usuario != "BIBLIOTECARIO":
-        raise OperacionNoPermitida("Solo un bibliotecario puede registrar la entrega de un préstamo.")
+        raise OperacionNoPermitida(f"Solo un bibliotecario puede {accion}.")
 
 
 def _validar_dueno(objeto, usuario):
@@ -99,6 +99,14 @@ def _bloquear_reserva_con_ejemplar(reserva):
     if reserva.ejemplar_asignado_id != ejemplar_id:
         raise OperacionNoPermitida("La reserva cambió mientras se procesaba; inténtalo de nuevo.")
     return reserva, ejemplar
+
+
+def _cancelar_y_liberar(reserva, ejemplar):
+    """Cancela una reserva ya bloqueada; si tenía un ejemplar apartado, lo libera (RN-12)."""
+    tenia_ejemplar_apartado = reserva.estado == Reserva.Estado.DISPONIBLE
+    reserva.cancelar()
+    if tenia_ejemplar_apartado and ejemplar is not None:
+        _liberar_ejemplar(ejemplar)
 
 
 def _tomar_ejemplar_disponible(libro):
@@ -416,11 +424,7 @@ def cancelar_reserva(reserva, usuario):
         usuario = _bloquear_usuario(usuario)
         reserva, ejemplar = _bloquear_reserva_con_ejemplar(reserva)
         _validar_dueno(reserva, usuario)
-
-        tenia_ejemplar_apartado = reserva.estado == Reserva.Estado.DISPONIBLE
-        reserva.cancelar()
-        if tenia_ejemplar_apartado and ejemplar is not None:
-            _liberar_ejemplar(ejemplar)
+        _cancelar_y_liberar(reserva, ejemplar)
     return reserva
 
 
@@ -461,3 +465,100 @@ def recoger_reserva(reserva, bibliotecario):
             f"Devuélvelo a más tardar el {prestamo.fecha_vencimiento:%d/%m/%Y}.",
         )
     return prestamo
+
+
+# --- Funciones del bibliotecario: CU-30 gestionar reservas -----------------------------
+
+# El motivo va en la notificación (notificacion.mensaje es varchar(500)); con este tope el
+# mensaje completo cabe aunque el título del libro tenga 255 caracteres.
+MAX_LONGITUD_MOTIVO = 150
+
+
+def listar_reservas(libro=None, estado=None):
+    """CU-30: reservas filtradas por libro y/o estado, en orden de llegada.
+
+    Solo lee: el permiso lo revisa la vista. La paginación (RNF-05) también va en la vista.
+    """
+    reservas = Reserva.objects.select_related("usuario", "libro", "ejemplar_asignado")
+    if libro is not None:
+        reservas = reservas.filter(libro=libro)
+    if estado is not None:
+        if estado not in Reserva.Estado.values:
+            raise ValueError(f"Estado de reserva desconocido: {estado}")
+        reservas = reservas.filter(estado=estado)
+    return reservas.order_by("fecha_reserva", "pk")
+
+
+def cola_de_reservas(libro):
+    """CU-30 / RN-12: reservas PENDIENTES de un libro en orden FIFO; la primera es la siguiente."""
+    return (
+        Reserva.objects.filter(libro=libro, estado=Reserva.Estado.PENDIENTE)
+        .select_related("usuario")
+        .order_by("fecha_reserva", "pk")
+    )
+
+
+def cancelar_reserva_por_bibliotecario(reserva, bibliotecario, motivo):
+    """CU-30: el bibliotecario cancela la reserva de cualquier usuario, con motivo obligatorio.
+
+    El motivo no se guarda en la reserva (la tabla no tiene esa columna); se le envía al
+    usuario en la notificación. Si había un ejemplar apartado, se libera (RN-12).
+    """
+    _validar_bibliotecario(bibliotecario, "cancelar la reserva de otro usuario")
+    motivo = (motivo or "").strip()
+    if not motivo:
+        raise OperacionNoPermitida("Indica el motivo de la cancelación.")
+    if len(motivo) > MAX_LONGITUD_MOTIVO:
+        raise OperacionNoPermitida(
+            f"El motivo no puede pasar de {MAX_LONGITUD_MOTIVO} caracteres."
+        )
+
+    with transaction.atomic():
+        usuario = _bloquear_usuario(reserva.usuario)
+        reserva, ejemplar = _bloquear_reserva_con_ejemplar(reserva)
+        _cancelar_y_liberar(reserva, ejemplar)
+        notificar(
+            usuario,
+            "GENERAL",
+            f"La biblioteca canceló tu reserva de «{reserva.libro}». Motivo: {motivo}",
+        )
+    return reserva
+
+
+# --- Funciones del bibliotecario: CU-31 configurar políticas ---------------------------
+
+CAMPOS_EDITABLES_POLITICA = (
+    "dias_prestamo",
+    "max_libros",
+    "max_renovaciones",
+    "multa_por_dia",
+    "multa_maxima",
+    "horas_para_recoger",
+)
+
+
+def actualizar_politica(politica, bibliotecario, **cambios):
+    """CU-31: el bibliotecario cambia los valores de una política (RN-01 a RN-06).
+
+    Valida con full_clean(): tipos, decimales, CHECK de la tabla y PoliticaPrestamo.clean().
+    Si algo no es válido lanza ValidationError (un mensaje por campo) y no guarda nada.
+
+    Efecto en préstamos existentes: los ya entregados conservan su fecha de vencimiento, pero
+    renovaciones_restantes() y calcular_multa() usan siempre la política vigente.
+    """
+    _validar_bibliotecario(bibliotecario, "configurar las políticas de préstamo")
+    if not cambios:
+        raise OperacionNoPermitida("No hay cambios que guardar.")
+    no_editables = sorted(set(cambios) - set(CAMPOS_EDITABLES_POLITICA))
+    if no_editables:
+        raise OperacionNoPermitida(
+            f"Estos campos no se pueden cambiar: {', '.join(no_editables)}."
+        )
+
+    with transaction.atomic():
+        politica = PoliticaPrestamo.objects.select_for_update().get(pk=politica.pk)
+        for campo, valor in cambios.items():
+            setattr(politica, campo, valor)
+        politica.full_clean()
+        politica.save(update_fields=[*cambios, "actualizado_en"])
+    return politica
