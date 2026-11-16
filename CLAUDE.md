@@ -3,22 +3,24 @@
 Proyecto final de Ingeniería de Software (Universidad Anáhuac, ago–dic 2026).
 Equipo de 4 integrantes. Documentos de referencia en `docs/`:
 
-- `docs/requerimientos_proyecto_final.html`: requerimientos completos. Léelo antes de implementar cualquier
+- `docs/requerimientos/requerimientos_proyecto_final.html`: requerimientos completos. Léelo antes de implementar cualquier
   caso de uso (CU-XX), regla (RN-XX) o requerimiento (RF/RNF-XX).
-- `docs/esquema_bd_biblioteca.html`: **referencia principal del modelo.** Es el esquema real de la implementación
+- `docs/bd/esquema_bd_biblioteca.html`: **referencia principal del modelo.** Es el esquema real de la implementación
   del profesor en Django (generado desde `information_schema`): tipos exactos, nombres de CHECK e índices,
   `on_delete`, app de cada modelo, métodos de modelo (sección 6) y datos de prueba. Si difiere del `.sql`, **manda este**.
-- `docs/biblioteca_modelo_er.sql`: diseño original de la base. Referencia secundaria: **no lo ejecutes.**
+- `docs/bd/biblioteca_modelo_er.sql`: diseño original de la base. Referencia secundaria: **no lo ejecutes.**
 
 ## Forma de trabajar
 
 - Antes de escribir código, lee `PLAN_DE_TRABAJO.md`: pregunta a qué integrante ayudas y trabaja solo en las apps de su sección.
 - Responde y comenta siempre en **español**. Identificadores de código en español (como en los requerimientos).
 - Quien te usa está aprendiendo Django: antes de cambios grandes explica el plan y el **por qué**; después, resume qué archivos tocaste.
-- Cuando el usuario deba ejecutar algo él mismo, indica en qué terminal (PowerShell en Windows o bash en WSL/Linux) y recuérdale que debe estar en la raíz del repo con el entorno virtual activo (el prompt empieza con `(.venv)`).- Trabaja en pasos pequeños y verificables. Después de cada cambio de modelos: `makemigrations` → `migrate` → pruebas.
+- Cuando el usuario deba ejecutar algo él mismo, indica en qué terminal (PowerShell en Windows o bash en WSL/Linux) y recuérdale que debe estar en la raíz del repo con el entorno virtual activo (el prompt empieza con `(.venv)`).
+- Trabaja en pasos pequeños y verificables. Después de cada cambio de modelos: `makemigrations` → `migrate` → pruebas.
 - Commits pequeños y descriptivos en español (`feat(prestamos): solicitar préstamo CU-06`). No hagas push sin que te lo pidan.
 - Nunca escribas contraseñas ni credenciales en código, commits o mensajes. Nunca subas `.env`.
   Cuando se necesite el `.env`, avisa al usuario: lo crea en la raíz del repo copiando `.env.example` (`cp .env.example .env` en bash o `Copy-Item .env.example .env` en PowerShell) y llena las contraseñas con su editor.
+
 ## Entorno
 
 - El equipo trabaja en Windows (CMD/PowerShell) y en WSL/Linux (bash). Python 3.13, Django 5.2 (LTS), Git, Docker Desktop. Si no sabes en cuál está el usuario, pregúntale antes de darle comandos.
@@ -28,12 +30,12 @@ Equipo de 4 integrantes. Documentos de referencia en `docs/`:
 
 ### Base de datos: MySQL 8.4 con Docker Compose
 
-Cada integrante levanta su propia base idéntica con `docker-compose.yml` (versionado en el repo):
+Cada integrante levanta su propia base idéntica con `compose.yaml` (versionado en el repo):
 
 - Imagen `mysql:8.4`, contenedor `biblioteca-mysql`, volumen con nombre para los datos.
 - `utf8mb4` / `utf8mb4_0900_ai_ci`, motor InnoDB.
 - Al primer arranque crea la base `DB_NAME` y el usuario `DB_USER` (`biblioteca_app`, host `'%'`) con `DB_PASSWORD`.
-- Script en `docker/mysql-init/` que da a `biblioteca_app` permisos sobre `test_biblioteca`
+- Script en `docker/mysql/init/` que da a `biblioteca_app` permisos sobre `test_biblioteca`
   (las pruebas de Django crean esa base).
 - Puerto del host tomado de `DB_PORT`. En la máquina de Eduardo es **3308**
   (el 3307 lo usa otro contenedor, `mysql-trabajo`, que **no** debe tocarse).
@@ -96,9 +98,9 @@ notificaciones/    Notificacion
 reportes/          vistas de reportes
 templates/         plantillas (base.html con Bootstrap 5 por CDN)
 static/
-docker/mysql-init/ scripts de inicialización de MySQL
-docs/              requerimientos, esquema de referencia, modelo ER y artefactos
-docker-compose.yml
+docker/mysql/init/ scripts de inicialización de MySQL
+docs/              requerimientos/, bd/ (esquema de referencia y modelo ER), uml/ y artefactos
+compose.yaml
 ```
 
 Reglas de diseño:
@@ -110,7 +112,7 @@ Reglas de diseño:
 - Listados paginados (RNF-05). Interfaz en español y responsive (RNF-04). PEP 8 (RNF-06).
 - Los modelos se registran en Django Admin, pero las funciones del bibliotecario tienen vistas propias.
 
-## Reglas del modelo (coincidencia con `docs/esquema_bd_biblioteca.html`)
+## Reglas del modelo (coincidencia con `docs/bd/esquema_bd_biblioteca.html`)
 
 El objetivo es que nuestras migraciones produzcan el mismo esquema que el del profesor (secciones 5 y 6 del HTML).
 
@@ -134,7 +136,8 @@ El objetivo es que nuestras migraciones produzcan el mismo esquema que el del pr
 - Métodos de modelo con los nombres de la sección 6 del HTML: `Usuario.politica`, `Usuario.motivos_no_elegible()`,
   `Usuario.tiene_multas_pendientes()`, `Usuario.tiene_prestamos_vencidos()`, `Prestamo.dias_retraso()`,
   `Prestamo.calcular_multa()`, `Prestamo.renovaciones_restantes()`, `Multa.saldo()`, `Multa.clean()` (RN-14),
-  `Ejemplar.se_puede_prestar`, `Reserva.Meta.ordering = ["fecha_reserva"]`.
+  `Ejemplar.es_prestable()` (nombre del plan; el HTML del profesor lo llama se_puede_prestar, pendiente de confirmar por B),
+  `Reserva.Meta.ordering = ["fecha_reserva"]`.
 - RN-02 cuenta como préstamos vigentes los que están en SOLICITADO, ACTIVO y VENCIDO.
 - Diferencias aceptables con el `.sql` (sección 8 del HTML): nombres de FK con hash, `ON DELETE NO ACTION` en MySQL,
   sin `DEFAULT` en columnas, tablas del framework y CHECK `>= 0` extra en campos `Positive*Field`.
@@ -180,7 +183,7 @@ Como referencia, el profesor usa: 6 carreras, 5 departamentos, 10 categorías, 1
 
 ## Orden de implementación sugerido
 
-1. `git init` + `.gitignore`, `docker-compose.yml` + `docker/mysql-init/`, `.env.example`, venv,
+1. `git init` + `.gitignore`, `compose.yaml` + `docker/mysql/init/`, `.env.example`, venv,
    Django 5.2 + `mysqlclient` + `python-dotenv`, proyecto `biblioteca`, app `cuentas`
    (Usuario, Carrera, Departamento, Estudiante, Profesor) → primer `migrate`, `requirements.txt`, `README.md`, primer commit.
 2. `catalogo` (modelos, admin, búsqueda CU-04/CU-05).

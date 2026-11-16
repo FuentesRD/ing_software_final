@@ -82,6 +82,7 @@ Miércoles 5:30–8:30 pm (tentativo).
 ## 3. Contratos entre paquetes
 
 Estas son las piezas que un paquete le **entrega** a otro. Los nombres son una propuesta: el dueño puede cambiarlos, pero **debe avisar** y actualizar esta tabla.
+Lo marcado como *propuesta, pendiente de confirmar por su dueño* lo pidió otro paquete: el dueño lo acepta, lo cambia o lo rechaza, y quita la marca.
 
 | Qué | Dónde vive | Lo provee | Lo usan |
 |---|---|---|---|
@@ -90,15 +91,17 @@ Estas son las piezas que un paquete le **entrega** a otro. Los nombres son una p
 | `BibliotecarioRequeridoMixin`, `LectorRequeridoMixin`, `ProfesorRequeridoMixin` | `cuentas/mixins.py` | A | B, C, D |
 | Plantilla `base.html` (Bootstrap 5, navbar por rol, bloque de mensajes) | `templates/base.html` | A | B, C, D |
 | Modelos `Libro`, `Ejemplar`, `Autor`, `Editorial`, `Categoria` | `catalogo/models.py` | B | C, D, reportes |
-| `Libro.ejemplares_disponibles()` y `Ejemplar.es_prestable()` (RN-15) | `catalogo/models.py` | B | C |
+| `Libro.ejemplares_disponibles()` y `Ejemplar.es_prestable()` (RN-15). Que `ejemplares_disponibles()` devuelva un **queryset** (C le encadena `select_for_update()`): *propuesta, pendiente de confirmar por su dueño* | `catalogo/models.py` | B | C |
+| `Ejemplar.cambiar_estado(estado)`: C cambia el estado del ejemplar (RESERVADO, PRESTADO, DISPONIBLE) al solicitar, entregar, cancelar y apartar para reservas — *propuesta, pendiente de confirmar por su dueño* | `catalogo/models.py` | B | C |
 | Comando `cargar_datos_prueba` | `catalogo/management/commands/` | B | Todos (para probar) |
 | `PoliticaPrestamo.para(usuario)` | `prestamos/models.py` | C | D |
-| `verificar_elegibilidad(usuario)` → lista de motivos de rechazo (CU-07) | `prestamos/services.py` | C | C (internamente) |
-| `tiene_prestamos_vencidos(usuario)` | `prestamos/services.py` | C | C, D |
-| Métodos de estado de `Prestamo`: `entregar()`, `marcar_vencido()`, `marcar_devuelto()`, `marcar_perdido()` | `prestamos/models.py` | C | D |
-| `asignar_siguiente_reserva(ejemplar)` (RN-12) | `prestamos/services.py` | C | D (devolución y expiraciones) |
-| `Reserva.expirar()` y expiración de solicitudes | `prestamos/models.py` | C | D (comando de vencimientos) |
+| `verificar_elegibilidad(usuario, libro=None, excluir=None)` → lista de motivos de rechazo (CU-07). Con `libro` también revisa RN-11; `excluir` es un préstamo que no se cuenta (al entregar o renovar) | `prestamos/services.py` | C | C (internamente) |
+| `tiene_prestamos_vencidos(usuario, excluir=None)` (RN-08): cuenta los VENCIDOS y los ACTIVOS con fecha ya pasada; `excluir` es opcional | `prestamos/services.py` | C | C, D |
+| Métodos de estado de `Prestamo`: `entregar()`, `marcar_vencido()`, `marcar_devuelto()`, `marcar_perdido()`, `cancelar()`, `expirar()`, `renovar()` | `prestamos/models.py` | C | D (y C internamente) |
+| `asignar_siguiente_reserva(ejemplar)` (RN-12): aparta el ejemplar para la reserva pendiente más antigua y la devuelve, o devuelve `None` si no hay. En la devolución (CU-25) y en las expiraciones (CU-35), después de cambiar el préstamo o la reserva, D la llama y, si devuelve `None`, pone el ejemplar en DISPONIBLE — *propuesta, pendiente de confirmar por su dueño* | `prestamos/services.py` | C | D (devolución y expiraciones) |
+| `Reserva.expirar()` y `Prestamo.expirar()` (expiración de solicitudes) | `prestamos/models.py` | C | D (comando de vencimientos) |
 | `tiene_multas_pendientes(usuario)` (RN-08) | `multas/services.py` | D | C |
+| Función de monto adeudado del usuario (multas PENDIENTES menos sus pagos), para mostrarlo al rechazar por RN-08 (CU-06, excepción 4a); nombre a definir por D — *propuesta, pendiente de confirmar por su dueño* | `multas/services.py` | D | C |
 | `notificar(usuario, tipo, mensaje)` | `notificaciones/services.py` | D | C, B (opcional) |
 
 **Dependencia circular a cuidar:** `prestamos` necesita saber si hay multas pendientes (RN-08), y `multas` tiene llave foránea a `prestamo`.
