@@ -136,7 +136,7 @@ El objetivo es que nuestras migraciones produzcan el mismo esquema que el del pr
 - Métodos de modelo con los nombres de la sección 6 del HTML: `Usuario.politica`, `Usuario.motivos_no_elegible()`,
   `Usuario.tiene_multas_pendientes()`, `Usuario.tiene_prestamos_vencidos()`, `Prestamo.dias_retraso()`,
   `Prestamo.calcular_multa()`, `Prestamo.renovaciones_restantes()`, `Multa.saldo()`, `Multa.clean()` (RN-14),
-  `Ejemplar.es_prestable()` (nombre del plan; el HTML del profesor lo llama se_puede_prestar, pendiente de confirmar por B),
+  `Ejemplar.es_prestable()` y `Ejemplar.cambiar_estado(estado)` (confirmados por B; el HTML del profesor lo llama se_puede_prestar),
   `Reserva.Meta.ordering = ["fecha_reserva"]`.
 - RN-02 cuenta como préstamos vigentes los que están en SOLICITADO, ACTIVO y VENCIDO.
 - Diferencias aceptables con el `.sql` (sección 8 del HTML): nombres de FK con hash, `ON DELETE NO ACTION` en MySQL,
