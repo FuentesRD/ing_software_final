@@ -227,3 +227,4 @@ class Ejemplar(models.Model):
             raise ValidationError(f"Estado de ejemplar no válido: {nuevo_estado}")
         self.estado = nuevo_estado
         self.save(update_fields=["estado"])
+        
