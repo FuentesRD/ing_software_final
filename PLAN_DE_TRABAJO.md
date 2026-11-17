@@ -91,8 +91,8 @@ Lo marcado como *propuesta, pendiente de confirmar por su dueño* lo pidió otro
 | `BibliotecarioRequeridoMixin`, `LectorRequeridoMixin`, `ProfesorRequeridoMixin` | `cuentas/mixins.py` | A | B, C, D |
 | Plantilla `base.html` (Bootstrap 5, navbar por rol, bloque de mensajes) | `templates/base.html` | A | B, C, D |
 | Modelos `Libro`, `Ejemplar`, `Autor`, `Editorial`, `Categoria` | `catalogo/models.py` | B | C, D, reportes |
-| `Libro.ejemplares_disponibles()` y `Ejemplar.es_prestable()` (RN-15). Que `ejemplares_disponibles()` devuelva un **queryset** (C le encadena `select_for_update()`): *propuesta, pendiente de confirmar por su dueño* | `catalogo/models.py` | B | C |
-| `Ejemplar.cambiar_estado(estado)`: C cambia el estado del ejemplar (RESERVADO, PRESTADO, DISPONIBLE) al solicitar, entregar, cancelar y apartar para reservas — *propuesta, pendiente de confirmar por su dueño* | `catalogo/models.py` | B | C |
+| `Libro.ejemplares_disponibles()` → **queryset** de ejemplares DISPONIBLE (C le encadena `select_for_update()`) y `Ejemplar.es_prestable()` (RN-15) | `catalogo/models.py` | B | C |
+| `Ejemplar.cambiar_estado(estado)`: valida que el estado exista y lo guarda. Las reglas de transición y el `select_for_update()` quedan en los servicios de C y D | `catalogo/models.py` | B | C, D |
 | Comando `cargar_datos_prueba` | `catalogo/management/commands/` | B | Todos (para probar) |
 | `PoliticaPrestamo.para(usuario)` | `prestamos/models.py` | C | D |
 | `verificar_elegibilidad(usuario, libro=None, excluir=None)` → lista de motivos de rechazo (CU-07). Con `libro` también revisa RN-11; `excluir` es un préstamo que no se cuenta (al entregar o renovar) | `prestamos/services.py` | C | C (internamente) |
@@ -194,8 +194,8 @@ Para evitar el import circular, C importa `tiene_multas_pendientes` **dentro de 
 
 **Código:**
 - [ ] Modelos `Autor`, `Editorial`, `Categoria`, `Libro`, `LibroAutor` (`ManyToManyField` con `through`), `Ejemplar`, `SugerenciaAdquisicion`, con `db_table`, índices y CHECKs del esquema.
-- [ ] `Ejemplar.es_prestable()`: solo `DISPONIBLE` se presta (RN-15).
-- [ ] `Libro.ejemplares_disponibles()`.
+- [ x] `Ejemplar.es_prestable()`: solo `DISPONIBLE` se presta (RN-15).
+- [ x] `Libro.ejemplares_disponibles()`.
 - [ ] Baja lógica: `Libro.activo = False` y ejemplar en estado `BAJA`; nunca borrado físico.
 - [ ] Búsqueda por título, autor, ISBN, categoría y editorial, mostrando disponibilidad (RF-02).
 - [ ] Listados paginados con `select_related` / `prefetch_related`; menos de 2 segundos con 10,000 libros (RNF-05).
