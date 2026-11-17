@@ -39,8 +39,11 @@ class OperacionNoPermitida(ValidationError):
 
 
 # --- Estado del ejemplar -------------------------------------------------------------
-# Único lugar que lee o escribe Ejemplar.estado. Es provisional: cuando catalogo (Diego)
-# ofrezca un contrato para cambiar el estado, solo se ajusta esta sección.
+# Único lugar de prestamos que toca el estado de un ejemplar.
+# Escritura: contrato Ejemplar.cambiar_estado(estado) de catalogo (B → C); quien llama ya
+# tiene el ejemplar bloqueado con select_for_update() dentro de transaction.atomic().
+# Lectura: el campo `estado` y los valores de Ejemplar.Estado, documentados por catalogo;
+# el contrato no tiene métodos de lectura aparte de es_prestable().
 
 _ESTADOS_NO_ASIGNABLES = {
     Ejemplar.Estado.EN_REPARACION,
@@ -50,8 +53,7 @@ _ESTADOS_NO_ASIGNABLES = {
 
 
 def _cambiar_estado_ejemplar(ejemplar, estado):
-    ejemplar.estado = estado
-    ejemplar.save(update_fields=["estado"])
+    ejemplar.cambiar_estado(estado)
 
 
 def _ejemplar_asignable(ejemplar):
