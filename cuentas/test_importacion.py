@@ -4,6 +4,7 @@ import io
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from django.urls import reverse
 
 from .importacion import COLUMNAS_CSV, importar_usuarios_csv
 from .models import Usuario
@@ -118,4 +119,66 @@ class ImportacionUsuariosTests(TestCase):
 
         self.assertFalse(
             Usuario.objects.filter(username="prohibido_csv").exists()
+        )
+
+    def test_bibliotecario_importa_desde_la_pantalla(self):
+        self.client.force_login(self.responsable)
+
+        respuesta = self.client.post(
+            reverse("cuentas:usuarios_importar"),
+            {"archivo": self.archivo([self.fila("desde_web_csv")])},
+        )
+
+        self.assertRedirects(
+            respuesta,
+            reverse("cuentas:usuarios_lista"),
+        )
+        self.assertTrue(
+            Usuario.objects.filter(username="desde_web_csv").exists()
+        )
+
+    def test_error_se_muestra_sin_guardar_usuarios(self):
+        self.client.force_login(self.responsable)
+        incorrecta = self.fila("invalido_web_csv")
+        incorrecta["email"] = "correo-invalido"
+
+        respuesta = self.client.post(
+            reverse("cuentas:usuarios_importar"),
+            {
+                "archivo": self.archivo([
+                    self.fila("valido_web_csv"),
+                    incorrecta,
+                ]),
+            },
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, "Fila 3")
+        self.assertFalse(
+            Usuario.objects.filter(username="valido_web_csv").exists()
+        )
+
+    def test_lectores_no_pueden_abrir_ni_enviar_csv(self):
+        for rol in ("ESTUDIANTE", "PROFESOR"):
+            usuario = Usuario.objects.create_user(
+                username=f"lector_web_{rol}",
+                email=f"{rol.lower()}@example.com",
+                tipo_usuario=rol,
+            )
+            self.client.force_login(usuario)
+            ruta = reverse("cuentas:usuarios_importar")
+
+            with self.subTest(rol=rol):
+                self.assertEqual(
+                    self.client.get(ruta).status_code,
+                    403,
+                )
+                respuesta = self.client.post(
+                    ruta,
+                    {"archivo": self.archivo([self.fila("prohibido_web")])},
+                )
+                self.assertEqual(respuesta.status_code, 403)
+
+        self.assertFalse(
+            Usuario.objects.filter(username="prohibido_web").exists()
         )

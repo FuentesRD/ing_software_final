@@ -5,9 +5,15 @@
 {% block contenido %}
 <h1 class="h3">Usuarios</h1>
 
-<a class="btn btn-primary mb-3" href="{% url 'cuentas:usuario_crear' %}">
-    Crear usuario
-</a>
+<div class="d-flex gap-2 mb-3">
+    <a class="btn btn-primary" href="{% url 'cuentas:usuario_crear' %}">
+        Crear usuario
+    </a>
+    <a class="btn btn-outline-primary"
+       href="{% url 'cuentas:usuarios_importar' %}">
+        Importar CSV
+    </a>
+</div>
 
 <div class="table-responsive">
     <table class="table table-striped">
