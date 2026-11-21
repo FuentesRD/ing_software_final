@@ -109,3 +109,11 @@ class EditarUsuarioForm(forms.ModelForm):
             "email",
             "telefono",
         )
+
+class BloquearUsuarioForm(forms.Form):
+    motivo = forms.CharField(
+        label="Motivo del bloqueo",
+        max_length=255,
+        strip=True,
+        widget=forms.Textarea(attrs={"rows": 3}),
+    )

@@ -19,6 +19,7 @@
                 <th scope="col">Rol</th>
                 <th scope="col">Activo</th>
                 <th scope="col">Bloqueado</th>
+                <th scope="col">Motivo</th>
                 <th scope="col">Acciones</th>
             </tr>
         </thead>
@@ -31,6 +32,7 @@
                     <td>{{ cuenta.get_tipo_usuario_display }}</td>
                     <td>{{ cuenta.is_active|yesno:"Sí,No" }}</td>
                     <td>{{ cuenta.bloqueado|yesno:"Sí,No" }}</td>
+                    <td>{{ cuenta.motivo_bloqueo|default:"—" }}</td>
                     <td>
                         <a href="{% url 'cuentas:usuario_editar' cuenta.pk %}">
                             Editar
@@ -49,11 +51,23 @@
                                 Reactivar
                             </a>
                         {% endif %}
+
+                        {% if cuenta.bloqueado %}
+                            <a class="ms-2"
+                               href="{% url 'cuentas:usuario_desbloquear' cuenta.pk %}">
+                                Desbloquear
+                            </a>
+                        {% else %}
+                            <a class="ms-2"
+                               href="{% url 'cuentas:usuario_bloquear' cuenta.pk %}">
+                                Bloquear
+                            </a>
+                        {% endif %}
                     </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="7">No hay usuarios registrados.</td>
+                    <td colspan="8">No hay usuarios registrados.</td>
                 </tr>
             {% endfor %}
         </tbody>

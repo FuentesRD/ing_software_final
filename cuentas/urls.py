@@ -35,6 +35,16 @@ urlpatterns = [
         name="usuario_reactivar",
     ),
     path(
+        "usuarios/<int:pk>/bloquear/",
+        views.BloquearUsuarioView.as_view(),
+        name="usuario_bloquear",
+    ),
+    path(
+        "usuarios/<int:pk>/desbloquear/",
+        views.DesbloquearUsuarioView.as_view(),
+        name="usuario_desbloquear",
+    ),
+    path(
         "login/",
         auth_views.LoginView.as_view(
             template_name="cuentas/login.html",

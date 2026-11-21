@@ -13,6 +13,11 @@ from django.shortcuts import redirect
 from django.views.generic import DetailView
 
 from .services import cambiar_estado_cuenta
+from django.shortcuts import get_object_or_404
+from django.views.generic import FormView
+
+from .forms import BloquearUsuarioForm
+from .services import cambiar_bloqueo_cuenta
 
 
 @login_required
@@ -73,3 +78,61 @@ class CambiarEstadoUsuarioView(
         contexto = super().get_context_data(**kwargs)
         contexto["activar"] = self.kwargs["activar"]
         return contexto
+
+class BloquearUsuarioView(BibliotecarioRequeridoMixin, FormView):
+    form_class = BloquearUsuarioForm
+    template_name = "cuentas/usuario_bloquear.html"
+    success_url = reverse_lazy("cuentas:usuarios_lista")
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["cuenta"] = get_object_or_404(
+            Usuario,
+            pk=self.kwargs["pk"],
+        )
+        return contexto
+
+    def form_valid(self, form):
+        cuenta = get_object_or_404(Usuario, pk=self.kwargs["pk"])
+
+        try:
+            cambiar_bloqueo_cuenta(
+                responsable=self.request.user,
+                usuario_id=cuenta.pk,
+                bloquear=True,
+                motivo=form.cleaned_data["motivo"],
+            )
+        except ValidationError as error:
+            form.add_error(None, error)
+            return self.form_invalid(form)
+        except Usuario.DoesNotExist:
+            raise Http404("El usuario ya no existe.")
+
+        messages.success(self.request, "Usuario bloqueado.")
+        return super().form_valid(form)
+
+class DesbloquearUsuarioView(
+    BibliotecarioRequeridoMixin,
+    DetailView,
+):
+    model = Usuario
+    template_name = "cuentas/usuario_desbloquear.html"
+    context_object_name = "cuenta"
+
+    def post(self, request, *args, **kwargs):
+        cuenta = self.get_object()
+
+        try:
+            cambiar_bloqueo_cuenta(
+                responsable=request.user,
+                usuario_id=cuenta.pk,
+                bloquear=False,
+            )
+        except ValidationError as error:
+            messages.error(request, " ".join(error.messages))
+        except Usuario.DoesNotExist:
+            raise Http404("El usuario ya no existe.")
+        else:
+            messages.success(request, "Usuario desbloqueado.")
+
+        return redirect("cuentas:usuarios_lista")
