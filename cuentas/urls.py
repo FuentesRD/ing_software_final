@@ -8,6 +8,11 @@ app_name = "cuentas"
 urlpatterns = [
     path("", views.inicio, name="inicio"),
     path(
+        "usuarios/",
+        views.ListaUsuariosView.as_view(),
+        name="usuarios_lista",
+    ),
+    path(
         "login/",
         auth_views.LoginView.as_view(
             template_name="cuentas/login.html",

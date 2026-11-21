@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block titulo %}Usuarios · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Usuarios</h1>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Usuario</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Correo</th>
+                <th scope="col">Rol</th>
+                <th scope="col">Activo</th>
+                <th scope="col">Bloqueado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cuenta in usuarios %}
+                <tr>
+                    <td>{{ cuenta.username }}</td>
+                    <td>{{ cuenta.get_full_name|default:"—" }}</td>
+                    <td>{{ cuenta.email }}</td>
+                    <td>{{ cuenta.get_tipo_usuario_display }}</td>
+                    <td>{{ cuenta.is_active|yesno:"Sí,No" }}</td>
+                    <td>{{ cuenta.bloqueado|yesno:"Sí,No" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No hay usuarios registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+    <nav aria-label="Páginas de usuarios">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+
+        <span>
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </nav>
+{% endif %}
+{% endblock %}
