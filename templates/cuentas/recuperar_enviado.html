@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h1 class="h3">Solicitud recibida</h1>
+<p>
+    Si el correo corresponde a una cuenta activa,
+    recibirás un enlace para restablecer tu contraseña.
+</p>
+<a href="{% url 'cuentas:login' %}">Volver al login</a>
+{% endblock %}
