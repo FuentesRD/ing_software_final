@@ -23,6 +23,18 @@ urlpatterns = [
         name="usuario_editar",
     ),
     path(
+        "usuarios/<int:pk>/desactivar/",
+        views.CambiarEstadoUsuarioView.as_view(),
+        {"activar": False},
+        name="usuario_desactivar",
+    ),
+    path(
+        "usuarios/<int:pk>/reactivar/",
+        views.CambiarEstadoUsuarioView.as_view(),
+        {"activar": True},
+        name="usuario_reactivar",
+    ),
+    path(
         "login/",
         auth_views.LoginView.as_view(
             template_name="cuentas/login.html",

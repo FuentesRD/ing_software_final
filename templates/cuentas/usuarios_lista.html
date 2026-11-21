@@ -5,6 +5,10 @@
 {% block contenido %}
 <h1 class="h3">Usuarios</h1>
 
+<a class="btn btn-primary mb-3" href="{% url 'cuentas:usuario_crear' %}">
+    Crear usuario
+</a>
+
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>
@@ -31,11 +35,25 @@
                         <a href="{% url 'cuentas:usuario_editar' cuenta.pk %}">
                             Editar
                         </a>
+
+                        {% if cuenta.is_active %}
+                            {% if cuenta.pk != user.pk %}
+                                <a class="ms-2"
+                                   href="{% url 'cuentas:usuario_desactivar' cuenta.pk %}">
+                                    Desactivar
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a class="ms-2"
+                               href="{% url 'cuentas:usuario_reactivar' cuenta.pk %}">
+                                Reactivar
+                            </a>
+                        {% endif %}
                     </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="6">No hay usuarios registrados.</td>
+                    <td colspan="7">No hay usuarios registrados.</td>
                 </tr>
             {% endfor %}
         </tbody>
