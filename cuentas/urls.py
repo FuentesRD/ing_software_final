@@ -12,6 +12,11 @@ urlpatterns = [
         views.ListaUsuariosView.as_view(),
         name="usuarios_lista",
     ),
+        path(
+        "usuarios/nuevo/",
+        views.CrearUsuarioView.as_view(),
+        name="usuario_crear",
+    ),
     path(
         "login/",
         auth_views.LoginView.as_view(
