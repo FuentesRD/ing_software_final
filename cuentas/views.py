@@ -19,6 +19,9 @@ from django.views.generic import FormView
 from .forms import BloquearUsuarioForm
 from .services import cambiar_bloqueo_cuenta
 
+from .forms import ImportarUsuariosForm
+from .importacion import importar_usuarios_csv
+
 
 @login_required
 def inicio(request):
@@ -136,3 +139,24 @@ class DesbloquearUsuarioView(
             messages.success(request, "Usuario desbloqueado.")
 
         return redirect("cuentas:usuarios_lista")
+
+class ImportarUsuariosView(BibliotecarioRequeridoMixin, FormView):
+    form_class = ImportarUsuariosForm
+    template_name = "cuentas/usuarios_importar.html"
+    success_url = reverse_lazy("cuentas:usuarios_lista")
+
+    def form_valid(self, form):
+        try:
+            cantidad = importar_usuarios_csv(
+                responsable=self.request.user,
+                archivo=form.cleaned_data["archivo"],
+            )
+        except ValidationError as error:
+            form.add_error(None, error)
+            return self.form_invalid(form)
+
+        messages.success(
+            self.request,
+            f"Se importaron {cantidad} usuarios.",
+        )
+        return super().form_valid(form)

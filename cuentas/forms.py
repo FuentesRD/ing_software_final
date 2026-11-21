@@ -117,3 +117,21 @@ class BloquearUsuarioForm(forms.Form):
         strip=True,
         widget=forms.Textarea(attrs={"rows": 3}),
     )
+class ImportarUsuariosForm(forms.Form):
+    archivo = forms.FileField(
+        label="Archivo CSV",
+        help_text="Selecciona un CSV en UTF-8, separado por comas.",
+    )
+
+    def clean_archivo(self):
+        archivo = self.cleaned_data["archivo"]
+
+        if not archivo.name.lower().endswith(".csv"):
+            raise forms.ValidationError("Selecciona un archivo .csv.")
+
+        if archivo.size > 2 * 1024 * 1024:
+            raise forms.ValidationError(
+                "El archivo no puede superar 2 MB."
+            )
+
+        return archivo

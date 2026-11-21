@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block titulo %}Importar usuarios · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Importar usuarios desde CSV</h1>
+
+<p>Usa un archivo UTF-8 separado por comas, con estas columnas en orden:</p>
+
+<pre>username,first_name,last_name,email,tipo_usuario,telefono,password1,password2,matricula,semestre,carrera,num_empleado,departamento</pre>
+
+<p>
+    Los roles son ESTUDIANTE, PROFESOR y BIBLIOTECARIO.
+    Carrera y departamento deben contener identificadores existentes.
+    Conserva las columnas que no correspondan al rol, dejando su valor vacío.
+</p>
+
+<p>
+    Si alguna fila contiene errores, no se guardará ningún usuario.
+    El archivo contiene contraseñas iniciales: no lo subas al repositorio.
+</p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button class="btn btn-primary" type="submit">Importar</button>
+    <a href="{% url 'cuentas:usuarios_lista' %}">Cancelar</a>
+</form>
+{% endblock %}

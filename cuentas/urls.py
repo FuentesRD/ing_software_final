@@ -45,6 +45,11 @@ urlpatterns = [
         name="usuario_desbloquear",
     ),
     path(
+        "usuarios/importar/",
+        views.ImportarUsuariosView.as_view(),
+        name="usuarios_importar",
+    ),
+    path(
         "login/",
         auth_views.LoginView.as_view(
             template_name="cuentas/login.html",
