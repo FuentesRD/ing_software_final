@@ -12,10 +12,15 @@ urlpatterns = [
         views.ListaUsuariosView.as_view(),
         name="usuarios_lista",
     ),
-        path(
+    path(
         "usuarios/nuevo/",
         views.CrearUsuarioView.as_view(),
         name="usuario_crear",
+    ),
+    path(
+        "usuarios/<int:pk>/editar/",
+        views.EditarUsuarioView.as_view(),
+        name="usuario_editar",
     ),
     path(
         "login/",

@@ -15,6 +15,7 @@
                 <th scope="col">Rol</th>
                 <th scope="col">Activo</th>
                 <th scope="col">Bloqueado</th>
+                <th scope="col">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -26,6 +27,11 @@
                     <td>{{ cuenta.get_tipo_usuario_display }}</td>
                     <td>{{ cuenta.is_active|yesno:"Sí,No" }}</td>
                     <td>{{ cuenta.bloqueado|yesno:"Sí,No" }}</td>
+                    <td>
+                        <a href="{% url 'cuentas:usuario_editar' cuenta.pk %}">
+                            Editar
+                        </a>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>

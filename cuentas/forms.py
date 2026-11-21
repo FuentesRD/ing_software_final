@@ -98,3 +98,14 @@ class CrearUsuarioForm(UserCreationForm):
             )
 
         return usuario
+
+
+class EditarUsuarioForm(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = (
+            "first_name",
+            "last_name",
+            "email",
+            "telefono",
+        )
