@@ -168,6 +168,33 @@ def posicion_en_cola(reserva):
     return anteriores.count() + 1
 
 
+def prestamos_de(usuario):
+    """CU-09 / RNF-02: préstamos del lector, los más recientes primero. Solo lee."""
+    return (
+        Prestamo.objects.filter(usuario=usuario)
+        .select_related("ejemplar__libro")
+        .order_by("-fecha_solicitud", "-pk")
+    )
+
+
+def reservas_de(usuario):
+    """CU-12 / RNF-02: reservas del lector, las más recientes primero. Solo lee."""
+    return (
+        Reserva.objects.filter(usuario=usuario)
+        .select_related("libro", "ejemplar_asignado")
+        .order_by("-fecha_reserva", "-pk")
+    )
+
+
+def solicitudes_pendientes():
+    """CU-23: solicitudes en línea esperando entrega, la más antigua primero. Solo lee."""
+    return (
+        Prestamo.objects.filter(estado=Prestamo.Estado.SOLICITADO)
+        .select_related("usuario", "ejemplar__libro")
+        .order_by("fecha_solicitud", "pk")
+    )
+
+
 def verificar_elegibilidad(usuario, libro=None, excluir=None):
     """CU-07: motivos por los que `usuario` no puede pedir un préstamo; lista vacía si puede.
 
