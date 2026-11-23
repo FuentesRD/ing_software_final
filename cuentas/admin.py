@@ -30,6 +30,10 @@ class UsuarioAdmin(UserAdmin):
     )
     list_filter = UserAdmin.list_filter + ("tipo_usuario", "bloqueado")
 
+    def has_delete_permission(self, request, obj=None):
+        # Las cuentas se desactivan; se conserva su historial.
+        return False
+
 
 admin.site.register(Carrera)
 admin.site.register(Departamento)
