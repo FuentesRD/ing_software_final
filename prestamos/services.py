@@ -1,7 +1,8 @@
 """Servicios de la app prestamos: reglas de negocio que usan varias apps.
 
 Las otras apps se usan solo a través de los contratos de PLAN_DE_TRABAJO.md (sección 3):
-Libro.ejemplares_disponibles(), Ejemplar.es_prestable(), tiene_multas_pendientes() y notificar().
+Libro.ejemplares_disponibles(), Ejemplar.es_prestable(), tiene_multas_pendientes(),
+monto_adeudado() y notificar().
 
 Las operaciones que cambian préstamos, reservas o ejemplares corren en transaction.atomic() y
 bloquean las filas con select_for_update() (RNF-03), siempre en el mismo orden para evitar
@@ -174,7 +175,7 @@ def verificar_elegibilidad(usuario, libro=None, excluir=None):
     - `excluir`: préstamo que no debe contarse (al entregar una solicitud, ya cuenta para RN-02 y RN-11).
     """
     # Import aquí y no al inicio: multas tiene llave foránea a prestamo (import circular).
-    from multas.services import tiene_multas_pendientes
+    from multas.services import monto_adeudado, tiene_multas_pendientes
 
     motivos = []
     if not usuario.is_active:
@@ -193,7 +194,10 @@ def verificar_elegibilidad(usuario, libro=None, excluir=None):
         return motivos
 
     if tiene_multas_pendientes(usuario):
-        motivos.append("Tienes multas pendientes de pago.")
+        # CU-06, excepción 4a: además del motivo, se informa el monto adeudado.
+        motivos.append(
+            f"Tienes multas pendientes de pago. Monto adeudado: ${monto_adeudado(usuario):,.2f}."
+        )
     if tiene_prestamos_vencidos(usuario, excluir=excluir):
         motivos.append("Tienes préstamos vencidos sin devolver.")
 

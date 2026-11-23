@@ -1,6 +1,7 @@
 """CU-10 renovar_prestamo: RN-03, RN-08, RN-09 y RN-10."""
 
 from datetime import timedelta
+from decimal import Decimal
 from unittest import mock
 
 from django.test import TestCase
@@ -127,10 +128,15 @@ class RN09Tests(BaseRenovarTests):
 class RN08Tests(BaseRenovarTests):
     def test_con_multas_pendientes_no_se_renueva(self):
         prestamo = self.prestamo_activo()
-        with mock.patch("multas.services.tiene_multas_pendientes", return_value=True):
+        with (
+            mock.patch("multas.services.tiene_multas_pendientes", return_value=True),
+            mock.patch("multas.services.monto_adeudado", return_value=Decimal("20")),
+        ):
             with self.assertRaises(UsuarioNoElegible) as error:
                 renovar_prestamo(prestamo, self.estudiante)
-        self.assertEqual(error.exception.motivos, ["Tienes multas pendientes de pago."])
+        self.assertEqual(
+            error.exception.motivos, ["Tienes multas pendientes de pago. Monto adeudado: $20.00."]
+        )
 
     def test_con_otro_prestamo_vencido_no_se_renueva(self):
         prestamo = self.prestamo_activo()
