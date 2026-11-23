@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h1 class="h3">Desbloquear a {{ cuenta.username }}</h1>
+
+<p>Motivo actual: {{ cuenta.motivo_bloqueo }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">
+        Confirmar desbloqueo
+    </button>
+    <a href="{% url 'cuentas:usuarios_lista' %}">Cancelar</a>
+</form>
+{% endblock %}
