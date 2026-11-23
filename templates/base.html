@@ -33,6 +33,17 @@
                         </a>
                     {% endif %}
 
+                    {# Préstamos y reservas (paquete C) #}
+                    {% if user.tipo_usuario == "BIBLIOTECARIO" %}
+                        <a class="link-light" href="{% url 'prestamos:solicitudes' %}">Solicitudes</a>
+                        <a class="link-light" href="{% url 'prestamos:mostrador' %}">Mostrador</a>
+                        <a class="link-light" href="{% url 'prestamos:reservas' %}">Reservas</a>
+                        <a class="link-light" href="{% url 'prestamos:politicas' %}">Políticas</a>
+                    {% elif user.tipo_usuario == "ESTUDIANTE" or user.tipo_usuario == "PROFESOR" %}
+                        <a class="link-light" href="{% url 'prestamos:mis_prestamos' %}">Mis préstamos</a>
+                        <a class="link-light" href="{% url 'prestamos:mis_reservas' %}">Mis reservas</a>
+                    {% endif %}
+
                     <form
                         method="post"
                         action="{% url 'cuentas:logout' %}"
