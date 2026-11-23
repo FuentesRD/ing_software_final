@@ -8,6 +8,48 @@ app_name = "cuentas"
 urlpatterns = [
     path("", views.inicio, name="inicio"),
     path(
+        "usuarios/",
+        views.ListaUsuariosView.as_view(),
+        name="usuarios_lista",
+    ),
+    path(
+        "usuarios/nuevo/",
+        views.CrearUsuarioView.as_view(),
+        name="usuario_crear",
+    ),
+    path(
+        "usuarios/<int:pk>/editar/",
+        views.EditarUsuarioView.as_view(),
+        name="usuario_editar",
+    ),
+    path(
+        "usuarios/<int:pk>/desactivar/",
+        views.CambiarEstadoUsuarioView.as_view(),
+        {"activar": False},
+        name="usuario_desactivar",
+    ),
+    path(
+        "usuarios/<int:pk>/reactivar/",
+        views.CambiarEstadoUsuarioView.as_view(),
+        {"activar": True},
+        name="usuario_reactivar",
+    ),
+    path(
+        "usuarios/<int:pk>/bloquear/",
+        views.BloquearUsuarioView.as_view(),
+        name="usuario_bloquear",
+    ),
+    path(
+        "usuarios/<int:pk>/desbloquear/",
+        views.DesbloquearUsuarioView.as_view(),
+        name="usuario_desbloquear",
+    ),
+    path(
+        "usuarios/importar/",
+        views.ImportarUsuariosView.as_view(),
+        name="usuarios_importar",
+    ),
+    path(
         "login/",
         auth_views.LoginView.as_view(
             template_name="cuentas/login.html",
