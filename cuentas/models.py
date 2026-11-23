@@ -26,6 +26,8 @@ class Usuario(AbstractUser):
         null=True,
     )
 
+    REQUIRED_FIELDS = ["email", "tipo_usuario"]
+
     class Meta:
         db_table = "usuario"
         constraints = [
