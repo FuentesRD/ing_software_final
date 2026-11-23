@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block titulo %}Reservas · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Reservas</h1>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label class="form-label" for="{{ filtro.estado.id_for_label }}">{{ filtro.estado.label }}</label>
+        {{ filtro.estado }}
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+    </div>
+</form>
+
+{% if reservas %}
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Lector</th>
+                <th scope="col">Libro</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Reservado</th>
+                <th scope="col">Ejemplar apartado</th>
+                <th scope="col">Recoger antes de</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reserva in reservas %}
+                <tr>
+                    <td>{{ reserva.usuario.get_full_name|default:reserva.usuario.username }}</td>
+                    <td>{{ reserva.libro }}</td>
+                    <td>{{ reserva.get_estado_display }}</td>
+                    <td>{{ reserva.fecha_reserva|date:"d/m/Y H:i" }}</td>
+                    <td>{{ reserva.ejemplar_asignado.codigo_inventario|default:"—" }}</td>
+                    <td>{{ reserva.fecha_expiracion|date:"d/m/Y H:i"|default:"—" }}</td>
+                    <td>
+                        {% if reserva.estado == "DISPONIBLE" %}
+                            <form method="post" action="{% url 'prestamos:recoger_reserva' reserva.pk %}" class="mb-1">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-primary">Entregar</button>
+                            </form>
+                        {% endif %}
+                        {% if reserva.estado == "PENDIENTE" or reserva.estado == "DISPONIBLE" %}
+                            <form method="post" action="{% url 'prestamos:cancelar_reserva_bibliotecario' reserva.pk %}"
+                                  class="d-flex gap-1">
+                                {% csrf_token %}
+                                <input type="text" name="motivo" class="form-control form-control-sm"
+                                       placeholder="Motivo" aria-label="Motivo de la cancelación"
+                                       maxlength="{{ max_longitud_motivo }}" required>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "prestamos/paginacion.html" %}
+{% else %}
+    <p class="text-muted">No hay reservas con ese filtro.</p>
+{% endif %}
+{% endblock %}

@@ -10,13 +10,14 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
-from django.views.generic import ListView, TemplateView
+from django.views.generic import FormView, ListView, TemplateView
 
 from catalogo.models import Libro
-from cuentas.mixins import LectorRequeridoMixin
+from cuentas.mixins import BibliotecarioRequeridoMixin, LectorRequeridoMixin
 
 from . import services
-from .models import Prestamo, Reserva
+from .forms import FiltroReservasForm, PoliticaPrestamoForm, PrestamoMostradorForm
+from .models import PoliticaPrestamo, Prestamo, Reserva
 
 POR_PAGINA = 10  # RNF-05
 
@@ -182,3 +183,140 @@ class CancelarReservaView(LectorRequeridoMixin, AccionPostView):
 
     def url_destino(self):
         return reverse("prestamos:mis_reservas")
+
+
+# --- Bibliotecario: solicitudes y préstamo en mostrador (CU-23, CU-24) ------------------
+
+class SolicitudesPendientesView(BibliotecarioRequeridoMixin, ListView):
+    template_name = "prestamos/solicitudes.html"
+    context_object_name = "solicitudes"
+    paginate_by = POR_PAGINA
+
+    def get_queryset(self):
+        return services.solicitudes_pendientes()
+
+
+class EntregarPrestamoView(BibliotecarioRequeridoMixin, AccionPostView):
+    def ejecutar(self):
+        prestamo = get_object_or_404(Prestamo, pk=self.kwargs["pk"])
+        prestamo = services.entregar_prestamo(prestamo, self.request.user)
+        return (
+            f"Entregaste «{prestamo.ejemplar.libro}» a {prestamo.usuario}. "
+            f"Vence el {prestamo.fecha_vencimiento:%d/%m/%Y}."
+        )
+
+    def url_destino(self):
+        return reverse("prestamos:solicitudes")
+
+
+class PrestamoMostradorView(BibliotecarioRequeridoMixin, FormView):
+    template_name = "prestamos/mostrador.html"
+    form_class = PrestamoMostradorForm
+
+    def form_valid(self, form):
+        try:
+            prestamo = services.prestar_en_mostrador(
+                form.cleaned_data["username"],
+                form.cleaned_data["codigo_inventario"],
+                self.request.user,
+            )
+        except ValidationError as error:
+            _mostrar_errores(self.request, error)
+            return self.form_invalid(form)
+        messages.success(
+            self.request,
+            f"Prestaste «{prestamo.ejemplar.libro}» ({prestamo.ejemplar.codigo_inventario}) "
+            f"a {prestamo.usuario}. Vence el {prestamo.fecha_vencimiento:%d/%m/%Y}.",
+        )
+        return redirect("prestamos:mostrador")
+
+
+# --- Bibliotecario: reservas (CU-30) ---------------------------------------------------
+
+class ReservasView(BibliotecarioRequeridoMixin, ListView):
+    template_name = "prestamos/reservas.html"
+    context_object_name = "reservas"
+    paginate_by = POR_PAGINA
+
+    def get_queryset(self):
+        self.filtro = FiltroReservasForm(self.request.GET or None)
+        estado = None
+        if self.filtro.is_valid():
+            estado = self.filtro.cleaned_data["estado"] or None
+        return services.listar_reservas(estado=estado)
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["filtro"] = self.filtro
+        contexto["max_longitud_motivo"] = services.MAX_LONGITUD_MOTIVO
+        return contexto
+
+
+class RecogerReservaView(BibliotecarioRequeridoMixin, AccionPostView):
+    def ejecutar(self):
+        reserva = get_object_or_404(Reserva, pk=self.kwargs["pk"])
+        prestamo = services.recoger_reserva(reserva, self.request.user)
+        return (
+            f"Entregaste «{prestamo.ejemplar.libro}» a {prestamo.usuario}. "
+            f"Vence el {prestamo.fecha_vencimiento:%d/%m/%Y}."
+        )
+
+    def url_destino(self):
+        return reverse("prestamos:reservas")
+
+
+class CancelarReservaBibliotecarioView(BibliotecarioRequeridoMixin, AccionPostView):
+    def ejecutar(self):
+        reserva = get_object_or_404(Reserva, pk=self.kwargs["pk"])
+        reserva = services.cancelar_reserva_por_bibliotecario(
+            reserva, self.request.user, self.request.POST.get("motivo", "")
+        )
+        return f"Cancelaste la reserva de «{reserva.libro}» de {reserva.usuario}."
+
+    def url_destino(self):
+        return reverse("prestamos:reservas")
+
+
+# --- Bibliotecario: políticas de préstamo (CU-31) --------------------------------------
+
+class PoliticasView(BibliotecarioRequeridoMixin, ListView):
+    template_name = "prestamos/politicas.html"
+    context_object_name = "politicas"
+    queryset = PoliticaPrestamo.objects.order_by("tipo_usuario")
+
+
+class EditarPoliticaView(BibliotecarioRequeridoMixin, FormView):
+    template_name = "prestamos/politica_editar.html"
+    form_class = PoliticaPrestamoForm
+
+    def get_politica(self):
+        # Se busca aquí y no en dispatch(): así primero se revisan la sesión y el rol.
+        if not hasattr(self, "_politica"):
+            self._politica = get_object_or_404(PoliticaPrestamo, pk=self.kwargs["pk"])
+        return self._politica
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["instance"] = self.get_politica()
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["politica"] = self.get_politica()
+        return contexto
+
+    def form_valid(self, form):
+        cambios = {campo: form.cleaned_data[campo] for campo in form.changed_data}
+        if not cambios:
+            messages.info(self.request, "No hiciste cambios.")
+            return redirect("prestamos:politicas")
+        try:
+            politica = services.actualizar_politica(
+                self.get_politica(), self.request.user, **cambios
+            )
+        except ValidationError as error:
+            # Con errores por campo los muestra junto a cada campo; si no, arriba del formulario.
+            form.add_error(None, error)
+            return self.form_invalid(form)
+        messages.success(self.request, f"Guardaste los cambios de la {politica}.")
+        return redirect("prestamos:politicas")
