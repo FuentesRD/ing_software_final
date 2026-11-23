@@ -1,6 +1,7 @@
 """CU-06 solicitar_prestamo: RN-06, RN-15 y garantía mínima (si falla, no cambia nada)."""
 
 from datetime import timedelta
+from decimal import Decimal
 from unittest import mock
 
 from django.test import TestCase
@@ -54,10 +55,15 @@ class SolicitarPrestamoTests(TestCase):
 
     def test_usuario_no_elegible_no_cambia_nada(self, notificar):
         ejemplar = crear_ejemplar(self.libro, "EJ-1")
-        with mock.patch("multas.services.tiene_multas_pendientes", return_value=True):
+        with (
+            mock.patch("multas.services.tiene_multas_pendientes", return_value=True),
+            mock.patch("multas.services.monto_adeudado", return_value=Decimal("50")),
+        ):
             with self.assertRaises(UsuarioNoElegible) as error:
                 solicitar_prestamo(self.estudiante, self.libro)
-        self.assertEqual(error.exception.motivos, ["Tienes multas pendientes de pago."])
+        self.assertEqual(
+            error.exception.motivos, ["Tienes multas pendientes de pago. Monto adeudado: $50.00."]
+        )
         self.assertFalse(Prestamo.objects.exists())
         self.assertEqual(estado_de(ejemplar), "DISPONIBLE")
         notificar.assert_not_called()

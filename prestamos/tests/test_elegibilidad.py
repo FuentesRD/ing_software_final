@@ -1,6 +1,7 @@
 """CU-07 verificar_elegibilidad: cuenta, RN-02, RN-08 y RN-11."""
 
 from datetime import timedelta
+from decimal import Decimal
 from unittest import mock
 
 from django.test import TestCase
@@ -53,10 +54,14 @@ class RN08Tests(BaseElegibilidadTests):
     """RN-08: multas pendientes o préstamos vencidos impiden pedir libros."""
 
     def test_multas_pendientes(self):
-        with mock.patch("multas.services.tiene_multas_pendientes", return_value=True) as consulta:
+        with (
+            mock.patch("multas.services.tiene_multas_pendientes", return_value=True) as consulta,
+            mock.patch("multas.services.monto_adeudado", return_value=Decimal("1250.5")) as monto,
+        ):
             motivos = verificar_elegibilidad(self.estudiante)
         consulta.assert_called_once_with(self.estudiante)
-        self.assertEqual(motivos, ["Tienes multas pendientes de pago."])
+        monto.assert_called_once_with(self.estudiante)
+        self.assertEqual(motivos, ["Tienes multas pendientes de pago. Monto adeudado: $1,250.50."])
 
     def test_prestamo_vencido(self):
         self.prestar(self.estudiante, 0, estado=Prestamo.Estado.VENCIDO, dias_para_vencer=-2)
