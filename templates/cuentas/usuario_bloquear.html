@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block titulo %}Bloquear usuario · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Bloquear a {{ cuenta.username }}</h1>
+
+<p>
+    El usuario conservará acceso a su cuenta, pero el bloqueo
+    impedirá las operaciones de préstamos cuando se compruebe
+    su elegibilidad.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button class="btn btn-warning" type="submit">
+        Confirmar bloqueo
+    </button>
+    <a href="{% url 'cuentas:usuarios_lista' %}">Cancelar</a>
+</form>
+{% endblock %}

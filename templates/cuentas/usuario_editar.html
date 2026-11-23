@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block titulo %}Editar usuario · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Editar usuario: {{ object.username }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button class="btn btn-primary" type="submit">
+        Guardar cambios
+    </button>
+    <a href="{% url 'cuentas:usuarios_lista' %}">Cancelar</a>
+</form>
+{% endblock %}

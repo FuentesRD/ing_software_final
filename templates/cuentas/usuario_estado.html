@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h1 class="h3">
+    {% if activar %}Reactivar{% else %}Desactivar{% endif %} cuenta
+</h1>
+
+<p>
+    ¿Confirmas que deseas
+    {% if activar %}reactivar{% else %}desactivar{% endif %}
+    la cuenta de {{ cuenta.username }}?
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">Confirmar</button>
+    <a href="{% url 'cuentas:usuarios_lista' %}">Cancelar</a>
+</form>
+{% endblock %}
