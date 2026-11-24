@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %}Eliminar · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Eliminar {{ opciones.verbose_name }}</h1>
+<p>¿Seguro que quieres eliminar <strong>{{ object }}</strong>? Solo se puede si ningún libro lo usa.</p>
+<form method="post" class="d-flex gap-3 align-items-center">
+    {% csrf_token %}
+    <button class="btn btn-danger" type="submit">Eliminar</button>
+    <a href="{% url lista_url %}">Cancelar</a>
+</form>
+{% endblock %}

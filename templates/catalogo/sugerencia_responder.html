@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block titulo %}Responder sugerencia · Biblioteca{% endblock %}
+
+{% block contenido %}
+<div class="row">
+    <div class="col-lg-7">
+        <h1 class="h3 mb-3">Responder sugerencia</h1>
+        <div class="card card-body mb-3">
+            <h2 class="h5 mb-1">{{ sugerencia.titulo }}</h2>
+            <p class="text-muted mb-2">{{ sugerencia.autores }}{% if sugerencia.isbn %} · ISBN {{ sugerencia.isbn }}{% endif %}</p>
+            <p class="mb-0">{{ sugerencia.justificacion|linebreaksbr }}</p>
+        </div>
+        <form method="post" class="card card-body">
+            {% csrf_token %}
+            {% include "catalogo/_campos.html" %}
+            <div class="d-flex gap-3 align-items-center">
+                <button class="btn btn-primary" type="submit">Guardar respuesta</button>
+                <a href="{% url 'catalogo:sugerencias_lista' %}">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

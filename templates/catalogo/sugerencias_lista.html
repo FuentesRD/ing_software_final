@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block titulo %}Sugerencias · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-3">Sugerencias de adquisición</h1>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Título</th>
+                <th scope="col">Autores</th>
+                <th scope="col">Profesor</th>
+                <th scope="col">Estado</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sugerencia in sugerencias %}
+                <tr>
+                    <td>{{ sugerencia.fecha|date:"d/m/Y" }}</td>
+                    <td>{{ sugerencia.titulo }}</td>
+                    <td>{{ sugerencia.autores }}</td>
+                    <td>{{ sugerencia.profesor.usuario.get_full_name|default:sugerencia.profesor.usuario.username }}</td>
+                    <td>{{ sugerencia.get_estado_display }}</td>
+                    <td>
+                        {% if sugerencia.estado == "PENDIENTE" %}
+                            <a href="{% url 'catalogo:sugerencia_responder' sugerencia.pk %}">Responder</a>
+                        {% else %}
+                            <span class="small text-muted">{{ sugerencia.respuesta }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6" class="text-muted">No hay sugerencias.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "reportes/paginacion.html" with pagina=page_obj parametro="page" filtros="" %}
+{% endblock %}
