@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block titulo %}Crear usuario · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Crear usuario</h1>
+
+<p>
+    Para estudiantes completa matrícula, semestre y carrera.
+    Para profesores completa número de empleado y departamento.
+    Para bibliotecarios deja los datos académicos vacíos.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-primary" type="submit">Guardar usuario</button>
+    <a href="{% url 'cuentas:usuarios_lista' %}">Cancelar</a>
+</form>
+{% endblock %}

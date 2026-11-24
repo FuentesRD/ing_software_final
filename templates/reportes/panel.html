@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h1>Reportes</h1>
+
+<form method="get" class="mb-4">
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Consultar</button>
+    <a href="{% url 'reportes:panel' %}" class="btn btn-secondary">
+        Limpiar
+    </a>
+</form>
+
+{% if mostrar_resultados %}
+
+<h2>Préstamos por periodo</h2>
+<p>Periodo según la fecha de entrega. Total: {{ prestamos.paginator.count }}.</p>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Libro</th>
+                <th>Entrega</th>
+                <th>Vencimiento</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prestamo in prestamos %}
+            <tr>
+                <td>{{ prestamo.usuario.username }}</td>
+                <td>{{ prestamo.ejemplar.libro.titulo }}</td>
+                <td>{{ prestamo.fecha_prestamo|date:"d/m/Y H:i" }}</td>
+                <td>{{ prestamo.fecha_vencimiento|date:"d/m/Y" }}</td>
+                <td>{{ prestamo.get_estado_display }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No hay préstamos en este periodo.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "reportes/paginacion.html" with pagina=prestamos parametro="pagina_prestamos" %}
+
+<h2>Libros más solicitados</h2>
+<p>Periodo según la fecha de solicitud; incluye solicitudes canceladas.</p>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr><th>Libro</th><th>ISBN</th><th>Solicitudes</th></tr>
+        </thead>
+        <tbody>
+            {% for libro in libros %}
+            <tr>
+                <td>{{ libro.ejemplar__libro__titulo }}</td>
+                <td>{{ libro.ejemplar__libro__isbn }}</td>
+                <td>{{ libro.total_solicitudes }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">No hay solicitudes en este periodo.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "reportes/paginacion.html" with pagina=libros parametro="pagina_libros" %}
+
+<h2>Préstamos vencidos</h2>
+<p>
+    Pendientes de devolución a la fecha de hoy.
+    Periodo según su vencimiento. Total: {{ vencidos.paginator.count }}.
+</p>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr><th>Usuario</th><th>Libro</th><th>Vencimiento</th></tr>
+        </thead>
+        <tbody>
+            {% for prestamo in vencidos %}
+            <tr>
+                <td>{{ prestamo.usuario.username }}</td>
+                <td>{{ prestamo.ejemplar.libro.titulo }}</td>
+                <td>{{ prestamo.fecha_vencimiento|date:"d/m/Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">No hay préstamos vencidos en este periodo.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "reportes/paginacion.html" with pagina=vencidos parametro="pagina_vencidos" %}
+
+<h2>Multas cobradas</h2>
+<p>
+    Pagos recibidos durante el periodo, incluidos abonos parciales.
+    Total cobrado: ${{ total_cobrado|floatformat:2 }} MXN.
+</p>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Recibo</th>
+                <th>Usuario</th>
+                <th>Fecha de pago</th>
+                <th>Monto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pago in cobradas %}
+            <tr>
+                <td>{{ pago.folio_recibo }}</td>
+                <td>{{ pago.multa.usuario.username }}</td>
+                <td>{{ pago.fecha_pago|date:"d/m/Y H:i" }}</td>
+                <td>${{ pago.monto|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No hay pagos en este periodo.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "reportes/paginacion.html" with pagina=cobradas parametro="pagina_cobradas" %}
+
+<h2>Multas pendientes</h2>
+<p>
+    Multas generadas durante el periodo, con su saldo actual.
+    Total pendiente: ${{ total_pendiente|floatformat:2 }} MXN.
+</p>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Generación</th>
+                <th>Multa</th>
+                <th>Pagado</th>
+                <th>Saldo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for multa in pendientes %}
+            <tr>
+                <td>{{ multa.usuario.username }}</td>
+                <td>{{ multa.fecha_generacion|date:"d/m/Y" }}</td>
+                <td>${{ multa.monto|floatformat:2 }}</td>
+                <td>${{ multa.total_pagado|floatformat:2 }}</td>
+                <td>${{ multa.saldo_pendiente|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No hay multas pendientes en este periodo.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "reportes/paginacion.html" with pagina=pendientes parametro="pagina_pendientes" %}
+
+{% endif %}
+{% endblock %}
