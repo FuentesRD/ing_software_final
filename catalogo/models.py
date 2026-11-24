@@ -227,4 +227,52 @@ class Ejemplar(models.Model):
             raise ValidationError(f"Estado de ejemplar no válido: {nuevo_estado}")
         self.estado = nuevo_estado
         self.save(update_fields=["estado"])
-        
+
+
+class SugerenciaAdquisicion(models.Model):
+    """Sugerencia de compra de un profesor y su respuesta (CU-16, CU-33)."""
+
+    class Estado(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente"
+        APROBADA = "APROBADA", "Aprobada"
+        RECHAZADA = "RECHAZADA", "Rechazada"
+
+    titulo = models.CharField("título", max_length=255)
+    autores = models.CharField("autores", max_length=255)
+    isbn = models.CharField(
+        "ISBN", max_length=13, null=True, blank=True, validators=[validar_isbn]
+    )
+    justificacion = models.TextField("justificación")
+    estado = models.CharField(
+        "estado",
+        max_length=10,
+        choices=Estado.choices,
+        default=Estado.PENDIENTE,
+    )
+    respuesta = models.CharField(
+        "respuesta", max_length=255, null=True, blank=True
+    )
+    fecha = models.DateTimeField("fecha", auto_now_add=True)
+    profesor = models.ForeignKey(
+        "cuentas.Profesor",
+        on_delete=models.CASCADE,
+        related_name="sugerencias",
+        verbose_name="profesor",
+    )
+
+    class Meta:
+        db_table = "sugerencia_adquisicion"
+        ordering = ["-fecha"]
+        verbose_name = "sugerencia de adquisición"
+        verbose_name_plural = "sugerencias de adquisición"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    estado__in=["PENDIENTE", "APROBADA", "RECHAZADA"]
+                ),
+                name="ck_sugerencia_estado",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.titulo} ({self.get_estado_display()})"
