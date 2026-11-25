@@ -34,14 +34,28 @@ Si eres un asistente de IA ayudando a un integrante del equipo:
 | **C. Préstamos y reservas** | Ricardo | `prestamos` | CU-06 a 13, 23, 24, 30, 31 |
 | **D. Multas, devoluciones y procesos automáticos** | Samanta | `multas`, `notificaciones` | CU-14, 15, 25 a 29, 34, 35, 36 |
 
-**Fase 1 (BD en Docker):** la terminan quienes ya la están trabajando. Es la base que todos usamos para conectarnos a MySQL.
+**Fase 1 (BD en Docker):** ✅ terminada (PR #2). Es la base que todos usamos para conectarnos a MySQL.
+
+### Avance verificado en `develop` (25 nov 2026)
+
+Solo se marca como hecho lo que se puede comprobar en el código de `develop` (PR #2 a #15, 169 pruebas en verde).
+La documentación y los diagramas viven fuera del repo (Google Doc y `.vpp`), así que cada dueño los marca él mismo.
+
+| Paquete | Código | Pruebas | Lo que falta en código |
+|---|---|---|---|
+| A · Alvaro | 8 / 8 | 3 / 3 | — |
+| B · Diego | 11 / 11 | 3 / 3 | — |
+| C · Ricardo | 7 / 12 | 5 / 8 | Cancelar, renovar, reservar, vistas del lector y del bibliotecario. **Ya está hecho en `feature/prestamos-datos-prueba`, falta abrir el PR.** |
+| D · Samanta | 3 / 10 | 1 / 4 | Devolución, pérdida o daño, pagos, condonación, Admin, vistas y comando `procesar_vencimientos`. |
+
+Pendientes de D detectados en revisión: índices `idx_multa_usuario_estado` e `idx_notificacion_usuario_leida`, registrar `Multa` y `Pago` en el Admin sin borrado, y pruebas en `multas/tests.py` (está vacío).
 
 ### Trabajo de todos
 
 - [ ] Sesión conjunta del **modelo de dominio** (diagrama de clases de análisis), antes de las clases de diseño.
 - [ ] **Diagrama general de casos de uso**, con actores y generalización (Usuario lector → Estudiante, Profesor).
 - [ ] Lista de **RF, RNF y RN** para el documento de especificación (vienen casi completos del profesor).
-- [ ] **Revisar PRs** de los demás: cada PR lo aprueba alguien que no lo escribió.
+- [x] **Revisar PRs** de los demás: cada PR lo aprueba alguien que no lo escribió. *(en curso: PR #2 a #15 revisados)*
 - [ ] **Cierre:** demo por actor, PDF integrado y `.vpp` final.
 
 ---
@@ -131,17 +145,17 @@ Para evitar el import circular, C importa `tiene_multas_pendientes` **dentro de 
 > ⚠️ **A bloquea al resto del código.** El modelo `Usuario` y `AUTH_USER_MODEL` deben existir **antes del primer `migrate`**. Si alguien migra antes, hay que borrar la base y empezar de nuevo. Prioridad de esta semana.
 
 **Esqueleto de Django (primero, semana 2):**
-- [ ] `venv` y `requirements.txt` inicial: `Django>=5.2,<5.3`, `mysqlclient`, `python-dotenv`, `pytest-django`.
-- [ ] Documentar en el README que en WSL/Linux `mysqlclient` necesita antes: `sudo apt install python3-dev default-libmysqlclient-dev build-essential pkg-config`.
-- [ ] `django-admin startproject biblioteca .` en la raíz del repo.
-- [ ] `settings.py` leyendo `.env` con `python-dotenv`: `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`; `OPTIONS: {"charset": "utf8mb4"}`.
-- [ ] `TIME_ZONE = "America/Mexico_City"`, `LANGUAGE_CODE = "es-mx"`, `USE_TZ = True`.
-- [ ] Crear las 6 apps vacías y registrarlas en `INSTALLED_APPS`, para que cada dueño empiece en su carpeta.
-- [ ] App `cuentas` con `Usuario` y `AUTH_USER_MODEL = "cuentas.Usuario"`; primer `migrate` contra el MySQL de Docker.
-- [ ] `EMAIL_BACKEND` de consola para desarrollo (CU-03).
-- [ ] `templates/base.html` con Bootstrap 5, navbar según el rol y bloque de mensajes.
-- [ ] Mixins de rol en `cuentas/mixins.py`.
-- [ ] Sección "Instalación" del README: venv, requirements, `.env`, Docker, `migrate`, `runserver`.
+- [x] `venv` y `requirements.txt` inicial: `Django>=5.2,<5.3`, `mysqlclient`, `python-dotenv`, `pytest-django`.
+- [x] Documentar en el README que en WSL/Linux `mysqlclient` necesita antes: `sudo apt install python3-dev default-libmysqlclient-dev build-essential pkg-config`.
+- [x] `django-admin startproject biblioteca .` en la raíz del repo.
+- [x] `settings.py` leyendo `.env` con `python-dotenv`: `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`; `OPTIONS: {"charset": "utf8mb4"}`.
+- [x] `TIME_ZONE = "America/Mexico_City"`, `LANGUAGE_CODE = "es-mx"`, `USE_TZ = True`.
+- [x] Crear las 6 apps vacías y registrarlas en `INSTALLED_APPS`, para que cada dueño empiece en su carpeta.
+- [x] App `cuentas` con `Usuario` y `AUTH_USER_MODEL = "cuentas.Usuario"`; primer `migrate` contra el MySQL de Docker.
+- [x] `EMAIL_BACKEND` de consola para desarrollo (CU-03).
+- [x] `templates/base.html` con Bootstrap 5, navbar según el rol y bloque de mensajes.
+- [x] Mixins de rol en `cuentas/mixins.py`.
+- [x] Sección "Instalación" del README: venv, requirements, `.env`, Docker, `migrate`, `runserver`. *(falta ordenarla: hay dos secciones "Requisitos")*
 
 **Documentación:**
 - [ ] Descripción de sus 7 casos de uso con la plantilla.
@@ -151,19 +165,19 @@ Para evitar el import circular, C importa `tiene_multas_pendientes` **dentro de 
 - [ ] **Diagramas de estados** de Préstamo y de Ejemplar (sección 10.3), validados con C y B.
 
 **Código:**
-- [ ] Modelos `Usuario`, `Estudiante`, `Profesor` (uno a uno con `Usuario`), `Carrera`, `Departamento`, con `db_table` del esquema.
-- [ ] Registro en Django Admin.
-- [ ] Login, logout y recuperación de contraseña con las vistas de autenticación de Django.
-- [ ] Un usuario `bloqueado` no puede operar préstamos (C lo revisa en la elegibilidad); mostrar el motivo al usuario.
-- [ ] CRUD de usuarios para el bibliotecario, con vistas propias (no solo Admin).
-- [ ] Importación CSV: validar columnas, reportar filas con error y guardar todo en una transacción.
-- [ ] Bloquear / desbloquear con `motivo_bloqueo` obligatorio.
-- [ ] **Reportes** (semana 6, cuando ya existan los datos de C y D): préstamos por periodo, libros más solicitados, préstamos vencidos, multas cobradas y pendientes.
+- [x] Modelos `Usuario`, `Estudiante`, `Profesor` (uno a uno con `Usuario`), `Carrera`, `Departamento`, con `db_table` del esquema.
+- [x] Registro en Django Admin.
+- [x] Login, logout y recuperación de contraseña con las vistas de autenticación de Django.
+- [x] Un usuario `bloqueado` no puede operar préstamos (C lo revisa en la elegibilidad); mostrar el motivo al usuario. *(verificar_elegibilidad incluye el motivo del bloqueo)*
+- [x] CRUD de usuarios para el bibliotecario, con vistas propias (no solo Admin).
+- [x] Importación CSV: validar columnas, reportar filas con error y guardar todo en una transacción.
+- [x] Bloquear / desbloquear con `motivo_bloqueo` obligatorio.
+- [x] **Reportes** (semana 6, cuando ya existan los datos de C y D): préstamos por periodo, libros más solicitados, préstamos vencidos, multas cobradas y pendientes. *(PR #11 y #12)*
 
 **Pruebas:**
-- [ ] Un estudiante no puede entrar a vistas de bibliotecario (RNF-01, RNF-02).
-- [ ] Importación CSV con filas válidas e inválidas.
-- [ ] Bloqueo y desbloqueo.
+- [x] Un estudiante no puede entrar a vistas de bibliotecario (RNF-01, RNF-02).
+- [x] Importación CSV con filas válidas e inválidas.
+- [x] Bloqueo y desbloqueo.
 
 ---
 
@@ -189,7 +203,7 @@ Para evitar el import circular, C importa `tiene_multas_pendientes` **dentro de 
 - [ ] Diagrama de casos de uso del paquete "Administración del acervo".
 - [ ] Clases de diseño de `catalogo`.
 - [ ] **Diagrama ER físico en Visual Paradigm**, igual a las tablas que generen las migraciones.
-- [ ] **Diccionario de datos** de todas las tablas (columna, tipo, restricciones, descripción).
+- [ ] **Diccionario de datos** de todas las tablas (columna, tipo, restricciones, descripción). *(`docs/bd/diccionario_datos.md`, 18 tablas, generado con `manage.py diccionario_datos`)*
 - [ ] Lista de pantallas del paquete para los wireframes de A.
 
 **Código:**
@@ -247,28 +261,28 @@ Para evitar el import circular, C importa `tiene_multas_pendientes` **dentro de 
 - [ ] Lista de pantallas del paquete para los wireframes de A.
 
 **Código:**
-- [ ] Modelos `PoliticaPrestamo`, `Prestamo`, `Reserva`, con `db_table` y estados del esquema.
-- [ ] Migración de datos con las políticas predeterminadas: estudiante 7 días / 3 libros / 1 renovación; profesor 30 / 10 / 2; ambos $10 por día, tope $300 y 48 h para recoger.
-- [ ] `verificar_elegibilidad(usuario)` (CU-07): cuenta activa y no bloqueada, sin multas pendientes ni préstamos vencidos (RN-08), debajo del máximo de libros (RN-02), sin el mismo título prestado (RN-11).
-- [ ] Solicitar préstamo (CU-06) en transacción con `select_for_update()`: ejemplar → `RESERVADO`, préstamo `SOLICITADO`, `fecha_limite_recoger` según RN-06, notificación al usuario.
-- [ ] Cancelar solicitud (CU-08): préstamo `CANCELADO`, ejemplar `DISPONIBLE`.
-- [ ] Entregar (CU-23) y préstamo en mostrador (CU-24): estado `ACTIVO`, `fecha_vencimiento` según RN-01, `entregado_por`.
-- [ ] Renovar (CU-10): RN-03, RN-09 y RN-10 (la nueva fecha cuenta desde el día de la renovación).
-- [ ] Reservar y cancelar reserva (CU-11, CU-12) con cola FIFO por `fecha_reserva`.
-- [ ] `asignar_siguiente_reserva(ejemplar)` (RN-12): reserva más antigua → `DISPONIBLE`, ejemplar apartado, `fecha_expiracion`, notificación.
-- [ ] Métodos de estado de `Prestamo` que usará D (sección 3).
-- [ ] Mis préstamos e historial (CU-09, CU-13): cada usuario ve solo lo suyo (RNF-02).
-- [ ] Gestión de reservas y configuración de políticas para el bibliotecario (CU-30, CU-31).
+- [x] Modelos `PoliticaPrestamo`, `Prestamo`, `Reserva`, con `db_table` y estados del esquema. *(PR #7)*
+- [x] Migración de datos con las políticas predeterminadas: estudiante 7 días / 3 libros / 1 renovación; profesor 30 / 10 / 2; ambos $10 por día, tope $300 y 48 h para recoger. *(PR #7)*
+- [x] `verificar_elegibilidad(usuario)` (CU-07): cuenta activa y no bloqueada, sin multas pendientes ni préstamos vencidos (RN-08), debajo del máximo de libros (RN-02), sin el mismo título prestado (RN-11). *(PR #13)*
+- [x] Solicitar préstamo (CU-06) en transacción con `select_for_update()`: ejemplar → `RESERVADO`, préstamo `SOLICITADO`, `fecha_limite_recoger` según RN-06, notificación al usuario. *(PR #13)*
+- [ ] Cancelar solicitud (CU-08): préstamo `CANCELADO`, ejemplar `DISPONIBLE`. *(hecho en rama `feature/prestamos-datos-prueba`, falta PR)*
+- [x] Entregar (CU-23) y préstamo en mostrador (CU-24): estado `ACTIVO`, `fecha_vencimiento` según RN-01, `entregado_por`. *(PR #13)*
+- [ ] Renovar (CU-10): RN-03, RN-09 y RN-10 (la nueva fecha cuenta desde el día de la renovación). *(hecho en rama `feature/prestamos-datos-prueba`, falta PR)*
+- [ ] Reservar y cancelar reserva (CU-11, CU-12) con cola FIFO por `fecha_reserva`. *(hecho en rama `feature/prestamos-datos-prueba`, falta PR)*
+- [x] `asignar_siguiente_reserva(ejemplar)` (RN-12): reserva más antigua → `DISPONIBLE`, ejemplar apartado, `fecha_expiracion`, notificación. *(PR #13)*
+- [x] Métodos de estado de `Prestamo` que usará D (sección 3). *(PR #7; `renovar()` llega con CU-10)*
+- [ ] Mis préstamos e historial (CU-09, CU-13): cada usuario ve solo lo suyo (RNF-02). *(hecho en rama `feature/prestamos-datos-prueba`, falta PR)*
+- [ ] Gestión de reservas y configuración de políticas para el bibliotecario (CU-30, CU-31). *(hecho en rama `feature/prestamos-datos-prueba`, falta PR)*
 
 **Pruebas (cubren la mayor parte de RNF-07):**
-- [ ] RN-01: fecha de vencimiento por tipo de usuario.
-- [ ] RN-02: máximo de libros.
-- [ ] RN-03: máximo de renovaciones.
-- [ ] RN-06: expiración de la solicitud.
-- [ ] RN-08: rechazo con multas pendientes o préstamos vencidos.
-- [ ] RN-09: no renovar vencidos ni títulos con reservas.
-- [ ] RN-10: nueva fecha de vencimiento al renovar.
-- [ ] RN-11: no dos préstamos del mismo título.
+- [x] RN-01: fecha de vencimiento por tipo de usuario.
+- [x] RN-02: máximo de libros.
+- [ ] RN-03: máximo de renovaciones. *(llega con CU-10)*
+- [x] RN-06: expiración de la solicitud. *(entrega rechazada con el plazo vencido)*
+- [x] RN-08: rechazo con multas pendientes o préstamos vencidos.
+- [ ] RN-09: no renovar vencidos ni títulos con reservas. *(llega con CU-10)*
+- [ ] RN-10: nueva fecha de vencimiento al renovar. *(llega con CU-10)*
+- [x] RN-11: no dos préstamos del mismo título.
 
 ---
 
@@ -302,17 +316,17 @@ Para evitar el import circular, C importa `tiene_multas_pendientes` **dentro de 
 - [ ] Lista de pantallas del paquete para los wireframes de A.
 
 **Código:**
-- [ ] Modelos `Multa`, `Pago`, `Notificacion`, con `db_table` y estados del esquema.
-- [ ] `notificar(usuario, tipo, mensaje)` y `tiene_multas_pendientes(usuario)` (sección 3). **Estos dos los necesita C pronto.**
+- [x] Modelos `Multa`, `Pago`, `Notificacion`, con `db_table` y estados del esquema. *(PR #12; faltan los índices compuestos `idx_multa_usuario_estado` e `idx_notificacion_usuario_leida`)*
+- [x] `notificar(usuario, tipo, mensaje)` y `tiene_multas_pendientes(usuario)` (sección 3). **Estos dos los necesita C pronto.** *(PR #12; también `monto_adeudado`, corregido en PR #14)*
 - [ ] Registrar devolución (CU-25) en una sola transacción:
     - préstamo devuelto con el método de C;
     - multa por retraso si aplica (RN-07);
     - ejemplar `DISPONIBLE`, o apartado con `asignar_siguiente_reserva` si hay reservas (RN-12).
-- [ ] Cálculo RN-07: `monto = min(días_retraso × multa_por_día, multa_máxima)`.
+- [x] Cálculo RN-07: `monto = min(días_retraso × multa_por_día, multa_máxima)`. *(existe como `Prestamo.calcular_multa()` (PR #7); D lo usa en la devolución)*
 - [ ] Pérdida o daño (CU-27, RN-13): multa por el `costo_reposicion` del libro; ejemplar `PERDIDO` o `EN_REPARACION`.
 - [ ] Pagos parciales (CU-28): la multa pasa a `PAGADA` cuando la suma de pagos cubre el monto; folio único.
 - [ ] Condonar (CU-29, RN-14): solo bibliotecario, justificación obligatoria, guarda quién condonó.
-- [ ] RN-16: multas y pagos nunca se borran (sin vistas de borrado y sin permiso de borrado en Admin).
+- [ ] RN-16: multas y pagos nunca se borran (sin vistas de borrado y sin permiso de borrado en Admin). *(`multas/admin.py` aún vacío)*
 - [ ] Mis multas y mis notificaciones (CU-14, CU-15), con contador de no leídas en la navbar (coordinar con A).
 - [ ] Comando `procesar_vencimientos` (CU-34, 35, 36). Va en `prestamos/management/commands/`, como sugiere el profesor. Es la **única excepción** a "no tocar la app de otro": D es dueño de ese archivo y usa los métodos de C.
     - `ACTIVO` con fecha vencida → `VENCIDO`.
@@ -320,7 +334,7 @@ Para evitar el import circular, C importa `tiene_multas_pendientes` **dentro de 
     - Recordatorio `VENCE_PRONTO` antes del vencimiento (días a definir con el equipo).
 
 **Pruebas:**
-- [ ] RN-07 con casos límite: 0 días, 1 día, varios días y tope máximo (lo pide el profesor en CU-25).
+- [x] RN-07 con casos límite: 0 días, 1 día, varios días y tope máximo (lo pide el profesor en CU-25). *(en `prestamos/tests/test_prestamo.py`: 0, 1, 5, 30 y 45 días)*
 - [ ] Pago parcial y pago completo.
 - [ ] Condonación sin justificación rechazada.
 - [ ] El comando marca vencidos y expira solicitudes y reservas.
