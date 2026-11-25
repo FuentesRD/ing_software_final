@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block titulo %}Reservar libro · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Reservar libro</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h2 class="h5 card-title">{{ libro.titulo }}</h2>
+        {% if libro.subtitulo %}<p class="card-subtitle text-muted mb-2">{{ libro.subtitulo }}</p>{% endif %}
+        <p class="mb-1">ISBN: {{ libro.isbn }}</p>
+        <p class="mb-0">Editorial: {{ libro.editorial }}</p>
+    </div>
+</div>
+
+{% if hay_disponibles %}
+    <div class="alert alert-info">
+        Hay ejemplares disponibles de este libro: puedes solicitar el préstamo directamente.
+    </div>
+    <a class="btn btn-primary" href="{% url 'prestamos:solicitar' libro.pk %}">Solicitar préstamo</a>
+    <a class="btn btn-link" href="{% url 'prestamos:mis_reservas' %}">Volver</a>
+{% else %}
+    <p>Entrarás a la fila de espera. Te avisaremos cuando haya un ejemplar apartado para ti.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Reservar</button>
+        <a class="btn btn-link" href="{% url 'prestamos:mis_reservas' %}">Volver</a>
+    </form>
+{% endif %}
+{% endblock %}

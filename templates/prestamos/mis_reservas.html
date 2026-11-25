@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis reservas · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Mis reservas</h1>
+
+{% if reservas %}
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Libro</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Reservado</th>
+                <th scope="col">Lugar en la fila</th>
+                <th scope="col">Recoger antes de</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reserva in reservas %}
+                <tr>
+                    <td>{{ reserva.libro }}</td>
+                    <td>{{ reserva.get_estado_display }}</td>
+                    <td>{{ reserva.fecha_reserva|date:"d/m/Y H:i" }}</td>
+                    <td>{{ reserva.posicion|default:"—" }}</td>
+                    <td>
+                        {% if reserva.estado == "DISPONIBLE" %}
+                            {{ reserva.fecha_expiracion|date:"d/m/Y H:i" }}
+                            ({{ reserva.ejemplar_asignado.codigo_inventario }})
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        {% if reserva.estado == "PENDIENTE" or reserva.estado == "DISPONIBLE" %}
+                            <form method="post" action="{% url 'prestamos:cancelar_reserva' reserva.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "prestamos/paginacion.html" %}
+{% else %}
+    <p class="text-muted">No tienes reservas.</p>
+{% endif %}
+{% endblock %}

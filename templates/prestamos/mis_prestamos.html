@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis préstamos · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Mis préstamos</h1>
+
+{% if prestamos %}
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Libro</th>
+                <th scope="col">Ejemplar</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Solicitado</th>
+                <th scope="col">Recoger antes de</th>
+                <th scope="col">Vence</th>
+                <th scope="col">Renovaciones restantes</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prestamo in prestamos %}
+                <tr>
+                    <td>{{ prestamo.ejemplar.libro }}</td>
+                    <td>{{ prestamo.ejemplar.codigo_inventario }}</td>
+                    <td>{{ prestamo.get_estado_display }}</td>
+                    <td>{{ prestamo.fecha_solicitud|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {% if prestamo.estado == "SOLICITADO" %}
+                            {{ prestamo.fecha_limite_recoger|date:"d/m/Y H:i"|default:"—" }}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{{ prestamo.fecha_vencimiento|date:"d/m/Y"|default:"—" }}</td>
+                    <td>
+                        {% if prestamo.estado == "ACTIVO" %}{{ prestamo.renovaciones_restantes }}{% else %}—{% endif %}
+                    </td>
+                    <td>
+                        {% if prestamo.estado == "ACTIVO" %}
+                            <form method="post" action="{% url 'prestamos:renovar' prestamo.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Renovar</button>
+                            </form>
+                        {% elif prestamo.estado == "SOLICITADO" %}
+                            <form method="post" action="{% url 'prestamos:cancelar_solicitud' prestamo.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar solicitud</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "prestamos/paginacion.html" %}
+{% else %}
+    <p class="text-muted">No tienes préstamos.</p>
+{% endif %}
+{% endblock %}

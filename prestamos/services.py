@@ -40,8 +40,11 @@ class OperacionNoPermitida(ValidationError):
 
 
 # --- Estado del ejemplar -------------------------------------------------------------
-# Único lugar que lee o escribe Ejemplar.estado. Es provisional: cuando catalogo (Diego)
-# ofrezca un contrato para cambiar el estado, solo se ajusta esta sección.
+# Único lugar de prestamos que toca el estado de un ejemplar.
+# Escritura: contrato Ejemplar.cambiar_estado(estado) de catalogo (B → C); quien llama ya
+# tiene el ejemplar bloqueado con select_for_update() dentro de transaction.atomic().
+# Lectura: el campo `estado` y los valores de Ejemplar.Estado, documentados por catalogo;
+# el contrato no tiene métodos de lectura aparte de es_prestable().
 
 _ESTADOS_NO_ASIGNABLES = {
     Ejemplar.Estado.EN_REPARACION,
@@ -51,13 +54,23 @@ _ESTADOS_NO_ASIGNABLES = {
 
 
 def _cambiar_estado_ejemplar(ejemplar, estado):
-    ejemplar.estado = estado
-    ejemplar.save(update_fields=["estado"])
+    ejemplar.cambiar_estado(estado)
 
 
 def _ejemplar_asignable(ejemplar):
     """Un ejemplar devuelto o liberado puede apartarse si no está dañado, perdido ni dado de baja."""
     return ejemplar.estado not in _ESTADOS_NO_ASIGNABLES
+
+
+def _ejemplar_apartado(ejemplar):
+    """¿El ejemplar está apartado (RESERVADO) para una solicitud o una reserva?"""
+    return ejemplar.estado == Ejemplar.Estado.RESERVADO
+
+
+def _liberar_ejemplar(ejemplar):
+    """Un ejemplar apartado queda libre: pasa a la siguiente reserva (RN-12) o a DISPONIBLE."""
+    if asignar_siguiente_reserva(ejemplar) is None:
+        _cambiar_estado_ejemplar(ejemplar, Ejemplar.Estado.DISPONIBLE)
 
 
 # --- Utilidades internas -------------------------------------------------------------
@@ -66,13 +79,37 @@ def _bloquear_usuario(usuario):
     return get_user_model().objects.select_for_update().get(pk=usuario.pk)
 
 
-def _validar_bibliotecario(usuario):
+def _validar_bibliotecario(usuario, accion="registrar la entrega de un préstamo"):
     if usuario is None or usuario.tipo_usuario != "BIBLIOTECARIO":
-        raise OperacionNoPermitida("Solo un bibliotecario puede registrar la entrega de un préstamo.")
+        raise OperacionNoPermitida(f"Solo un bibliotecario puede {accion}.")
+
+
+def _validar_dueno(objeto, usuario):
+    """RNF-02: un lector solo opera sobre sus propios préstamos y reservas."""
+    if objeto.usuario_id != usuario.pk:
+        raise OperacionNoPermitida(f"{objeto} no te pertenece.")
 
 
 def _formato_fecha(fecha_hora):
     return timezone.localtime(fecha_hora).strftime("%d/%m/%Y %H:%M")
+
+
+def _bloquear_reserva_con_ejemplar(reserva):
+    """Bloquea el ejemplar asignado y luego la reserva, respetando el orden ejemplar → reserva."""
+    ejemplar_id = Reserva.objects.values_list("ejemplar_asignado_id", flat=True).get(pk=reserva.pk)
+    ejemplar = Ejemplar.objects.select_for_update().get(pk=ejemplar_id) if ejemplar_id else None
+    reserva = Reserva.objects.select_for_update().get(pk=reserva.pk)
+    if reserva.ejemplar_asignado_id != ejemplar_id:
+        raise OperacionNoPermitida("La reserva cambió mientras se procesaba; inténtalo de nuevo.")
+    return reserva, ejemplar
+
+
+def _cancelar_y_liberar(reserva, ejemplar):
+    """Cancela una reserva ya bloqueada; si tenía un ejemplar apartado, lo libera (RN-12)."""
+    tenia_ejemplar_apartado = reserva.estado == Reserva.Estado.DISPONIBLE
+    reserva.cancelar()
+    if tenia_ejemplar_apartado and ejemplar is not None:
+        _liberar_ejemplar(ejemplar)
 
 
 def _tomar_ejemplar_disponible(libro):
@@ -88,18 +125,74 @@ def _tomar_ejemplar_disponible(libro):
 
 # --- Consultas -----------------------------------------------------------------------
 
-def tiene_prestamos_vencidos(usuario):
+def tiene_prestamos_vencidos(usuario, excluir=None):
     """RN-08: ¿el usuario tiene algún préstamo vencido? (contrato C → C, D).
 
     Cuenta los préstamos en estado VENCIDO y también los ACTIVOS cuya fecha de vencimiento
     ya pasó, aunque el comando de vencimientos (CU-34) todavía no los haya marcado.
+    `excluir`: préstamo que no debe contarse (al renovar, el propio préstamo se revisa aparte).
     """
     hoy = timezone.localdate()
-    return Prestamo.objects.filter(
+    prestamos = Prestamo.objects.filter(
         Q(estado=Prestamo.Estado.VENCIDO)
         | Q(estado=Prestamo.Estado.ACTIVO, fecha_vencimiento__lt=hoy),
         usuario=usuario,
-    ).exists()
+    )
+    if excluir is not None:
+        prestamos = prestamos.exclude(pk=excluir.pk)
+    return prestamos.exists()
+
+
+def esta_vencido(prestamo):
+    """RN-09: VENCIDO, o ACTIVO con la fecha de vencimiento ya pasada."""
+    return prestamo.estado == Prestamo.Estado.VENCIDO or (
+        prestamo.estado == Prestamo.Estado.ACTIVO
+        and prestamo.fecha_vencimiento is not None
+        and prestamo.fecha_vencimiento < timezone.localdate()
+    )
+
+
+def posicion_en_cola(reserva):
+    """RN-12: lugar de una reserva PENDIENTE en la fila de su libro (1 = la siguiente).
+
+    Devuelve None si la reserva ya no está pendiente.
+    """
+    if reserva.estado != Reserva.Estado.PENDIENTE:
+        return None
+    anteriores = Reserva.objects.filter(
+        Q(fecha_reserva__lt=reserva.fecha_reserva)
+        | Q(fecha_reserva=reserva.fecha_reserva, pk__lt=reserva.pk),
+        libro_id=reserva.libro_id,
+        estado=Reserva.Estado.PENDIENTE,
+    )
+    return anteriores.count() + 1
+
+
+def prestamos_de(usuario):
+    """CU-09 / RNF-02: préstamos del lector, los más recientes primero. Solo lee."""
+    return (
+        Prestamo.objects.filter(usuario=usuario)
+        .select_related("ejemplar__libro")
+        .order_by("-fecha_solicitud", "-pk")
+    )
+
+
+def reservas_de(usuario):
+    """CU-12 / RNF-02: reservas del lector, las más recientes primero. Solo lee."""
+    return (
+        Reserva.objects.filter(usuario=usuario)
+        .select_related("libro", "ejemplar_asignado")
+        .order_by("-fecha_reserva", "-pk")
+    )
+
+
+def solicitudes_pendientes():
+    """CU-23: solicitudes en línea esperando entrega, la más antigua primero. Solo lee."""
+    return (
+        Prestamo.objects.filter(estado=Prestamo.Estado.SOLICITADO)
+        .select_related("usuario", "ejemplar__libro")
+        .order_by("fecha_solicitud", "pk")
+    )
 
 
 def verificar_elegibilidad(usuario, libro=None, excluir=None):
@@ -132,7 +225,7 @@ def verificar_elegibilidad(usuario, libro=None, excluir=None):
         motivos.append(
             f"Tienes multas pendientes de pago. Monto adeudado: ${monto_adeudado(usuario):,.2f}."
         )
-    if tiene_prestamos_vencidos(usuario):
+    if tiene_prestamos_vencidos(usuario, excluir=excluir):
         motivos.append("Tienes préstamos vencidos sin devolver.")
 
     vigentes = Prestamo.objects.filter(usuario=usuario, estado__in=Prestamo.ESTADOS_VIGENTES)
@@ -274,3 +367,231 @@ def asignar_siguiente_reserva(ejemplar):
             f"Recógelo antes del {_formato_fecha(reserva.fecha_expiracion)}.",
         )
     return reserva
+
+
+def cancelar_solicitud(prestamo, usuario):
+    """CU-08: el lector cancela su solicitud; el ejemplar pasa a la siguiente reserva o a DISPONIBLE."""
+    with transaction.atomic():
+        usuario = _bloquear_usuario(usuario)
+        prestamo = Prestamo.objects.select_for_update().get(pk=prestamo.pk)
+        _validar_dueno(prestamo, usuario)
+        ejemplar = Ejemplar.objects.select_for_update().get(pk=prestamo.ejemplar_id)
+
+        prestamo.cancelar()
+        _liberar_ejemplar(ejemplar)
+    return prestamo
+
+
+def renovar_prestamo(prestamo, usuario):
+    """CU-10: el lector renueva su préstamo (RN-03, RN-08, RN-09, RN-10).
+
+    Lanza UsuarioNoElegible con todos los motivos de rechazo juntos.
+    """
+    with transaction.atomic():
+        usuario = _bloquear_usuario(usuario)
+        prestamo = Prestamo.objects.select_for_update().get(pk=prestamo.pk)
+        _validar_dueno(prestamo, usuario)
+        libro = prestamo.ejemplar.libro
+
+        motivos = []
+        if esta_vencido(prestamo):  # RN-09
+            motivos.append("El préstamo está vencido: devuélvelo en la biblioteca.")
+        elif prestamo.estado != Prestamo.Estado.ACTIVO:
+            motivos.append(
+                f"Solo se renuevan préstamos activos; este está «{prestamo.get_estado_display()}»."
+            )
+        # CU-07 sin contar este préstamo: renovar no suma libros (RN-02) ni repite título (RN-11).
+        motivos.extend(verificar_elegibilidad(usuario, libro, excluir=prestamo))
+        if prestamo.estado == Prestamo.Estado.ACTIVO and prestamo.renovaciones_restantes() == 0:
+            motivos.append("Ya usaste todas las renovaciones de este préstamo.")  # RN-03
+        reservas_de_otros = Reserva.objects.filter(
+            libro=libro, estado=Reserva.Estado.PENDIENTE
+        ).exclude(usuario=usuario)
+        if reservas_de_otros.exists():  # RN-09
+            motivos.append(f"Otro usuario reservó «{libro}»; no se puede renovar.")
+        if motivos:
+            raise UsuarioNoElegible(motivos)
+
+        prestamo.renovar()  # RN-10
+        notificar(
+            usuario,
+            "GENERAL",
+            f"Renovaste «{libro}» (préstamo {prestamo.pk}). "
+            f"Nueva fecha de devolución: {prestamo.fecha_vencimiento:%d/%m/%Y}.",
+        )
+    return prestamo
+
+
+def reservar_libro(usuario, libro):
+    """CU-11: el lector reserva un libro sin ejemplares disponibles; entra a la cola FIFO (RN-12)."""
+    with transaction.atomic():
+        usuario = _bloquear_usuario(usuario)
+        if libro.ejemplares_disponibles().exists():
+            raise OperacionNoPermitida(
+                f"Hay ejemplares disponibles de «{libro}»: solicita el préstamo en lugar de reservar."
+            )
+        reserva_activa = Reserva.objects.filter(
+            usuario=usuario,
+            libro=libro,
+            estado__in=[Reserva.Estado.PENDIENTE, Reserva.Estado.DISPONIBLE],
+        )
+        if reserva_activa.exists():
+            raise OperacionNoPermitida(f"Ya tienes una reserva activa de «{libro}».")
+
+        motivos = verificar_elegibilidad(usuario, libro)
+        if motivos:
+            raise UsuarioNoElegible(motivos)
+
+        reserva = Reserva.objects.create(usuario=usuario, libro=libro)
+        notificar(
+            usuario,
+            "GENERAL",
+            f"Reservaste «{libro}». Tu lugar en la fila es el {posicion_en_cola(reserva)}.",
+        )
+    return reserva
+
+
+def cancelar_reserva(reserva, usuario):
+    """CU-12: el lector cancela su reserva; si ya tenía un ejemplar apartado, éste se libera."""
+    with transaction.atomic():
+        usuario = _bloquear_usuario(usuario)
+        reserva, ejemplar = _bloquear_reserva_con_ejemplar(reserva)
+        _validar_dueno(reserva, usuario)
+        _cancelar_y_liberar(reserva, ejemplar)
+    return reserva
+
+
+def recoger_reserva(reserva, bibliotecario):
+    """El lector recoge en mostrador el ejemplar apartado por su reserva DISPONIBLE.
+
+    Se crea un préstamo ACTIVO (RN-01), el ejemplar pasa a PRESTADO y la reserva a ATENDIDA.
+    """
+    _validar_bibliotecario(bibliotecario)
+    with transaction.atomic():
+        usuario = _bloquear_usuario(reserva.usuario)
+        reserva, ejemplar = _bloquear_reserva_con_ejemplar(reserva)
+
+        if reserva.estado != Reserva.Estado.DISPONIBLE:
+            raise OperacionNoPermitida(
+                f"La reserva está «{reserva.get_estado_display()}»: "
+                "solo se recoge una reserva disponible para recoger."
+            )
+        if reserva.fecha_expiracion is not None and timezone.now() > reserva.fecha_expiracion:
+            raise OperacionNoPermitida(
+                f"El plazo para recoger venció el {_formato_fecha(reserva.fecha_expiracion)}."
+            )
+        if ejemplar is None or not _ejemplar_apartado(ejemplar):
+            raise OperacionNoPermitida("El ejemplar apartado para esta reserva ya no está disponible.")
+
+        motivos = verificar_elegibilidad(usuario, reserva.libro)
+        if motivos:
+            raise UsuarioNoElegible(motivos)
+
+        prestamo = Prestamo.objects.create(usuario=usuario, ejemplar=ejemplar)
+        prestamo.entregar(bibliotecario)
+        _cambiar_estado_ejemplar(ejemplar, Ejemplar.Estado.PRESTADO)
+        reserva.atender()
+        notificar(
+            usuario,
+            "GENERAL",
+            f"Recibiste «{reserva.libro}» (préstamo {prestamo.pk}). "
+            f"Devuélvelo a más tardar el {prestamo.fecha_vencimiento:%d/%m/%Y}.",
+        )
+    return prestamo
+
+
+# --- Funciones del bibliotecario: CU-30 gestionar reservas -----------------------------
+
+# El motivo va en la notificación (notificacion.mensaje es varchar(500)); con este tope el
+# mensaje completo cabe aunque el título del libro tenga 255 caracteres.
+MAX_LONGITUD_MOTIVO = 150
+
+
+def listar_reservas(libro=None, estado=None):
+    """CU-30: reservas filtradas por libro y/o estado, en orden de llegada.
+
+    Solo lee: el permiso lo revisa la vista. La paginación (RNF-05) también va en la vista.
+    """
+    reservas = Reserva.objects.select_related("usuario", "libro", "ejemplar_asignado")
+    if libro is not None:
+        reservas = reservas.filter(libro=libro)
+    if estado is not None:
+        if estado not in Reserva.Estado.values:
+            raise ValueError(f"Estado de reserva desconocido: {estado}")
+        reservas = reservas.filter(estado=estado)
+    return reservas.order_by("fecha_reserva", "pk")
+
+
+def cola_de_reservas(libro):
+    """CU-30 / RN-12: reservas PENDIENTES de un libro en orden FIFO; la primera es la siguiente."""
+    return (
+        Reserva.objects.filter(libro=libro, estado=Reserva.Estado.PENDIENTE)
+        .select_related("usuario")
+        .order_by("fecha_reserva", "pk")
+    )
+
+
+def cancelar_reserva_por_bibliotecario(reserva, bibliotecario, motivo):
+    """CU-30: el bibliotecario cancela la reserva de cualquier usuario, con motivo obligatorio.
+
+    El motivo no se guarda en la reserva (la tabla no tiene esa columna); se le envía al
+    usuario en la notificación. Si había un ejemplar apartado, se libera (RN-12).
+    """
+    _validar_bibliotecario(bibliotecario, "cancelar la reserva de otro usuario")
+    motivo = (motivo or "").strip()
+    if not motivo:
+        raise OperacionNoPermitida("Indica el motivo de la cancelación.")
+    if len(motivo) > MAX_LONGITUD_MOTIVO:
+        raise OperacionNoPermitida(
+            f"El motivo no puede pasar de {MAX_LONGITUD_MOTIVO} caracteres."
+        )
+
+    with transaction.atomic():
+        usuario = _bloquear_usuario(reserva.usuario)
+        reserva, ejemplar = _bloquear_reserva_con_ejemplar(reserva)
+        _cancelar_y_liberar(reserva, ejemplar)
+        notificar(
+            usuario,
+            "GENERAL",
+            f"La biblioteca canceló tu reserva de «{reserva.libro}». Motivo: {motivo}",
+        )
+    return reserva
+
+
+# --- Funciones del bibliotecario: CU-31 configurar políticas ---------------------------
+
+CAMPOS_EDITABLES_POLITICA = (
+    "dias_prestamo",
+    "max_libros",
+    "max_renovaciones",
+    "multa_por_dia",
+    "multa_maxima",
+    "horas_para_recoger",
+)
+
+
+def actualizar_politica(politica, bibliotecario, **cambios):
+    """CU-31: el bibliotecario cambia los valores de una política (RN-01 a RN-06).
+
+    Valida con full_clean(): tipos, decimales, CHECK de la tabla y PoliticaPrestamo.clean().
+    Si algo no es válido lanza ValidationError (un mensaje por campo) y no guarda nada.
+
+    Efecto en préstamos existentes: los ya entregados conservan su fecha de vencimiento, pero
+    renovaciones_restantes() y calcular_multa() usan siempre la política vigente.
+    """
+    _validar_bibliotecario(bibliotecario, "configurar las políticas de préstamo")
+    if not cambios:
+        raise OperacionNoPermitida("No hay cambios que guardar.")
+    no_editables = sorted(set(cambios) - set(CAMPOS_EDITABLES_POLITICA))
+    if no_editables:
+        raise OperacionNoPermitida(
+            f"Estos campos no se pueden cambiar: {', '.join(no_editables)}."
+        )
+
+    with transaction.atomic():
+        politica = PoliticaPrestamo.objects.select_for_update().get(pk=politica.pk)
+        for campo, valor in cambios.items():
+            setattr(politica, campo, valor)
+        politica.full_clean()
+        politica.save(update_fields=[*cambios, "actualizado_en"])
+    return politica

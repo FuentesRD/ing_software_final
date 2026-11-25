@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block titulo %}Políticas de préstamo · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Políticas de préstamo</h1>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Tipo de usuario</th>
+                <th scope="col">Días de préstamo</th>
+                <th scope="col">Máximo de libros</th>
+                <th scope="col">Renovaciones</th>
+                <th scope="col">Multa por día</th>
+                <th scope="col">Multa máxima</th>
+                <th scope="col">Horas para recoger</th>
+                <th scope="col">Actualizada</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for politica in politicas %}
+                <tr>
+                    <td>{{ politica.get_tipo_usuario_display }}</td>
+                    <td>{{ politica.dias_prestamo }}</td>
+                    <td>{{ politica.max_libros }}</td>
+                    <td>{{ politica.max_renovaciones }}</td>
+                    <td>${{ politica.multa_por_dia }}</td>
+                    <td>${{ politica.multa_maxima }}</td>
+                    <td>{{ politica.horas_para_recoger }}</td>
+                    <td>{{ politica.actualizado_en|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="{% url 'prestamos:politica_editar' politica.pk %}">Editar</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<p class="text-muted small">
+    Los préstamos ya entregados conservan su fecha de vencimiento; las renovaciones y multas usan la política vigente.
+</p>
+{% endblock %}
