@@ -29,6 +29,12 @@
                     {% if user.tipo_usuario == "BIBLIOTECARIO" %}
                         <a
                             class="link-light"
+                            href="{% url 'catalogo:sugerencias_lista' %}"
+                        >
+                            Sugerencias
+                        </a>
+                        <a
+                            class="link-light"
                             href="{% url 'cuentas:usuarios_lista' %}"
                         >
                             Usuarios
