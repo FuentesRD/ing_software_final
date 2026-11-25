@@ -15,7 +15,6 @@ from multas.services import (
     registrar_pago,
     registrar_perdida_o_danio,
 )
-from prestamos.models import Prestamo
 
 try:
     from cuentas.mixins import BibliotecarioRequeridoMixin
@@ -54,8 +53,9 @@ class RegistrarDevolucionView(BibliotecarioRequeridoMixin, View):
     template_name = "multas/registrar_devolucion.html"
 
     def get(self, request, prestamo_id=None):
+        from prestamos.models import Prestamo
         prestamo = get_object_or_404(Prestamo, pk=prestamo_id) if prestamo_id else None
-        prestamos_activos = Prestamo.objects.filter(devuelto=False).select_related("usuario", "ejemplar")
+        prestamos_activos = Prestamo.objects.filter(estado__in=[Prestamo.Estado.ACTIVO, Prestamo.Estado.VENCIDO]).select_related("usuario", "ejemplar")
         return render(
             request,
             self.template_name,
@@ -66,6 +66,7 @@ class RegistrarDevolucionView(BibliotecarioRequeridoMixin, View):
         )
 
     def post(self, request, prestamo_id=None):
+        from prestamos.models import Prestamo
         id_objetivo = prestamo_id or request.POST.get("prestamo_id")
         prestamo = get_object_or_404(Prestamo, pk=id_objetivo)
         try:
@@ -83,6 +84,8 @@ class RegistrarPerdidaDanioView(BibliotecarioRequeridoMixin, View):
     template_name = "multas/registrar_perdida_dano.html"
 
     def get(self, request, prestamo_id=None):
+        from prestamos.models import Prestamo
+        from prestamos.models import Prestamo
         prestamo = get_object_or_404(Prestamo, pk=prestamo_id) if prestamo_id else None
         return render(
             request,
@@ -94,6 +97,7 @@ class RegistrarPerdidaDanioView(BibliotecarioRequeridoMixin, View):
         )
 
     def post(self, request, prestamo_id=None):
+        from prestamos.models import Prestamo
         id_objetivo = prestamo_id or request.POST.get("prestamo_id")
         prestamo = get_object_or_404(Prestamo, pk=id_objetivo)
         motivo = request.POST.get("motivo", "").strip()
