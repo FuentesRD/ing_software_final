@@ -101,7 +101,7 @@ Lo marcado como *propuesta, pendiente de confirmar por su dueño* lo pidió otro
 | `asignar_siguiente_reserva(ejemplar)` (RN-12): aparta el ejemplar para la reserva pendiente más antigua y la devuelve, o devuelve `None` si no hay. En la devolución (CU-25) y en las expiraciones (CU-35), después de cambiar el préstamo o la reserva, D la llama y, si devuelve `None`, pone el ejemplar en DISPONIBLE — *propuesta, pendiente de confirmar por su dueño* | `prestamos/services.py` | C | D (devolución y expiraciones) |
 | `Reserva.expirar()` y `Prestamo.expirar()` (expiración de solicitudes) | `prestamos/models.py` | C | D (comando de vencimientos) |
 | `tiene_multas_pendientes(usuario)` (RN-08) | `multas/services.py` | D | C |
-| Función de monto adeudado del usuario (multas PENDIENTES menos sus pagos), para mostrarlo al rechazar por RN-08 (CU-06, excepción 4a); nombre a definir por D — *propuesta, pendiente de confirmar por su dueño* | `multas/services.py` | D | C |
+| `monto_adeudado(usuario)`: monto adeudado del usuario (multas PENDIENTES menos sus pagos), para mostrarlo al rechazar por RN-08 (CU-06, excepción 4a) | `multas/services.py` | D | C |
 | `notificar(usuario, tipo, mensaje)` | `notificaciones/services.py` | D | C, B (opcional) |
 
 **Dependencia circular a cuidar:** `prestamos` necesita saber si hay multas pendientes (RN-08), y `multas` tiene llave foránea a `prestamo`.
