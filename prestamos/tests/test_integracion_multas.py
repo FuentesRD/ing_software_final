@@ -10,9 +10,9 @@ from unittest import mock
 from django.test import TestCase
 from django.utils import timezone
 
-from multas.models import Multa
+from multas.models import Multa, Pago
 from prestamos.models import Prestamo
-from prestamos.services import UsuarioNoElegible, solicitar_prestamo
+from prestamos.services import UsuarioNoElegible, solicitar_prestamo, verificar_elegibilidad
 
 from .utilidades import crear_ejemplar, crear_libro, crear_usuario, estado_de
 
@@ -68,3 +68,60 @@ class SolicitarConMultaRealTests(TestCase):
         prestamo = solicitar_prestamo(self.estudiante, self.libro)
 
         self.assertEqual(prestamo.estado, Prestamo.Estado.SOLICITADO)
+
+
+class MontoAdeudadoConPagosParcialesTests(TestCase):
+    """CU-06 excepción 4a: el monto adeudado descuenta los pagos parciales de multas pendientes."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.estudiante = crear_usuario("a1", "ESTUDIANTE")
+        cls.bibliotecario = crear_usuario("b1", "BIBLIOTECARIO")
+        libro = crear_libro(isbn="9780000000020", titulo="Libro ya devuelto")
+        cls.prestamo_devuelto = Prestamo.objects.create(
+            usuario=cls.estudiante,
+            ejemplar=crear_ejemplar(libro, "EJ-PAGO"),
+            estado=Prestamo.Estado.DEVUELTO,
+            fecha_vencimiento=timezone.localdate() - timedelta(days=20),
+        )
+
+    def crear_multa(self, monto):
+        return Multa.objects.create(
+            prestamo=self.prestamo_devuelto,
+            usuario=self.estudiante,
+            motivo=Multa.Motivo.RETRASO,
+            dias_retraso=int(Decimal(monto) // 10),
+            monto=Decimal(monto),
+        )
+
+    def pagar(self, multa, monto, folio):
+        return Pago.objects.create(
+            multa=multa,
+            monto=Decimal(monto),
+            metodo=Pago.Metodo.EFECTIVO,
+            folio_recibo=folio,
+            registrado_por=self.bibliotecario,
+        )
+
+    def motivo_de_multas(self):
+        motivos = verificar_elegibilidad(self.estudiante)
+        return [motivo for motivo in motivos if "Monto adeudado" in motivo]
+
+    def test_pago_parcial_se_descuenta_del_adeudo(self):
+        multa = self.crear_multa("100.00")
+        self.pagar(multa, "40.00", "REC-0001")
+
+        self.assertEqual(
+            self.motivo_de_multas(),
+            ["Tienes multas pendientes de pago. Monto adeudado: $60.00."],
+        )
+
+    def test_dos_multas_pendientes_una_con_pago_parcial(self):
+        multa_con_pago = self.crear_multa("100.00")
+        self.pagar(multa_con_pago, "40.00", "REC-0002")
+        self.crear_multa("50.00")
+
+        self.assertEqual(
+            self.motivo_de_multas(),
+            ["Tienes multas pendientes de pago. Monto adeudado: $110.00."],
+        )
