@@ -6,7 +6,15 @@ del bibliotecario tendrán sus propias vistas (CU-17, CU-18, CU-19).
 from django.contrib import admin
 from django.db.models import Count, Q
 
-from .models import Autor, Categoria, Editorial, Ejemplar, Libro, LibroAutor
+from .models import (
+    Autor,
+    Categoria,
+    Editorial,
+    Ejemplar,
+    Libro,
+    LibroAutor,
+    SugerenciaAdquisicion,
+)
 
 
 @admin.register(Categoria)
@@ -87,3 +95,10 @@ class EjemplarAdmin(admin.ModelAdmin):
     search_fields = ["codigo_inventario", "libro__titulo", "libro__isbn"]
     list_select_related = ["libro"]
     autocomplete_fields = ["libro"]
+
+
+@admin.register(SugerenciaAdquisicion)
+class SugerenciaAdquisicionAdmin(admin.ModelAdmin):
+    list_display = ["titulo", "profesor", "estado", "fecha"]
+    list_filter = ["estado"]
+    search_fields = ["titulo", "autores", "isbn"]

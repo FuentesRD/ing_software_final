@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ titulo|default:"Formulario" }} · Biblioteca{% endblock %}
+
+{% block contenido %}
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-3">
+            {% if titulo %}{{ titulo }}{% elif object %}Editar {{ opciones.verbose_name }}{% else %}Nuevo(a) {{ opciones.verbose_name }}{% endif %}
+        </h1>
+        <form method="post" enctype="multipart/form-data" class="card card-body">
+            {% csrf_token %}
+            {% include "catalogo/_campos.html" %}
+            <div class="d-flex gap-3 align-items-center">
+                <button class="btn btn-primary" type="submit">Guardar</button>
+                <a href="javascript:history.back()">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block titulo %}Sugerir libro · Biblioteca{% endblock %}
+
+{% block contenido %}
+<div class="row g-4">
+    <div class="col-lg-6">
+        <h1 class="h3 mb-3">Sugerir la compra de un libro</h1>
+        <form method="post" class="card card-body">
+            {% csrf_token %}
+            {% include "catalogo/_campos.html" %}
+            <div><button class="btn btn-primary" type="submit">Enviar sugerencia</button></div>
+        </form>
+    </div>
+    <div class="col-lg-6">
+        <h2 class="h5 mb-3">Mis sugerencias</h2>
+        <ul class="list-group">
+            {% for sugerencia in mis_sugerencias %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between gap-2">
+                        <strong>{{ sugerencia.titulo }}</strong>
+                        <span class="badge {% if sugerencia.estado == 'APROBADA' %}text-bg-success{% elif sugerencia.estado == 'RECHAZADA' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">
+                            {{ sugerencia.get_estado_display }}
+                        </span>
+                    </div>
+                    <div class="small text-muted">{{ sugerencia.fecha|date:"d/m/Y" }}</div>
+                    {% if sugerencia.respuesta %}<div class="small mt-1">Respuesta: {{ sugerencia.respuesta }}</div>{% endif %}
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted">Aún no has enviado sugerencias.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

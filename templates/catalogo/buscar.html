@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block titulo %}Catálogo · Biblioteca{% endblock %}
+
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 m-0">Catálogo</h1>
+    {% if es_bibliotecario %}
+        <div class="d-flex flex-wrap align-items-center gap-3">
+            <a href="{% url 'catalogo:autor_lista' %}">Autores</a>
+            <a href="{% url 'catalogo:editorial_lista' %}">Editoriales</a>
+            <a href="{% url 'catalogo:categoria_lista' %}">Categorías</a>
+            <a class="btn btn-primary" href="{% url 'catalogo:libro_crear' %}">Nuevo libro</a>
+        </div>
+    {% endif %}
+</div>
+
+<form method="get" class="card card-body mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label" for="{{ form.q.id_for_label }}">{{ form.q.label }}</label>
+            {{ form.q }}
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="{{ form.criterio.id_for_label }}">{{ form.criterio.label }}</label>
+            {{ form.criterio }}
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>
+            {{ form.categoria }}
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="{{ form.editorial.id_for_label }}">{{ form.editorial.label }}</label>
+            {{ form.editorial }}
+        </div>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
+        <div class="form-check m-0">
+            {{ form.solo_disponibles }}
+            <label class="form-check-label" for="{{ form.solo_disponibles.id_for_label }}">
+                {{ form.solo_disponibles.label }}
+            </label>
+        </div>
+        <button class="btn btn-primary" type="submit">Buscar</button>
+        <a href="{% url 'catalogo:buscar' %}">Limpiar</a>
+    </div>
+</form>
+
+<p class="text-muted">{{ paginator.count }} libro{{ paginator.count|pluralize }}</p>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Título</th>
+                <th scope="col">Autores</th>
+                <th scope="col">Categoría</th>
+                <th scope="col">Editorial</th>
+                <th scope="col">ISBN</th>
+                <th scope="col" class="text-center">Disponibles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for libro in libros %}
+                <tr>
+                    <td>
+                        <a href="{% url 'catalogo:detalle' libro.pk %}">{{ libro.titulo }}</a>
+                        {% if not libro.activo %}<span class="badge text-bg-secondary ms-1">Baja</span>{% endif %}
+                    </td>
+                    <td>{{ libro.autores.all|join:"; " }}</td>
+                    <td>{{ libro.categoria }}</td>
+                    <td>{{ libro.editorial }}</td>
+                    <td class="font-monospace small">{{ libro.isbn }}</td>
+                    <td class="text-center">
+                        {% if libro.disponibles %}
+                            <span class="badge text-bg-success">{{ libro.disponibles }} de {{ libro.total_ejemplares }}</span>
+                        {% else %}
+                            <span class="badge text-bg-secondary">0 de {{ libro.total_ejemplares }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6" class="text-muted">No hay libros que coincidan con la búsqueda.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "reportes/paginacion.html" with pagina=page_obj parametro="page" filtros=filtros %}
+{% endblock %}

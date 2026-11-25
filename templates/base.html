@@ -18,7 +18,21 @@
 
             {% if user.is_authenticated %}
                 <div class="d-flex flex-wrap align-items-center gap-3">
+                        <a class="link-light" href="{% url 'catalogo:buscar' %}">
+                        Catálogo
+                        </a>
+                    {% if user.tipo_usuario == "PROFESOR" %}
+                        <a class="link-light" href="{% url 'catalogo:sugerir' %}">
+                            Sugerir libro
+                        </a>
+                    {% endif %}
                     {% if user.tipo_usuario == "BIBLIOTECARIO" %}
+                        <a
+                            class="link-light"
+                            href="{% url 'catalogo:sugerencias_lista' %}"
+                        >
+                            Sugerencias
+                        </a>
                         <a
                             class="link-light"
                             href="{% url 'cuentas:usuarios_lista' %}"

@@ -193,22 +193,22 @@ Para evitar el import circular, C importa `tiene_multas_pendientes` **dentro de 
 - [ ] Lista de pantallas del paquete para los wireframes de A.
 
 **Código:**
-- [ ] Modelos `Autor`, `Editorial`, `Categoria`, `Libro`, `LibroAutor` (`ManyToManyField` con `through`), `Ejemplar`, `SugerenciaAdquisicion`, con `db_table`, índices y CHECKs del esquema.
-- [ x ] `Ejemplar.es_prestable()`: solo `DISPONIBLE` se presta (RN-15).
-- [ x ] `Libro.ejemplares_disponibles()`.
-- [ ] Baja lógica: `Libro.activo = False` y ejemplar en estado `BAJA`; nunca borrado físico.
-- [ ] Búsqueda por título, autor, ISBN, categoría y editorial, mostrando disponibilidad (RF-02).
-- [ ] Listados paginados con `select_related` / `prefetch_related`; menos de 2 segundos con 10,000 libros (RNF-05).
-- [ ] Detalle de libro con botones "Solicitar préstamo" o "Reservar" que llevan a las vistas de C (CU-05 → CU-06 / CU-11).
-- [ ] CRUD de libros, ejemplares, autores, editoriales y categorías para el bibliotecario.
-- [ ] Portada con `ImageField`: agregar `Pillow` a `requirements.txt` y configurar `MEDIA_ROOT` / `MEDIA_URL`.
-- [ ] Sugerencias: el profesor las crea; el bibliotecario las aprueba o rechaza con respuesta.
-- [ ] Comando `cargar_datos_prueba`: al menos 50 libros, 100 ejemplares, 20 estudiantes, 5 profesores y 2 bibliotecarios. Que acepte un parámetro para generar 10,000 libros y medir RNF-05.
+- [x] Modelos `Autor`, `Editorial`, `Categoria`, `Libro`, `LibroAutor` (`ManyToManyField` con `through`), `Ejemplar`, `SugerenciaAdquisicion`, con `db_table`, índices y CHECKs del esquema.
+- [x] `Ejemplar.es_prestable()`: solo `DISPONIBLE` se presta (RN-15).
+- [x] `Libro.ejemplares_disponibles()`.
+- [x] Baja lógica: `Libro.activo = False` y ejemplar en estado `BAJA`; nunca borrado físico.
+- [x] Búsqueda por título, autor, ISBN, categoría y editorial, mostrando disponibilidad (RF-02).
+- [x] Listados paginados con `select_related` / `prefetch_related`; menos de 2 segundos con 10,000 libros (RNF-05).
+- [x] Detalle de libro con botones "Solicitar préstamo" o "Reservar" que llevan a las vistas de C (CU-05 → CU-06 / CU-11).
+- [x] CRUD de libros, ejemplares, autores, editoriales y categorías para el bibliotecario.
+- [x] Portada con `ImageField`: agregar `Pillow` a `requirements.txt` y configurar `MEDIA_ROOT` / `MEDIA_URL`.
+- [x] Sugerencias: el profesor las crea; el bibliotecario las aprueba o rechaza con respuesta.
+- [x] Comando `cargar_datos_prueba`: al menos 50 libros, 100 ejemplares, 20 estudiantes, 5 profesores y 2 bibliotecarios. Que acepte un parámetro para generar 10,000 libros y medir RNF-05.
 
 **Pruebas:**
-- [ X ] `es_prestable()` con cada estado del ejemplar.
-- [ ] Búsqueda por cada criterio.
-- [ X ] Unicidad de ISBN y de código de inventario.
+- [x] `es_prestable()` con cada estado del ejemplar.
+- [x] Búsqueda por cada criterio.
+- [x] Unicidad de ISBN y de código de inventario.
 
 ---
 

@@ -145,3 +145,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 LOGIN_URL = "cuentas:login"
 LOGIN_REDIRECT_URL = "cuentas:inicio"
 LOGOUT_REDIRECT_URL = "cuentas:login"
+
+# Archivos subidos por usuarios (portadas de libros).
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"

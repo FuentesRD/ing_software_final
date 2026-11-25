@@ -1,0 +1,19 @@
+{% comment %}Campos de un formulario con estilo Bootstrap. Uso: {% include "catalogo/_campos.html" %}{% endcomment %}
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>
+{% endif %}
+{% for campo in form %}
+    <div class="mb-3">
+        {% if campo.widget_type == "checkbox" %}
+            <div class="form-check">
+                {{ campo }}
+                <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+            </div>
+        {% else %}
+            <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+            {{ campo }}
+        {% endif %}
+        {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+        {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+    </div>
+{% endfor %}
