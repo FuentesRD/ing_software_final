@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.db.models import Sum
 
-from multas.models import Multa
+from multas.models import Multa, Pago
 
 
 def tiene_multas_pendientes(usuario):
@@ -10,5 +10,6 @@ def tiene_multas_pendientes(usuario):
 
 
 def monto_adeudado(usuario):
-    total = Multa.objects.filter(usuario=usuario, estado=Multa.Estado.PENDIENTE).aggregate(t=Sum("monto"))["t"]
-    return total or Decimal("0.00")
+    multas = Multa.objects.filter(usuario=usuario, estado=Multa.Estado.PENDIENTE).aggregate(t=Sum("monto"))["t"]
+    pagos = Pago.objects.filter(multa__usuario=usuario, multa__estado=Multa.Estado.PENDIENTE).aggregate(t=Sum("monto"))["t"]
+    return max((multas or Decimal("0.00")) - (pagos or Decimal("0.00")), Decimal("0.00"))
