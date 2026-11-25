@@ -1,0 +1,780 @@
+/* ==========================================================================
+   Biblioteca escolar · tema visual
+   Se carga DESPUÉS de Bootstrap 5.3 y lo re-tematiza: las plantillas del
+   equipo siguen usando clases de Bootstrap (btn, table, form-control...)
+   y aquí solo cambiamos cómo se ven.
+
+   Idea: el catálogo de fichas de una biblioteca. Fichas blancas con la línea
+   roja de encabezado y renglones azules; pestañas de separador para el menú.
+   ========================================================================== */
+
+/* ---------- 1. Tokens ---------------------------------------------------- */
+:root {
+    --tinta: #1c2a4a;          /* texto y acciones principales */
+    --tinta-suave: #4a5672;    /* texto secundario */
+    --mesa: #edf0f4;           /* fondo de la página */
+    --papel: #ffffff;          /* fichas y tarjetas */
+    --renglon: #c9d6e8;        /* renglones azules de la ficha */
+    --renglon-suave: #e3eaf3;
+    --sello: #b8322f;          /* línea de la ficha, vencimientos y alertas */
+    --disponible: #2d7a57;
+    --foco: #2f6fd6;
+
+    --fuente-ui: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+    --fuente-libro: "Literata", Georgia, serif;
+    --fuente-codigo: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+
+    --radio-ficha: 6px;
+    --sombra-ficha: 0 1px 0 var(--renglon), 0 6px 18px -12px rgba(28, 42, 74, 0.35);
+    --ancho-menu: 248px;
+
+    /* Bootstrap lee estas variables */
+    --bs-body-font-family: var(--fuente-ui);
+    --bs-body-font-size: 1rem;
+    --bs-body-line-height: 1.55;
+    --bs-body-color: var(--tinta);
+    --bs-body-bg: var(--mesa);
+    --bs-secondary-color: var(--tinta-suave);
+    --bs-border-color: var(--renglon);
+    --bs-link-color: var(--tinta);
+    --bs-link-color-rgb: 28, 42, 74;
+    --bs-link-hover-color: var(--foco);
+    --bs-link-hover-color-rgb: 47, 111, 214;
+    --bs-primary: var(--tinta);
+    --bs-primary-rgb: 28, 42, 74;
+    --bs-danger: var(--sello);
+    --bs-danger-rgb: 184, 50, 47;
+    --bs-success: var(--disponible);
+    --bs-success-rgb: 45, 122, 87;
+    --bs-border-radius: 6px;
+    --bs-focus-ring-color: rgba(47, 111, 214, 0.35);
+}
+
+/* ---------- 2. Base ------------------------------------------------------ */
+body {
+    font-family: var(--fuente-ui);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, .h1 { font-size: 2rem; }
+h2, .h2 { font-size: 1.5rem; }
+h3, .h3 { font-size: 1.75rem; }   /* las plantillas usan h1.h3 como título de página */
+h4, .h4 { font-size: 1.25rem; }
+h5, .h5 { font-size: 1.125rem; }
+h1, h2, h3, h4, h5,
+.h1, .h2, .h3, .h4, .h5 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    color: var(--tinta);
+}
+
+/* Títulos de libro: siempre en Literata */
+.titulo-libro {
+    font-family: var(--fuente-libro);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+/* Códigos (ISBN, inventario) */
+.font-monospace,
+.codigo {
+    font-family: var(--fuente-codigo) !important;
+    font-size: 0.875em;
+    letter-spacing: 0.02em;
+}
+
+a { text-underline-offset: 0.18em; }
+
+:focus-visible {
+    outline: 3px solid var(--foco);
+    outline-offset: 2px;
+}
+
+.text-muted,
+.text-body-secondary { color: var(--tinta-suave) !important; }
+
+/* ---------- 3. Estructura: menú lateral + contenido ---------------------- */
+.estructura {
+    display: grid;
+    grid-template-columns: var(--ancho-menu) minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+.menu {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem 0 1.25rem 1.25rem;
+    background: var(--papel);
+    border-right: 1px solid var(--renglon);
+    overflow-y: auto;
+}
+
+.marca {
+    display: inline-block;
+    font-family: var(--fuente-libro);
+    font-weight: 600;
+    font-size: 1.2rem;
+    line-height: 1.15;
+    color: var(--tinta);
+    text-decoration: none;
+    padding-bottom: 0.6rem;
+    margin-right: 1.25rem;
+    border-bottom: 3px solid var(--sello);   /* la línea roja de la ficha */
+}
+.marca:hover { color: var(--tinta); }
+
+.menu-grupo { display: flex; flex-direction: column; }
+.menu-grupo + .menu-grupo { margin-top: 0.25rem; }
+
+.menu-titulo {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--tinta-suave);
+    margin: 0 0 0.35rem 0.75rem;
+}
+
+/* Cada enlace es una pestaña de separador; la activa "sale" de la ficha */
+.menu-enlace {
+    display: block;
+    padding: 0.45rem 0.75rem;
+    margin-right: -1px;
+    color: var(--tinta);
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-right: 0;
+    border-radius: var(--radio-ficha) 0 0 var(--radio-ficha);
+}
+.menu-enlace:hover {
+    background: var(--renglon-suave);
+    color: var(--tinta);
+}
+.menu-enlace[aria-current="page"] {
+    background: var(--mesa);
+    border-color: var(--renglon);
+    font-weight: 700;
+    box-shadow: inset 3px 0 0 var(--sello);
+}
+
+.menu-pie {
+    margin-top: auto;
+    padding-right: 1.25rem;
+    font-size: 0.9rem;
+}
+.menu-usuario { margin: 0 0 0.5rem; line-height: 1.3; }
+.menu-usuario span { display: block; color: var(--tinta-suave); font-size: 0.8125rem; }
+
+.contenido {
+    padding: 2rem clamp(1rem, 3vw, 2.75rem) 3rem;
+    max-width: 1240px;
+    width: 100%;
+}
+
+/* Barra superior solo en celular */
+.barra-movil { display: none; }
+
+@media (max-width: 991.98px) {
+    .estructura { grid-template-columns: 1fr; }
+
+    .barra-movil {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        background: var(--papel);
+        border-bottom: 1px solid var(--renglon);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+    .barra-movil .marca { border-bottom-width: 2px; padding-bottom: 0.25rem; font-size: 1.05rem; }
+
+    .menu {
+        display: none;
+        position: static;
+        height: auto;
+        padding: 1rem;
+        border-right: 0;
+        border-bottom: 1px solid var(--renglon);
+    }
+    .menu.abierto { display: flex; }
+    .menu > .marca { display: none; }
+    .menu-enlace { border-radius: var(--radio-ficha); border-right: 1px solid transparent; }
+    .menu-enlace[aria-current="page"] { border-right: 1px solid var(--renglon); }
+    .menu-pie { padding-right: 0; }
+
+    .contenido { padding-top: 1.25rem; }
+}
+
+/* Página sin menú (login, recuperar contraseña) */
+.pagina-sola {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 2rem 1rem;
+}
+
+/* ---------- 4. La ficha (tarjeta con renglones) -------------------------- */
+.ficha,
+.card {
+    background: var(--papel);
+    border: 1px solid var(--renglon);
+    border-top: 3px solid var(--sello);
+    border-radius: var(--radio-ficha);
+    box-shadow: var(--sombra-ficha);
+}
+/* Tarjetas sin la línea roja (filtros, contenedores secundarios) */
+.card.ficha-lisa,
+.ficha-lisa { border-top-width: 1px; border-top-color: var(--renglon); }
+
+/* Lista de datos estilo ficha catalográfica: cada fila es un renglón azul */
+.renglones {
+    margin: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 2rem;
+}
+.renglones dt,
+.renglones dd {
+    margin: 0;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--renglon);
+}
+.renglones dt { font-weight: 400; color: var(--tinta-suave); }
+.renglones dd { font-weight: 600; }
+@media (max-width: 575.98px) {
+    .renglones { grid-template-columns: 1fr; }
+    .renglones dt { border-bottom: 0; padding-bottom: 0; }
+}
+
+/* ---------- 5. Componentes de Bootstrap re-tematizados ------------------- */
+.btn {
+    --bs-btn-font-weight: 600;
+    --bs-btn-padding-x: 1rem;
+    --bs-btn-padding-y: 0.5rem;
+    --bs-btn-border-radius: var(--radio-ficha);
+}
+.btn-sm { --bs-btn-padding-x: 0.65rem; --bs-btn-padding-y: 0.3rem; }
+
+.btn-primary {
+    --bs-btn-bg: var(--tinta);
+    --bs-btn-border-color: var(--tinta);
+    --bs-btn-hover-bg: #2a3c66;
+    --bs-btn-hover-border-color: #2a3c66;
+    --bs-btn-active-bg: #121d36;
+    --bs-btn-active-border-color: #121d36;
+    --bs-btn-disabled-bg: #8b94a8;
+    --bs-btn-disabled-border-color: #8b94a8;
+}
+.btn-outline-primary {
+    --bs-btn-color: var(--tinta);
+    --bs-btn-border-color: var(--tinta);
+    --bs-btn-hover-bg: var(--tinta);
+    --bs-btn-hover-border-color: var(--tinta);
+    --bs-btn-active-bg: var(--tinta);
+    --bs-btn-active-border-color: var(--tinta);
+    --bs-btn-disabled-color: #8b94a8;
+    --bs-btn-disabled-border-color: #b8bfcd;
+}
+.btn-secondary,
+.btn-outline-secondary {
+    --bs-btn-color: var(--tinta);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: var(--renglon);
+    --bs-btn-hover-color: var(--tinta);
+    --bs-btn-hover-bg: var(--renglon-suave);
+    --bs-btn-hover-border-color: var(--renglon);
+    --bs-btn-active-color: var(--tinta);
+    --bs-btn-active-bg: var(--renglon);
+    --bs-btn-active-border-color: var(--renglon);
+}
+.btn-danger {
+    --bs-btn-bg: var(--sello);
+    --bs-btn-border-color: var(--sello);
+    --bs-btn-hover-bg: #9a2926;
+    --bs-btn-hover-border-color: #9a2926;
+}
+.btn-outline-danger {
+    --bs-btn-color: var(--sello);
+    --bs-btn-border-color: var(--sello);
+    --bs-btn-hover-bg: var(--sello);
+    --bs-btn-hover-border-color: var(--sello);
+    --bs-btn-active-bg: #9a2926;
+}
+.btn-success,
+.btn-outline-success {
+    --bs-btn-hover-bg: var(--disponible);
+    --bs-btn-hover-border-color: var(--disponible);
+}
+.btn-outline-success {
+    --bs-btn-color: var(--disponible);
+    --bs-btn-border-color: var(--disponible);
+}
+.btn-link { --bs-btn-color: var(--tinta); --bs-btn-hover-color: var(--foco); font-weight: 600; }
+
+/* Formularios */
+.form-control,
+.form-select {
+    background-color: var(--papel);
+    border-color: #b3c2d8;
+    border-radius: var(--radio-ficha);
+    padding: 0.55rem 0.8rem;
+}
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--foco);
+    box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+}
+.form-label { font-weight: 600; margin-bottom: 0.3rem; }
+.form-text { color: var(--tinta-suave); }
+.form-check-input:checked { background-color: var(--tinta); border-color: var(--tinta); }
+/* Casillas sin la clase form-check-input (widgets de Django sin attrs) */
+input[type="checkbox"]:not(.form-check-input) {
+    accent-color: var(--tinta);
+    width: 1.05em;
+    height: 1.05em;
+    vertical-align: -0.15em;
+    margin-right: 0.35rem;
+}
+
+/* Campos que Django pinta sin clase (form.as_p, widgets sin attrs).
+   :where() deja la especificidad en cero, así una clase de Bootstrap siempre gana. */
+:where(.contenido, .pagina-sola) :where(
+    input:not([type="checkbox"], [type="radio"], [type="hidden"], [type="submit"], [type="button"], [type="file"]),
+    select,
+    textarea
+) {
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    padding: 0.55rem 0.8rem;
+    font: inherit;
+    color: var(--tinta);
+    background: var(--papel);
+    border: 1px solid #b3c2d8;
+    border-radius: var(--radio-ficha);
+}
+:where(.contenido, .pagina-sola) :where(form > p) > label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+:where(.contenido, .pagina-sola) :where(.helptext) {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--tinta-suave);
+    margin-top: 0.25rem;
+}
+:where(.contenido, .pagina-sola) :where(ul.errorlist) {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.35rem;
+    color: var(--sello);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Tablas: renglones de ficha, sin rayado de cebra */
+.table {
+    --bs-table-bg: var(--papel);
+    --bs-table-striped-bg: var(--papel);
+    --bs-table-hover-bg: #f4f7fb;
+    --bs-table-border-color: var(--renglon-suave);
+    margin-bottom: 1rem;
+}
+.table-responsive {
+    background: var(--papel);
+    border: 1px solid var(--renglon);
+    border-radius: var(--radio-ficha);
+    margin-bottom: 1.5rem;
+}
+.table-responsive > .table { margin-bottom: 0; }
+.table > thead th {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--tinta-suave);
+    border-bottom: 2px solid var(--renglon);
+    white-space: nowrap;
+    padding-top: 0.75rem;
+}
+.table > :not(caption) > * > * { padding: 0.65rem 0.85rem; }
+
+/* Etiquetas */
+.badge {
+    font-weight: 600;
+    font-size: 0.8125rem;
+    border-radius: 4px;
+    padding: 0.3em 0.55em;
+}
+.text-bg-success { background-color: #dcefe5 !important; color: #1d5a3f !important; }
+.text-bg-secondary { background-color: var(--renglon-suave) !important; color: var(--tinta-suave) !important; }
+.text-bg-danger { background-color: #f6dedd !important; color: #8f2422 !important; }
+.text-bg-warning { background-color: #f8ecd0 !important; color: #6d4c0c !important; }
+
+/* Mensajes */
+.alert {
+    border: 1px solid var(--renglon);
+    border-left: 4px solid var(--tinta);
+    border-radius: var(--radio-ficha);
+    background: var(--papel);
+    color: var(--tinta);
+}
+.alert-success { border-left-color: var(--disponible); }
+.alert-warning { border-left-color: #c48a12; }
+.alert-danger  { border-left-color: var(--sello); }
+
+/* Paginación */
+.pagination {
+    --bs-pagination-color: var(--tinta);
+    --bs-pagination-border-color: var(--renglon);
+    --bs-pagination-hover-bg: var(--renglon-suave);
+    --bs-pagination-hover-border-color: var(--renglon);
+    --bs-pagination-active-bg: var(--tinta);
+    --bs-pagination-active-border-color: var(--tinta);
+    --bs-pagination-disabled-color: var(--tinta-suave);
+    --bs-pagination-disabled-bg: var(--papel);
+    --bs-pagination-border-radius: var(--radio-ficha);
+}
+
+/* ---------- 6. Encabezado de página -------------------------------------- */
+.encabezado {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.encabezado h1 { margin: 0; }
+.encabezado p { margin: 0.25rem 0 0; color: var(--tinta-suave); }
+
+.enlaces-secundarios {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1.25rem;
+}
+
+.volver {
+    display: inline-block;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.volver:hover { text-decoration: underline; }
+
+/* ---------- 7. Portadas -------------------------------------------------- */
+/* Sin portada: un lomo de tela de encuadernación con el título en dorado.
+   data-tono (0–9) elige el color de la tela. */
+.portada {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    width: 100%;
+    border-radius: 3px 6px 6px 3px;
+    overflow: hidden;
+    background: var(--tela, #22385e);
+    box-shadow:
+        inset 6px 0 0 rgba(0, 0, 0, 0.18),
+        inset 7px 0 0 rgba(255, 255, 255, 0.08),
+        0 8px 16px -10px rgba(28, 42, 74, 0.55);
+}
+.portada[data-tono="0"] { --tela: #1f4b3f; }
+.portada[data-tono="1"] { --tela: #6b2232; }
+.portada[data-tono="2"] { --tela: #22385e; }
+.portada[data-tono="3"] { --tela: #7c5220; }
+.portada[data-tono="4"] { --tela: #3e4a57; }
+.portada[data-tono="5"] { --tela: #523566; }
+.portada[data-tono="6"] { --tela: #255d68; }
+.portada[data-tono="7"] { --tela: #7a3b22; }
+.portada[data-tono="8"] { --tela: #46562a; }
+.portada[data-tono="9"] { --tela: #2e2f45; }
+
+.portada-texto {
+    position: absolute;
+    inset: 12% 12% 12% 16%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #efe2bd;                      /* dorado de estampado */
+    border-top: 1px solid rgba(239, 226, 189, 0.45);
+    border-bottom: 1px solid rgba(239, 226, 189, 0.45);
+    padding: 0.6rem 0;
+}
+.portada-texto .titulo-libro {
+    font-size: clamp(0.8rem, 0.9vw + 0.3rem, 1.05rem);
+    line-height: 1.2;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.portada-texto small {
+    font-size: 0.72rem;
+    opacity: 0.85;
+    line-height: 1.25;
+}
+
+/* Imagen real (subida o de Open Library) encima del lomo de tela */
+.portada img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--papel);
+}
+.portada img[data-cargando] { opacity: 0; }
+.portada img.lista { animation: aparecer 0.35s ease-out both; }
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- 8. Catálogo -------------------------------------------------- */
+.buscador {
+    padding: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+.buscador-principal {
+    display: flex;
+    gap: 0.5rem;
+}
+.buscador-principal .form-control {
+    font-size: 1.125rem;
+    padding: 0.7rem 1rem;
+    max-width: none;
+}
+.buscador-filtros {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: 0.75rem 1rem;
+    align-items: end;
+    margin-top: 1rem;
+}
+.buscador-filtros .form-label { font-size: 0.875rem; }
+.buscador-filtros .form-select { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+.buscador-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    padding-bottom: 0.45rem;
+}
+@media (max-width: 767.98px) {
+    .buscador-filtros { grid-template-columns: 1fr 1fr; }
+    .buscador-pie { grid-column: 1 / -1; }
+}
+
+.conteo { color: var(--tinta-suave); margin-bottom: 1rem; }
+
+.estante {
+    list-style: none;
+    margin: 0 0 2rem;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 2rem 1.5rem;
+}
+.libro-tarjeta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.libro-tarjeta .portada { transition: transform 0.15s ease-out; }
+.libro-tarjeta:hover .portada { transform: translateY(-3px); }
+.libro-tarjeta h2 {
+    font-size: 1rem;
+    line-height: 1.3;
+    margin: 0;
+}
+/* El enlace del título cubre toda la tarjeta (una sola parada de tabulador) */
+.libro-tarjeta h2 a {
+    color: var(--tinta);
+    text-decoration: none;
+}
+.libro-tarjeta h2 a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+.libro-tarjeta h2 a:focus-visible { outline: none; }
+.libro-tarjeta:has(a:focus-visible) .portada {
+    outline: 3px solid var(--foco);
+    outline-offset: 3px;
+}
+.libro-autores {
+    margin: -0.35rem 0 0;
+    font-size: 0.875rem;
+    color: var(--tinta-suave);
+    line-height: 1.35;
+}
+
+.disponibilidad {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--tinta-suave);
+}
+.disponibilidad::before {
+    content: "";
+    flex: none;
+    margin-top: 0.3em;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+}
+.disponibilidad.si { color: var(--disponible); }
+.disponibilidad.si::before { background: currentColor; }
+
+.vacio {
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    color: var(--tinta-suave);
+}
+.vacio strong { display: block; color: var(--tinta); font-size: 1.125rem; margin-bottom: 0.25rem; }
+
+/* ---------- 9. Detalle del libro (ficha catalográfica) ------------------- */
+.detalle {
+    display: grid;
+    grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+    gap: 2.5rem;
+    align-items: start;
+}
+.detalle-lateral { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.prestamo-caja { padding: 1rem 1.1rem; }
+.prestamo-caja p { margin: 0 0 0.75rem; }
+.prestamo-caja .btn { width: 100%; }
+
+.ficha-catalografica { padding: 1.5rem 1.75rem 1.75rem; }
+.ficha-cabeza {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--renglon);
+}
+.ficha-cabeza h1 {
+    font-family: var(--fuente-libro);
+    font-weight: 600;
+    font-size: clamp(1.6rem, 2.4vw + 0.8rem, 2.4rem);
+    line-height: 1.1;
+    margin: 0;
+    max-width: 22ch;
+}
+.ficha-cabeza .subtitulo {
+    font-family: var(--fuente-libro);
+    font-size: 1.15rem;
+    color: var(--tinta-suave);
+    margin: 0.4rem 0 0;
+}
+.ficha-cabeza .autores { margin: 0.75rem 0 0; font-size: 1.05rem; }
+.ficha-isbn {
+    flex: none;
+    text-align: right;
+    color: var(--tinta-suave);
+    font-size: 0.875rem;
+}
+.ficha-isbn .codigo { display: block; color: var(--tinta); font-size: 0.95rem; }
+
+.ficha-descripcion {
+    margin: 1.25rem 0 0;
+    max-width: 68ch;
+    line-height: 1.7;
+}
+
+.acciones-bibliotecario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0 2rem;
+}
+
+/* Ubicación como etiqueta de lomo */
+.etiqueta-lomo {
+    display: inline-block;
+    font-family: var(--fuente-codigo);
+    font-size: 0.8125rem;
+    padding: 0.15rem 0.45rem;
+    background: var(--papel);
+    border: 1px solid var(--tinta);
+    border-radius: 3px;
+    line-height: 1.3;
+}
+
+@media (max-width: 767.98px) {
+    .detalle { grid-template-columns: 1fr; gap: 1.5rem; }
+    .detalle-lateral { flex-direction: row; align-items: flex-start; }
+    .detalle-lateral .portada { width: 120px; flex: none; }
+    .detalle-lateral .prestamo-caja { flex: 1; }
+    .ficha-catalografica { padding: 1.25rem; }
+    .ficha-cabeza { flex-direction: column; }
+    .ficha-isbn { text-align: left; }
+}
+
+/* ---------- 10. Inicio y acceso ----------------------------------------- */
+.saludo h1 {
+    font-family: var(--fuente-libro);
+    font-weight: 600;
+    font-size: clamp(2rem, 3vw + 1rem, 2.75rem);
+    margin: 0 0 0.35rem;
+}
+.saludo p { color: var(--tinta-suave); margin: 0 0 1.5rem; font-size: 1.05rem; }
+
+.inicio-buscar {
+    padding: 1.5rem;
+    max-width: 46rem;
+    margin-bottom: 2.5rem;
+}
+.inicio-buscar label { font-weight: 600; margin-bottom: 0.5rem; display: block; }
+
+.atajos {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: 46rem;
+    border-top: 1px solid var(--renglon);
+}
+.atajos li { border-bottom: 1px solid var(--renglon); }
+.atajos a {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 1rem;
+    padding: 0.9rem 0.25rem;
+    text-decoration: none;
+    color: var(--tinta);
+}
+.atajos a strong { font-weight: 700; }
+.atajos a span { color: var(--tinta-suave); }
+.atajos a:hover strong { text-decoration: underline; }
+@media (max-width: 575.98px) {
+    .atajos a { grid-template-columns: 1fr; gap: 0.15rem; }
+}
+
+.acceso {
+    width: 100%;
+    max-width: 25rem;
+}
+.acceso .marca { margin-bottom: 1.5rem; font-size: 1.35rem; border-bottom: 0; padding-bottom: 0; }
+.acceso .ficha { padding: 1.75rem; }
+.acceso h1 { font-size: 1.5rem; margin-bottom: 1.25rem; }
+.acceso input { max-width: none !important; }
+.acceso .btn-primary { width: 100%; margin-top: 0.5rem; }
+.acceso-pie { margin: 1.25rem 0 0; text-align: center; font-size: 0.95rem; }
+
+/* ---------- 11. Movimiento reducido -------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
