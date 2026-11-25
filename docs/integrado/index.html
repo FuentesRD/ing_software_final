@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documento integrado · Biblioteca Escolar</title>
+<!--
+  Documento integrado del proyecto final (entregable 4 de la sección 13).
+  Cómo editarlo:
+  - Cada paquete llena sus secciones; busca "pendiente" para ver lo que falta.
+  - Las imágenes de Visual Paradigm van en docs/uml/ con el nombre que indica cada recuadro.
+    En cuanto exista el PNG, aparece solo.
+  - Para el PDF: abrir en Chrome o Edge › Ctrl+P › Guardar como PDF ›
+    Más opciones › activar "Gráficos de fondo".
+  - El diccionario de datos se regenera con: python manage.py diccionario_datos
+-->
+<style>
+:root{--tinta:#14202b;--suave:#5b6773;--linea:#d6dde3;--panel:#f1f5f8;--acento:#9b1c1c;--azul:#1f5f8b}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--tinta);font:15px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:0 24px 80px}
+h1,h2,h3,h4{line-height:1.2;text-wrap:balance}
+h2{font:700 28px/1.2 Georgia,"Times New Roman",serif;margin:56px 0 12px;padding-bottom:8px;border-bottom:3px solid var(--tinta)}
+h3{font-size:20px;margin:36px 0 10px}
+h4{font-size:16px;margin:26px 0 8px}
+p,li{max-width:78ch}
+code{font:13px/1.4 Consolas,"Courier New",monospace;background:var(--panel);padding:1px 4px;border-radius:3px}
+pre{background:var(--panel);padding:12px 14px;border-radius:4px;overflow-x:auto;font:13px/1.5 Consolas,"Courier New",monospace}
+.portada{min-height:92vh;display:flex;flex-direction:column;justify-content:center;gap:10px;border-bottom:1px solid var(--linea)}
+.portada .escuela{color:var(--acento);font-weight:700;letter-spacing:.02em}
+.portada h1{font:700 44px/1.1 Georgia,"Times New Roman",serif;margin:8px 0}
+.portada .sub{font-size:19px;color:var(--suave);margin:0}
+.equipo{border-collapse:collapse;margin-top:28px;font-size:15px}
+.equipo td,.equipo th{padding:6px 18px 6px 0;text-align:left;border-bottom:1px solid var(--linea)}
+.indice{columns:2;column-gap:40px;padding-left:18px}
+.indice li{margin:2px 0}
+.indice a{color:var(--tinta)}
+.responsable{font:600 12px/1 "Segoe UI",system-ui,sans-serif;color:#fff;background:var(--azul);padding:3px 8px;border-radius:10px;vertical-align:middle;margin-left:6px}
+.pendiente{border:2px dashed #c9a227;background:#fffaeb;padding:12px 16px;border-radius:4px;margin:14px 0;color:#5c4a00}
+.pendiente ul{margin:6px 0 0}
+.lista-cu{columns:2;column-gap:30px}
+figure.diagrama{margin:18px 0;text-align:center}
+figure.diagrama img{max-width:100%;border:1px solid var(--linea)}
+figure.diagrama figcaption{font-size:13px;color:var(--suave);margin-top:6px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0}
+th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top;text-align:left}
+thead th{background:var(--panel)}
+table.plantilla th{width:24%;background:var(--panel)}
+table.plantilla ol,table.plantilla ul{margin:0;padding-left:20px}
+section.cu h4{margin-top:30px}
+h4.tabla-bd{margin:28px 0 4px}
+p.nota-tabla{margin:4px 0;color:var(--suave);font-size:14px}
+ul.restricciones{font-size:13.5px;margin:4px 0 10px}
+.spec{background:var(--panel);padding:12px 18px;border-radius:4px}
+.spec ul{padding-left:20px}
+@media print{
+  @page{size:letter;margin:18mm 16mm}
+  body{font-size:11pt}
+  main{max-width:none;padding:0}
+  .portada{min-height:0;height:auto;padding-top:60mm;border:0}
+  .no-print{display:none}
+  h2{break-before:page;margin-top:0}
+  h2,h3,h4{break-after:avoid}
+  tr,figure,section.cu table{break-inside:avoid}
+  thead{display:table-header-group}
+  a{color:inherit;text-decoration:none}
+  .pendiente{display:none}
+  figure.sin-imagen{display:none}
+}
+</style>
+</head>
+<body>
+<main>
+
+<!-- ============================================================ PORTADA -->
+<header class="portada">
+  <div class="escuela">Universidad Anáhuac México Norte · Ingeniería de Software · Otoño 2026</div>
+  <h1>Sistema de Gestión de Biblioteca Escolar</h1>
+  <p class="sub">Documento integrado del proyecto final</p>
+  <!-- Completen nombres y apellidos. -->
+  <table class="equipo">
+    <thead><tr><th>Integrante</th><th>Paquete</th></tr></thead>
+    <tbody>
+      <tr><td>Alvaro</td><td>A · Usuarios y reportes</td></tr>
+      <tr><td>Diego Fuentes Rubí</td><td>B · Administración del acervo</td></tr>
+      <tr><td>Ricardo</td><td>C · Préstamos y reservas</td></tr>
+      <tr><td>Samanta</td><td>D · Multas y notificaciones</td></tr>
+    </tbody>
+  </table>
+  <p class="sub" style="font-size:15px;margin-top:20px">Profesor: <!-- nombre --> · Entrega: diciembre de 2026</p>
+</header>
+
+<!-- ============================================================ ÍNDICE -->
+<section>
+  <h2 id="indice">Contenido</h2>
+  <ol class="indice">
+    <li><a href="#introduccion">Introducción y alcance</a></li>
+    <li><a href="#especificacion">Especificación</a></li>
+    <li><a href="#diseno">Diseño</a></li>
+    <li><a href="#base-de-datos">Base de datos</a></li>
+    <li><a href="#pantallas">Prototipo de pantallas</a></li>
+    <li><a href="#implementacion">Implementación</a></li>
+    <li><a href="#pruebas">Pruebas</a></li>
+    <li><a href="#conclusiones">Conclusiones</a></li>
+  </ol>
+</section>
+
+<!-- ============================================================ 1 -->
+<h2 id="introduccion">1. Introducción y alcance</h2>
+<p>El sistema administra la biblioteca escolar: catálogo y ejemplares, préstamos y reservas, multas y pagos, notificaciones a los usuarios y reportes para el bibliotecario. Lo usan tres tipos de usuario: estudiantes y profesores (usuarios lectores, con políticas de préstamo distintas) y bibliotecarios.</p>
+<p>Está construido con <strong>Django 5.2</strong> siguiendo el patrón <strong>MTV</strong> (modelo, plantilla, vista), sobre <strong>MySQL 8.4</strong> en Docker. Las reglas de negocio viven en servicios y métodos de modelo; las vistas solo orquestan.</p>
+<div class="pendiente"><strong>Pendiente (todos):</strong> ajustar la introducción si quieren agregar objetivos o limitaciones del proyecto.</div>
+
+<!-- ============================================================ 2 -->
+<h2 id="especificacion">2. Especificación</h2>
+
+<h3 id="requerimientos">2.1 Requerimientos</h3>
+<p>Los requerimientos funcionales (RF), no funcionales (RNF) y reglas de negocio (RN) completos están en <code>docs/requerimientos/requerimientos_proyecto_final.html</code>.</p>
+<div class="pendiente"><strong>Pendiente (todos):</strong> decidir si se copian aquí las tablas de RF, RNF y RN o se anexan como referencia.</div>
+
+<h3 id="cu-general">2.2 Diagrama general de casos de uso</h3>
+<figure class="diagrama">
+  <img src="../uml/casos_uso_general.png" alt="Diagrama general de casos de uso" data-pendiente="Pendiente (todos): exportar a docs/uml/casos_uso_general.png">
+  <figcaption>Diagrama general de casos de uso</figcaption>
+</figure>
+
+<h3 id="paquete-a">2.3 Paquete A · Usuarios y reportes <span class="responsable">Alvaro</span></h3>
+<figure class="diagrama">
+  <img src="../uml/cu_A_usuarios_reportes.png" alt="Diagrama de casos de uso · Usuarios y reportes" data-pendiente="Pendiente (Alvaro): exportar a docs/uml/cu_A_usuarios_reportes.png">
+  <figcaption>Diagrama de casos de uso · Usuarios y reportes</figcaption>
+</figure>
+<div class="pendiente"><strong>Pendiente (Alvaro):</strong> descripción de cada caso de uso con la plantilla de la sección 8. Copia una de las tablas del paquete B (<code>&lt;section class="cu"&gt;…&lt;/section&gt;</code>) y reemplaza el texto.<ul class="lista-cu"><li><strong>CU-01</strong> Iniciar sesión</li><li><strong>CU-02</strong> Cerrar sesión</li><li><strong>CU-03</strong> Recuperar contraseña</li><li><strong>CU-20</strong> Gestionar usuarios</li><li><strong>CU-21</strong> Importar usuarios desde CSV</li><li><strong>CU-22</strong> Bloquear / desbloquear usuario</li><li><strong>CU-32</strong> Generar reportes</li></ul></div>
+<h3 id="paquete-b">2.4 Paquete B · Administración del acervo <span class="responsable">Diego</span></h3>
+<figure class="diagrama">
+  <img src="../uml/cu_B_acervo.png" alt="Diagrama de casos de uso · Administración del acervo" data-pendiente="Pendiente (Diego): exportar a docs/uml/cu_B_acervo.png">
+  <figcaption>Diagrama de casos de uso · Administración del acervo</figcaption>
+</figure>
+<section class="cu" id="cu-04"><h4>CU-04 · Buscar libros en el catálogo</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Diego Fuentes Rubí · 25/11/2026</td></tr><tr><th>Actor principal</th><td>Usuario (Estudiante, Profesor o Bibliotecario)</td></tr><tr><th>Actores secundarios</th><td>—</td></tr><tr><th>Descripción</th><td>El usuario busca libros por título, autor, ISBN, categoría o editorial y ve cuántos ejemplares hay disponibles de cada uno.</td></tr><tr><th>Disparador</th><td>El usuario abre «Catálogo» en el menú.</td></tr><tr><th>Precondiciones</th><td><ul><li>El usuario inició sesión (CU-01).</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>Se muestra la lista paginada de libros que cumplen los filtros, con su disponibilidad.</li><li>No se modifica ningún dato.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>La búsqueda no altera el catálogo; si falla, se muestra un mensaje y la lista vacía.</td></tr><tr><th>Flujo básico</th><td><ol><li>El usuario abre el catálogo.</li><li>El sistema muestra el formulario de búsqueda y los libros activos ordenados por título, 20 por página.</li><li>El usuario escribe un texto, elige dónde buscar (todo, título, autor o ISBN) y, si quiere, una categoría y una editorial.</li><li>El usuario selecciona «Buscar».</li><li>El sistema filtra los libros activos y calcula, para cada uno, los ejemplares disponibles y el total.</li><li>El sistema muestra los resultados con título, autores, categoría, editorial, ISBN y disponibles «n de m».</li><li>El usuario selecciona un libro para ver su detalle («extend» CU-05).</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>3a. El usuario marca «Solo con ejemplares disponibles»: el sistema excluye los libros sin ejemplares DISPONIBLE.</li><li>3b. El usuario busca por ISBN con guiones: el sistema los ignora al comparar.</li><li>6a. El usuario es bibliotecario: el sistema incluye los libros dados de baja con la etiqueta «Baja».</li><li>6b. Hay más de 20 resultados: el sistema pagina y conserva los filtros al cambiar de página.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>5a. Ningún libro coincide: el sistema muestra «No hay libros que coincidan con la búsqueda».</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-15 (solo cuenta como disponible el ejemplar DISPONIBLE).</td></tr><tr><th>Requisitos especiales</th><td>RNF-05: respuesta menor a 2 s con 10,000 libros (consulta con select_related, prefetch_related y conteos anotados). RNF-04: responsive.</td></tr><tr><th>Relaciones</th><td>Es extendido por CU-05.</td></tr><tr><th>Frecuencia / prioridad</th><td>Muy alta: cientos de veces al día. Prioridad alta (RF-02).</td></tr></tbody></table></section>
+<section class="cu" id="cu-05"><h4>CU-05 · Consultar detalle de libro</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Diego Fuentes Rubí · 25/11/2026</td></tr><tr><th>Actor principal</th><td>Usuario (Estudiante, Profesor o Bibliotecario)</td></tr><tr><th>Actores secundarios</th><td>—</td></tr><tr><th>Descripción</th><td>El usuario consulta los datos completos de un libro y su disponibilidad, y desde ahí puede solicitarlo o reservarlo.</td></tr><tr><th>Disparador</th><td>El usuario selecciona un libro en los resultados de búsqueda (CU-04).</td></tr><tr><th>Precondiciones</th><td><ul><li>El usuario inició sesión.</li><li>El libro existe y está activo (el bibliotecario también ve libros dados de baja).</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>Se muestran los datos del libro, sus autores en orden y el número de ejemplares disponibles.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>La consulta no modifica datos.</td></tr><tr><th>Flujo básico</th><td><ol><li>El usuario selecciona un libro.</li><li>El sistema muestra portada, título, subtítulo, autores en orden, ISBN, categoría, editorial, año, edición, idioma, páginas y descripción.</li><li>El sistema muestra cuántos ejemplares están disponibles.</li><li>Si hay disponibles, el sistema ofrece «Solicitar préstamo» («extend» CU-06).</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>3a. No hay ejemplares disponibles: el sistema ofrece «Reservar» («extend» CU-11).</li><li>3b. El usuario es bibliotecario: el sistema muestra la tabla de ejemplares con su estado y las opciones de editar libro, agregar ejemplar y dar de baja (CU-17, CU-18).</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>1a. El libro no existe o está dado de baja (lector): el sistema muestra «Página no encontrada» (404).</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-15.</td></tr><tr><th>Requisitos especiales</th><td>RNF-04.</td></tr><tr><th>Relaciones</th><td>Extiende CU-04; es extendido por CU-06 y CU-11.</td></tr><tr><th>Frecuencia / prioridad</th><td>Muy alta. Prioridad alta.</td></tr></tbody></table></section>
+<section class="cu" id="cu-16"><h4>CU-16 · Sugerir adquisición de libro</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Diego Fuentes Rubí · 25/11/2026</td></tr><tr><th>Actor principal</th><td>Profesor</td></tr><tr><th>Actores secundarios</th><td>Bibliotecario (la atiende en CU-33)</td></tr><tr><th>Descripción</th><td>El profesor sugiere a la biblioteca la compra de un libro, con una justificación académica.</td></tr><tr><th>Disparador</th><td>El profesor selecciona «Sugerir libro» en el menú.</td></tr><tr><th>Precondiciones</th><td><ul><li>El usuario inició sesión y es profesor.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>Se crea una sugerencia en estado PENDIENTE ligada al profesor, con fecha y hora.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>Si falla la validación no se guarda nada y se conservan los datos capturados.</td></tr><tr><th>Flujo básico</th><td><ol><li>El profesor abre «Sugerir libro».</li><li>El sistema muestra el formulario y la lista de sus sugerencias con su estado y respuesta.</li><li>El profesor captura título, autores, ISBN (opcional) y justificación.</li><li>El profesor selecciona «Enviar sugerencia».</li><li>El sistema valida los datos y registra la sugerencia en estado PENDIENTE.</li><li>El sistema confirma el envío y la muestra en «Mis sugerencias».</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>2a. El profesor solo consulta el estado de sus sugerencias y no envía una nueva.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>5a. Falta un campo obligatorio: el sistema señala el campo y no guarda.</li><li>5b. ISBN con formato inválido: el sistema indica que debe tener 10 o 13 caracteres sin guiones.</li><li>1a. Un usuario que no es profesor intenta entrar: el sistema responde «sin permiso» (403).</li></ul></td></tr><tr><th>Reglas de negocio</th><td>—</td></tr><tr><th>Requisitos especiales</th><td>RNF-02 (acceso restringido por rol).</td></tr><tr><th>Relaciones</th><td>—</td></tr><tr><th>Frecuencia / prioridad</th><td>Baja: algunas veces por semestre. Prioridad baja (RF-16).</td></tr></tbody></table></section>
+<section class="cu" id="cu-17"><h4>CU-17 · Gestionar libros (alta, consulta, modificación, baja)</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Diego Fuentes Rubí · 25/11/2026</td></tr><tr><th>Actor principal</th><td>Bibliotecario</td></tr><tr><th>Actores secundarios</th><td>—</td></tr><tr><th>Descripción</th><td>El bibliotecario registra libros nuevos, edita sus datos y autores, y los da de baja lógicamente.</td></tr><tr><th>Disparador</th><td>El bibliotecario selecciona «Nuevo libro» en el catálogo, o «Editar libro» / «Dar de baja» en el detalle.</td></tr><tr><th>Precondiciones</th><td><ul><li>El bibliotecario inició sesión.</li><li>Existen la categoría, la editorial y los autores (CU-19).</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>Alta/edición: el libro queda guardado con sus autores.</li><li>Baja: el libro queda con activo = falso y sus ejemplares disponibles o en reparación pasan a BAJA; nada se borra.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>La baja es atómica: si no puede completarse, ningún ejemplar cambia de estado.</td></tr><tr><th>Flujo básico</th><td><ol><li>El bibliotecario selecciona «Nuevo libro».</li><li>El sistema muestra el formulario: ISBN, título, subtítulo, autores, categoría, editorial, año, edición, idioma, páginas, descripción, portada y costo de reposición.</li><li>El bibliotecario captura los datos y selecciona «Guardar».</li><li>El sistema valida el ISBN (10 o 13 caracteres, único) y guarda el libro con sus autores.</li><li>El sistema muestra el detalle del libro e invita a agregar ejemplares (CU-18).</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>1a. Modificación: en el detalle selecciona «Editar libro»; el sistema muestra el formulario con los datos actuales y guarda los cambios.</li><li>1b. Baja: en el detalle selecciona «Dar de baja»; el sistema marca el libro inactivo y pasa sus ejemplares libres a BAJA.</li><li>1c. Reactivar: en un libro dado de baja selecciona «Reactivar»; el sistema lo vuelve a mostrar en el catálogo.</li><li>1d. Consulta: usa la búsqueda (CU-04), donde también ve los libros dados de baja.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>4a. ISBN repetido o con formato inválido: el sistema lo indica y no guarda.</li><li>1b-a. El libro tiene ejemplares PRESTADOS o RESERVADOS: el sistema rechaza la baja y lo explica.</li><li>1a. Un lector intenta entrar: el sistema responde 403.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-13 (costo de reposición), RN-16 (sin borrado físico; baja lógica).</td></tr><tr><th>Requisitos especiales</th><td>Portada con ImageField (Pillow). Baja dentro de transaction.atomic() con select_for_update() (RNF-03).</td></tr><tr><th>Relaciones</th><td>Es extendido por CU-18.</td></tr><tr><th>Frecuencia / prioridad</th><td>Media: varias veces por semana. Prioridad alta (RF-10).</td></tr></tbody></table></section>
+<section class="cu" id="cu-18"><h4>CU-18 · Gestionar ejemplares</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Diego Fuentes Rubí · 25/11/2026</td></tr><tr><th>Actor principal</th><td>Bibliotecario</td></tr><tr><th>Actores secundarios</th><td>—</td></tr><tr><th>Descripción</th><td>El bibliotecario registra las copias físicas de un libro y actualiza su ubicación y su estado (disponible, en reparación o baja).</td></tr><tr><th>Disparador</th><td>En el detalle de un libro selecciona «Agregar ejemplar» o «Editar» en un ejemplar.</td></tr><tr><th>Precondiciones</th><td><ul><li>El bibliotecario inició sesión.</li><li>El libro existe (CU-17).</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>El ejemplar queda registrado o actualizado y ligado a su libro.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>Un ejemplar PRESTADO, RESERVADO o PERDIDO no cambia de estado desde esta pantalla.</td></tr><tr><th>Flujo básico</th><td><ol><li>El bibliotecario selecciona «Agregar ejemplar» en el detalle del libro.</li><li>El sistema muestra el formulario: código de inventario, estado, ubicación, fecha de adquisición y observaciones.</li><li>El bibliotecario captura los datos y selecciona «Guardar».</li><li>El sistema valida que el código de inventario sea único y guarda el ejemplar.</li><li>El sistema regresa al detalle del libro con el ejemplar en la tabla.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>1a. Edición: selecciona «Editar» en un ejemplar; puede cambiar ubicación, observaciones y estado entre DISPONIBLE, EN_REPARACION y BAJA.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>4a. Código de inventario repetido: el sistema lo indica y no guarda.</li><li>1a-a. El ejemplar está PRESTADO, RESERVADO o PERDIDO: el campo estado aparece bloqueado («lo controla préstamos o multas»).</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-15 (EN_REPARACION, PERDIDO y BAJA no se prestan), RN-16.</td></tr><tr><th>Requisitos especiales</th><td>Los estados PRESTADO y RESERVADO solo los asignan los servicios de préstamos mediante Ejemplar.cambiar_estado().</td></tr><tr><th>Relaciones</th><td>Extiende CU-17.</td></tr><tr><th>Frecuencia / prioridad</th><td>Media. Prioridad alta (RF-10).</td></tr></tbody></table></section>
+<section class="cu" id="cu-19"><h4>CU-19 · Gestionar autores, editoriales y categorías</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Diego Fuentes Rubí · 25/11/2026</td></tr><tr><th>Actor principal</th><td>Bibliotecario</td></tr><tr><th>Actores secundarios</th><td>—</td></tr><tr><th>Descripción</th><td>El bibliotecario mantiene los catálogos auxiliares que se usan al registrar libros.</td></tr><tr><th>Disparador</th><td>En el catálogo selecciona «Autores», «Editoriales» o «Categorías».</td></tr><tr><th>Precondiciones</th><td><ul><li>El bibliotecario inició sesión.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>El registro queda creado, modificado o eliminado.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>Nunca se elimina un registro que usa algún libro (PROTECT).</td></tr><tr><th>Flujo básico</th><td><ol><li>El bibliotecario abre la lista (autores, editoriales o categorías).</li><li>El sistema muestra los registros paginados con «Editar» y «Eliminar».</li><li>El bibliotecario selecciona «Agregar» y captura los datos (autor: nombre, apellidos, nacionalidad; editorial: nombre, país; categoría: nombre, descripción).</li><li>El sistema valida y guarda; regresa a la lista con un mensaje de confirmación.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>3a. Edición: selecciona «Editar», cambia los datos y guarda.</li><li>3b. Eliminación: selecciona «Eliminar» y confirma; el sistema borra el registro si ningún libro lo usa.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>4a. Nombre de editorial o categoría repetido: el sistema lo indica y no guarda.</li><li>3b-a. El registro lo usa algún libro: el sistema muestra «No se puede eliminar: hay libros que lo usan».</li></ul></td></tr><tr><th>Reglas de negocio</th><td>—</td></tr><tr><th>Requisitos especiales</th><td>Integridad referencial con on_delete=PROTECT.</td></tr><tr><th>Relaciones</th><td>—</td></tr><tr><th>Frecuencia / prioridad</th><td>Baja. Prioridad alta (RF-10).</td></tr></tbody></table></section>
+<section class="cu" id="cu-33"><h4>CU-33 · Atender sugerencias de adquisición</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Diego Fuentes Rubí · 25/11/2026</td></tr><tr><th>Actor principal</th><td>Bibliotecario</td></tr><tr><th>Actores secundarios</th><td>Profesor (recibe la respuesta)</td></tr><tr><th>Descripción</th><td>El bibliotecario revisa las sugerencias de los profesores y las aprueba o rechaza con una respuesta.</td></tr><tr><th>Disparador</th><td>El bibliotecario selecciona «Sugerencias» en el menú.</td></tr><tr><th>Precondiciones</th><td><ul><li>El bibliotecario inició sesión.</li><li>Existe al menos una sugerencia PENDIENTE (CU-16).</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>La sugerencia queda APROBADA o RECHAZADA con la respuesta registrada; el profesor la ve en «Mis sugerencias».</li></ul></td></tr><tr><th>Garantías mínimas</th><td>Una sugerencia ya respondida no puede volver a responderse.</td></tr><tr><th>Flujo básico</th><td><ol><li>El bibliotecario abre «Sugerencias».</li><li>El sistema lista las sugerencias, primero las pendientes, con fecha, título, autores, profesor y estado.</li><li>El bibliotecario selecciona «Responder» en una sugerencia pendiente.</li><li>El sistema muestra los datos y la justificación.</li><li>El bibliotecario elige «Aprobar» o «Rechazar», escribe la respuesta y guarda.</li><li>El sistema registra el estado y la respuesta y regresa a la lista.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>3a. La sugerencia ya fue respondida: el sistema muestra la respuesta en lugar del enlace «Responder».</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>5a. La respuesta está vacía: el sistema la pide y no guarda.</li><li>5b. Otro bibliotecario la respondió antes: el sistema indica «Esta sugerencia ya fue respondida».</li></ul></td></tr><tr><th>Reglas de negocio</th><td>—</td></tr><tr><th>Requisitos especiales</th><td>RNF-02.</td></tr><tr><th>Relaciones</th><td>—</td></tr><tr><th>Frecuencia / prioridad</th><td>Baja. Prioridad baja (RF-16).</td></tr></tbody></table></section>
+<h3 id="paquete-c">2.5 Paquete C · Préstamos y reservas <span class="responsable">Ricardo</span></h3>
+<figure class="diagrama">
+  <img src="../uml/cu_C_prestamos.png" alt="Diagrama de casos de uso · Préstamos y reservas" data-pendiente="Pendiente (Ricardo): exportar a docs/uml/cu_C_prestamos.png">
+  <figcaption>Diagrama de casos de uso · Préstamos y reservas</figcaption>
+</figure>
+<p>Archivo fuente de Visual Paradigm del paquete C (los 7 diagramas): <a href="../uml/Biblioteca_PaqueteC.vpp"><code>docs/uml/Biblioteca_PaqueteC.vpp</code></a>.</p>
+<section class="cu" id="cu-06"><h4>CU-06 · Solicitar préstamo de libro</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.1 · Ricardo Godyla · 11/11/2026 (basado en el ejemplo del profesor)</td></tr><tr><th>Actor principal</th><td>Usuario lector (Estudiante o Profesor)</td></tr><tr><th>Actores secundarios</th><td>Bibliotecario (atiende la solicitud en CU-23)</td></tr><tr><th>Descripción</th><td>El usuario lector solicita en línea el préstamo de un libro con ejemplares disponibles; el sistema aparta un ejemplar para que lo recoja en la biblioteca.</td></tr><tr><th>Disparador</th><td>El usuario selecciona «Solicitar préstamo» en el detalle de un libro.</td></tr><tr><th>Precondiciones</th><td><ul><li>El usuario inició sesión (CU-01) y su cuenta está activa y no bloqueada.</li><li>El libro existe en el catálogo.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>Existe un préstamo en estado SOLICITADO con <code>fecha_limite_recoger</code> = ahora + horas de la política (RN-06).</li><li>El ejemplar asignado está RESERVADO.</li><li>El usuario tiene una notificación de la solicitud.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>Si la solicitud falla, ningún ejemplar cambia de estado, no se crea ningún préstamo y no se envía notificación.</td></tr><tr><th>Flujo básico</th><td><ol><li>El usuario busca un libro (CU-04) y consulta su detalle (CU-05).</li><li>El sistema muestra los datos del libro y el número de ejemplares disponibles.</li><li>El usuario selecciona «Solicitar préstamo».</li><li>El sistema verifica la elegibilidad del usuario para ese libro («include» CU-07).</li><li>El sistema obtiene la política del tipo de usuario y muestra un resumen: título, días de préstamo, fecha estimada de vencimiento y plazo para recoger.</li><li>El usuario confirma la solicitud.</li><li>Dentro de una transacción, el sistema bloquea un ejemplar prestable (RN-15), lo marca RESERVADO, registra el préstamo SOLICITADO y genera la notificación.</li><li>El sistema muestra la confirmación con el folio, el código de inventario y la fecha límite para recoger.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>2a. No hay ejemplares disponibles: el sistema oculta «Solicitar préstamo» y ofrece «Reservar» («extend» CU-11). Fin del caso de uso.</li><li>6a. El usuario cancela: el sistema regresa al detalle del libro sin registrar cambios.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>4a. Usuario no elegible (CU-07): el sistema muestra todos los motivos juntos (multas pendientes con el monto adeudado o préstamos vencidos, RN-08; límite de libros, RN-02; título ya prestado, RN-11; cuenta bloqueada con su motivo) y termina.</li><li>7a. Los ejemplares restantes están EN_REPARACION, PERDIDO, BAJA o ya prestados (RN-15): no se crea nada y el sistema ofrece reservar.</li><li>7b. El último ejemplar fue tomado por otro usuario al mismo tiempo: el bloqueo de fila lo evita; la transacción se revierte y el sistema ofrece reservar.</li><li>7c. Falla la notificación: se revierte toda la operación.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-01, RN-02, RN-06, RN-08, RN-11, RN-15</td></tr><tr><th>Requisitos especiales</th><td>RNF-03: <code>transaction.atomic()</code> con <code>select_for_update()</code>; los bloqueos siguen siempre el orden usuario → préstamo → ejemplar → reserva.</td></tr><tr><th>Relaciones</th><td>«include» CU-07; extiende CU-05; es extendido por CU-11.</td></tr><tr><th>Frecuencia / prioridad</th><td>Alta: decenas de veces al día. Prioridad alta.</td></tr></tbody></table></section>
+<section class="cu" id="cu-07"><h4>CU-07 · Verificar elegibilidad del usuario</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Ninguno directo: es un caso de uso incluido, lo invoca el sistema</td></tr><tr><th>Actores secundarios</th><td>Usuario lector (a quien se evalúa); Bibliotecario (en CU-23 y CU-24)</td></tr><tr><th>Descripción</th><td>El sistema determina si un usuario lector puede recibir un préstamo, una renovación o una reserva, y devuelve la lista completa de motivos de rechazo.</td></tr><tr><th>Disparador</th><td>Otro caso de uso lo incluye: CU-06, CU-10, CU-11, CU-23 o CU-24.</td></tr><tr><th>Precondiciones</th><td><ul><li>Se conoce al usuario.</li><li>Opcionalmente, el libro que se quiere prestar o reservar.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td>El caso de uso que lo incluyó recibe «elegible» o la lista de motivos. No cambia ningún dato.</td></tr><tr><th>Garantías mínimas</th><td>Es una consulta de solo lectura: nunca modifica préstamos, reservas ni ejemplares.</td></tr><tr><th>Flujo básico</th><td><ol><li>El sistema verifica que la cuenta esté activa y no bloqueada.</li><li>El sistema verifica que no haya multas PENDIENTE (RN-08).</li><li>El sistema verifica que no haya préstamos VENCIDO, ni ACTIVO con la fecha de vencimiento ya pasada (RN-08).</li><li>El sistema cuenta los préstamos vigentes (SOLICITADO, ACTIVO y VENCIDO) y los compara con el máximo de la política (RN-02).</li><li>Si se indicó un libro, verifica que el usuario no tenga otro préstamo vigente del mismo título (RN-11).</li><li>El sistema devuelve «elegible» al caso de uso que lo incluyó.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>4a. Se evalúa una operación sobre un préstamo que ya existe (renovar o entregar una solicitud): ese préstamo se excluye del conteo, para que no cuente contra sí mismo.</li><li>1a. Falla una o varias de las verificaciones de los pasos 1 a 5: el sistema continúa con las demás y devuelve todos los motivos juntos.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>1b. El usuario es bibliotecario: no tiene política de préstamo y el sistema lo rechaza con un mensaje claro.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-02, RN-08, RN-11</td></tr><tr><th>Requisitos especiales</th><td>Los motivos se muestran en español y todos a la vez (RNF-04). La consulta de multas usa el contrato <code>tiene_multas_pendientes(usuario)</code> de la app <code>multas</code>.</td></tr><tr><th>Relaciones</th><td>Incluido por CU-06, CU-10, CU-11, CU-23 y CU-24.</td></tr><tr><th>Frecuencia / prioridad</th><td>Muy alta: cada solicitud, renovación, reserva y entrega. Prioridad alta.</td></tr></tbody></table></section>
+<section class="cu" id="cu-08"><h4>CU-08 · Cancelar solicitud de préstamo</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Usuario lector (dueño de la solicitud)</td></tr><tr><th>Actores secundarios</th><td>Siguiente usuario en la cola de reservas del título, si existe (recibe una notificación)</td></tr><tr><th>Descripción</th><td>El usuario cancela una solicitud que aún no recoge; el ejemplar apartado se libera para el siguiente en la cola o queda disponible.</td></tr><tr><th>Disparador</th><td>El usuario selecciona «Cancelar solicitud» en sus préstamos (CU-09).</td></tr><tr><th>Precondiciones</th><td><ul><li>Sesión iniciada.</li><li>El préstamo pertenece al usuario y está en estado SOLICITADO.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>El préstamo queda CANCELADO.</li><li>El ejemplar queda RESERVADO para la reserva más antigua del título (RN-12) o DISPONIBLE si no hay reservas.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>El préstamo y el ejemplar cambian juntos o no cambia ninguno. El registro del préstamo no se borra (RN-16).</td></tr><tr><th>Flujo básico</th><td><ol><li>El usuario consulta sus préstamos (CU-09).</li><li>El usuario selecciona «Cancelar solicitud» en un préstamo SOLICITADO.</li><li>El sistema pide confirmación.</li><li>El usuario confirma.</li><li>Dentro de una transacción, el sistema cambia el préstamo a CANCELADO.</li><li>El sistema libera el ejemplar: no hay reservas pendientes del título, así que queda DISPONIBLE.</li><li>El sistema muestra la confirmación.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>3a. El usuario no confirma: no se registran cambios.</li><li>6a. Hay reservas pendientes del título: el ejemplar se aparta para la más antigua, que pasa a DISPONIBLE con plazo para recoger (RN-06, RN-12), y se notifica a ese usuario.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>2a. El préstamo es de otro usuario: el sistema rechaza la operación (RNF-02).</li><li>2b. El préstamo ya fue entregado (ACTIVO) o está en otro estado: no se puede cancelar; el sistema lo indica.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-06, RN-12, RN-16</td></tr><tr><th>Requisitos especiales</th><td>RNF-02 (solo el dueño); RNF-03 (transacción con bloqueo del préstamo y del ejemplar).</td></tr><tr><th>Relaciones</th><td>Ninguna formal; se inicia desde CU-09.</td></tr><tr><th>Frecuencia / prioridad</th><td>Media: algunas veces al día. Prioridad media.</td></tr></tbody></table></section>
+<section class="cu" id="cu-09"><h4>CU-09 · Consultar mis préstamos</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Usuario lector</td></tr><tr><th>Actores secundarios</th><td>Ninguno</td></tr><tr><th>Descripción</th><td>El usuario consulta sus préstamos vigentes y sus reservas, con fechas, renovaciones restantes y lugar en la cola.</td></tr><tr><th>Disparador</th><td>El usuario selecciona «Mis préstamos» en el menú.</td></tr><tr><th>Precondiciones</th><td>Sesión iniciada (CU-01) como Estudiante o Profesor.</td></tr><tr><th>Postcondiciones (éxito)</th><td>Se muestra la información; no cambia ningún dato.</td></tr><tr><th>Garantías mínimas</th><td>El usuario nunca ve préstamos ni reservas de otras personas (RNF-02).</td></tr><tr><th>Flujo básico</th><td><ol><li>El usuario selecciona «Mis préstamos».</li><li>El sistema obtiene los préstamos del usuario en estado SOLICITADO, ACTIVO o VENCIDO.</li><li>El sistema muestra, por préstamo: título, código de inventario, estado, fecha límite para recoger (si está SOLICITADO), fecha de vencimiento y renovaciones restantes (RN-03).</li><li>El sistema resalta los préstamos vencidos y los que vencen pronto.</li><li>El sistema muestra las reservas PENDIENTE y DISPONIBLE, con el lugar en la cola o el plazo para recoger.</li><li>Junto a cada elemento, el sistema ofrece las acciones disponibles: «Renovar» (CU-10), «Cancelar solicitud» (CU-08) o «Cancelar reserva» (CU-12).</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>2a. El usuario no tiene préstamos ni reservas vigentes: el sistema lo indica y ofrece buscar en el catálogo (CU-04).</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>1a. La sesión expiró: el sistema redirige al inicio de sesión (CU-01).</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-03 (renovaciones restantes), RN-12 (lugar en la cola)</td></tr><tr><th>Requisitos especiales</th><td>RNF-02 (solo lo propio); RNF-04 (adaptable a móvil); listado paginado (RNF-05).</td></tr><tr><th>Relaciones</th><td>Extendido por CU-10; punto de partida de CU-08 y CU-12.</td></tr><tr><th>Frecuencia / prioridad</th><td>Alta: varias veces al día por usuario. Prioridad alta.</td></tr></tbody></table></section>
+<section class="cu" id="cu-10"><h4>CU-10 · Renovar préstamo</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.1 · Ricardo Godyla · 11/11/2026 (basado en el ejemplo del profesor)</td></tr><tr><th>Actor principal</th><td>Usuario lector (dueño del préstamo)</td></tr><tr><th>Actores secundarios</th><td>Ninguno</td></tr><tr><th>Descripción</th><td>El usuario extiende la fecha de vencimiento de un préstamo activo.</td></tr><tr><th>Disparador</th><td>El usuario selecciona «Renovar» en sus préstamos (CU-09).</td></tr><tr><th>Precondiciones</th><td><ul><li>Sesión iniciada.</li><li>El préstamo pertenece al usuario y está ACTIVO.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li><code>num_renovaciones</code> aumenta en 1.</li><li><code>fecha_vencimiento</code> = hoy + días de préstamo de la política (RN-10).</li></ul></td></tr><tr><th>Garantías mínimas</th><td>Si la renovación se rechaza o falla, el préstamo conserva su fecha y su número de renovaciones.</td></tr><tr><th>Flujo básico</th><td><ol><li>El usuario consulta sus préstamos (CU-09).</li><li>El usuario selecciona «Renovar» en un préstamo.</li><li>El sistema verifica la elegibilidad («include» CU-07, excluyendo este préstamo), las renovaciones restantes (RN-03) y que no haya reservas pendientes de otros usuarios para el título (RN-09).</li><li>El sistema muestra la nueva fecha de vencimiento: hoy + días de la política.</li><li>El usuario confirma.</li><li>Dentro de una transacción, el sistema actualiza el préstamo y muestra la confirmación.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>3a. El préstamo vence hoy: todavía se puede renovar.</li><li>3b. El usuario ya tiene el máximo de libros (RN-02): sí puede renovar, porque renovar no agrega un libro nuevo.</li><li>5a. El usuario no confirma: no se registran cambios.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>3c. Se alcanzó el máximo de renovaciones (1 estudiante, 2 profesor): el sistema lo indica (RN-03).</li><li>3d. El préstamo está VENCIDO, o ACTIVO con la fecha ya pasada: el sistema rechaza la renovación (RN-09).</li><li>3e. El usuario tiene multas pendientes u otro préstamo vencido: el sistema rechaza la renovación (RN-08).</li><li>3f. Otro usuario tiene una reserva pendiente del título: el sistema rechaza la renovación (RN-09). Las reservas canceladas, atendidas, expiradas o propias no bloquean.</li><li>3g. El préstamo es de otro usuario: el sistema rechaza la operación (RNF-02).</li><li>3h. Hay varios motivos de rechazo: el sistema los muestra todos juntos.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-02, RN-03, RN-08, RN-09, RN-10</td></tr><tr><th>Requisitos especiales</th><td>RNF-03 (transacción con bloqueo del préstamo). La fecha usa la zona horaria America/Mexico_City.</td></tr><tr><th>Relaciones</th><td>«extend» CU-09; «include» CU-07.</td></tr><tr><th>Frecuencia / prioridad</th><td>Media: varias veces al día. Prioridad media.</td></tr></tbody></table></section>
+<section class="cu" id="cu-11"><h4>CU-11 · Reservar libro no disponible</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Usuario lector</td></tr><tr><th>Actores secundarios</th><td>Ninguno</td></tr><tr><th>Descripción</th><td>El usuario se forma en la cola de un título sin ejemplares disponibles, para que se le aparte el primero que se libere.</td></tr><tr><th>Disparador</th><td>El usuario selecciona «Reservar» en el detalle de un libro sin ejemplares disponibles.</td></tr><tr><th>Precondiciones</th><td><ul><li>Sesión iniciada; cuenta activa y no bloqueada.</li><li>El libro no tiene ejemplares prestables.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td>Existe una reserva PENDIENTE del usuario para el título, con <code>fecha_reserva</code> que fija su lugar en la cola (RN-12).</td></tr><tr><th>Garantías mínimas</th><td>Si la reserva falla, no se crea ningún registro.</td></tr><tr><th>Flujo básico</th><td><ol><li>El usuario consulta el detalle de un libro (CU-05) y el sistema indica que no hay ejemplares disponibles.</li><li>El usuario selecciona «Reservar».</li><li>El sistema verifica la elegibilidad para ese libro («include» CU-07).</li><li>El sistema verifica que el usuario no tenga ya una reserva vigente del título.</li><li>El usuario confirma.</li><li>El sistema registra la reserva PENDIENTE y muestra su lugar en la cola.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>4a. El usuario canceló antes una reserva del mismo título: puede volver a reservar y entra al final de la cola.</li><li>5a. El usuario no confirma: no se registran cambios.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>1a. Hay ejemplares disponibles: el sistema rechaza la reserva y ofrece «Solicitar préstamo» (CU-06).</li><li>3a. Usuario no elegible: multas o préstamos vencidos (RN-08), límite de libros (RN-02) o título ya prestado (RN-11); se muestran todos los motivos.</li><li>4b. El usuario ya tiene una reserva PENDIENTE o DISPONIBLE del título: el sistema la indica y no crea otra.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-02, RN-08, RN-11, RN-12</td></tr><tr><th>Requisitos especiales</th><td>RNF-03 (transacción). La cola se ordena por <code>fecha_reserva</code> con el índice <code>idx_reserva_libro_fecha</code>.</td></tr><tr><th>Relaciones</th><td>«extend» CU-05; «include» CU-07; se ofrece desde CU-06 (alternativo 2a).</td></tr><tr><th>Frecuencia / prioridad</th><td>Media: algunas veces al día. Prioridad media.</td></tr></tbody></table></section>
+<section class="cu" id="cu-12"><h4>CU-12 · Cancelar reserva</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Usuario lector (dueño de la reserva)</td></tr><tr><th>Actores secundarios</th><td>Siguiente usuario de la cola, si la reserva ya tenía un ejemplar apartado</td></tr><tr><th>Descripción</th><td>El usuario sale de la cola de un título; si ya tenía un ejemplar apartado, este pasa al siguiente o queda disponible.</td></tr><tr><th>Disparador</th><td>El usuario selecciona «Cancelar reserva» en sus préstamos (CU-09).</td></tr><tr><th>Precondiciones</th><td><ul><li>Sesión iniciada.</li><li>La reserva pertenece al usuario y está PENDIENTE o DISPONIBLE.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>La reserva queda CANCELADA.</li><li>Si tenía ejemplar apartado: el ejemplar queda RESERVADO para la siguiente reserva (RN-12) o DISPONIBLE.</li><li>Las reservas posteriores avanzan un lugar.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>La reserva y el ejemplar cambian juntos o no cambia ninguno; el registro no se borra.</td></tr><tr><th>Flujo básico</th><td><ol><li>El usuario consulta sus préstamos y reservas (CU-09).</li><li>El usuario selecciona «Cancelar reserva» en una reserva PENDIENTE.</li><li>El usuario confirma.</li><li>El sistema cambia la reserva a CANCELADA; las siguientes de la cola suben un lugar.</li><li>El sistema muestra la confirmación.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>2a. La reserva está DISPONIBLE (ya tiene un ejemplar apartado): dentro de una transacción, el sistema bloquea el ejemplar, cancela la reserva y lo aparta para la siguiente reserva notificándole (RN-12), o lo deja DISPONIBLE si no hay cola.</li><li>3a. El usuario no confirma: no se registran cambios.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>2b. La reserva es de otro usuario: el sistema rechaza la operación (RNF-02).</li><li>2c. La reserva ya está ATENDIDA, CANCELADA o EXPIRADA: no se puede cancelar; el sistema lo indica.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-06, RN-12, RN-16</td></tr><tr><th>Requisitos especiales</th><td>RNF-02; RNF-03 (se bloquea el ejemplar antes que la reserva y se confirma que la reserva no cambió mientras tanto).</td></tr><tr><th>Relaciones</th><td>Ninguna formal; se inicia desde CU-09.</td></tr><tr><th>Frecuencia / prioridad</th><td>Baja: pocas veces al día. Prioridad media.</td></tr></tbody></table></section>
+<section class="cu" id="cu-13"><h4>CU-13 · Consultar historial de préstamos</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Usuario lector</td></tr><tr><th>Actores secundarios</th><td>Ninguno</td></tr><tr><th>Descripción</th><td>El usuario consulta sus préstamos ya cerrados: devueltos, cancelados, expirados o perdidos.</td></tr><tr><th>Disparador</th><td>El usuario selecciona «Historial» en el menú o en «Mis préstamos».</td></tr><tr><th>Precondiciones</th><td>Sesión iniciada como Estudiante o Profesor.</td></tr><tr><th>Postcondiciones (éxito)</th><td>Se muestra el historial; no cambia ningún dato.</td></tr><tr><th>Garantías mínimas</th><td>El usuario solo ve su propio historial (RNF-02).</td></tr><tr><th>Flujo básico</th><td><ol><li>El usuario selecciona «Historial».</li><li>El sistema obtiene los préstamos del usuario en estado DEVUELTO, CANCELADO, EXPIRADO o PERDIDO, del más reciente al más antiguo.</li><li>El sistema muestra, por préstamo: título, estado, fecha de préstamo, fecha de vencimiento, fecha de devolución, días de retraso y renovaciones usadas.</li><li>El sistema pagina el listado.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>2a. El usuario filtra por estado o por periodo: el sistema muestra solo los préstamos que coinciden.</li><li>2b. El usuario no tiene historial: el sistema lo indica.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>1a. La sesión expiró: el sistema redirige al inicio de sesión (CU-01).</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-16 (los préstamos no se borran, por eso el historial está completo)</td></tr><tr><th>Requisitos especiales</th><td>RNF-02; RNF-05 (listado paginado).</td></tr><tr><th>Relaciones</th><td>Ninguna formal.</td></tr><tr><th>Frecuencia / prioridad</th><td>Baja: unas veces por semana por usuario. Prioridad media.</td></tr></tbody></table></section>
+<section class="cu" id="cu-23"><h4>CU-23 · Entregar préstamo (atender solicitud)</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Bibliotecario</td></tr><tr><th>Actores secundarios</th><td>Usuario lector (recoge el libro en el mostrador)</td></tr><tr><th>Descripción</th><td>El bibliotecario entrega el ejemplar apartado por una solicitud en línea y el préstamo comienza a correr.</td></tr><tr><th>Disparador</th><td>Un usuario llega al mostrador a recoger un libro que solicitó (CU-06).</td></tr><tr><th>Precondiciones</th><td><ul><li>El bibliotecario inició sesión.</li><li>Existe un préstamo SOLICITADO del usuario dentro del plazo para recoger.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>El préstamo queda ACTIVO con <code>fecha_prestamo</code> = ahora, <code>fecha_vencimiento</code> = hoy + días de la política (RN-01) y <code>entregado_por</code> = el bibliotecario.</li><li>El ejemplar queda PRESTADO.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>Si la entrega falla, la solicitud y el ejemplar quedan como estaban.</td></tr><tr><th>Flujo básico</th><td><ol><li>El bibliotecario busca la solicitud por usuario o por código de inventario.</li><li>El sistema muestra la solicitud: usuario, título, ejemplar y fecha límite para recoger.</li><li>El sistema vuelve a verificar la elegibilidad del usuario («include» CU-07, sin contar esta misma solicitud).</li><li>El sistema muestra la fecha de vencimiento que tendrá el préstamo.</li><li>El bibliotecario confirma la entrega.</li><li>Dentro de una transacción, el sistema activa el préstamo, marca el ejemplar PRESTADO y registra quién entregó.</li><li>El sistema muestra el comprobante con la fecha de vencimiento.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>1a. El usuario viene por una reserva DISPONIBLE, no por una solicitud: se atiende como «recoger reserva» (CU-30, alternativo 2c).</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>2a. El plazo para recoger ya venció (RN-06): el sistema no permite la entrega; la solicitud la expira el proceso automático (CU-35).</li><li>3a. El usuario dejó de ser elegible después de solicitar (por ejemplo, se le generó una multa): el sistema muestra los motivos y no entrega.</li><li>5a. Quien registra no es bibliotecario: el sistema rechaza la operación.</li><li>6a. La solicitud ya fue entregada: el sistema no la entrega dos veces.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-01, RN-02, RN-06, RN-08, RN-11</td></tr><tr><th>Requisitos especiales</th><td>RNF-01 (solo bibliotecario); RNF-03 (transacción con bloqueo del préstamo y del ejemplar).</td></tr><tr><th>Relaciones</th><td>«include» CU-07; continúa CU-06.</td></tr><tr><th>Frecuencia / prioridad</th><td>Alta: decenas de veces al día. Prioridad alta.</td></tr></tbody></table></section>
+<section class="cu" id="cu-24"><h4>CU-24 · Registrar préstamo en mostrador</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Bibliotecario</td></tr><tr><th>Actores secundarios</th><td>Usuario lector (presente en el mostrador con el libro)</td></tr><tr><th>Descripción</th><td>El bibliotecario presta directamente un ejemplar que el usuario tomó del estante, sin solicitud previa en línea.</td></tr><tr><th>Disparador</th><td>Un usuario llega al mostrador con un libro para llevárselo.</td></tr><tr><th>Precondiciones</th><td><ul><li>El bibliotecario inició sesión.</li><li>El usuario y el ejemplar están registrados en el sistema.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td><ul><li>Existe un préstamo ACTIVO con vencimiento a 7 días (estudiante) o 30 días (profesor) según la política (RN-01) y <code>entregado_por</code> = el bibliotecario.</li><li>El ejemplar queda PRESTADO.</li></ul></td></tr><tr><th>Garantías mínimas</th><td>Si el registro falla, no se crea ningún préstamo y el ejemplar no cambia.</td></tr><tr><th>Flujo básico</th><td><ol><li>El bibliotecario selecciona «Préstamo en mostrador».</li><li>El bibliotecario identifica al usuario (matrícula, número de empleado o usuario).</li><li>El bibliotecario captura o escanea el código de inventario del ejemplar.</li><li>El sistema verifica la elegibilidad del usuario para ese libro («include» CU-07) y que el ejemplar sea prestable (RN-15).</li><li>El sistema muestra usuario, título y fecha de vencimiento.</li><li>El bibliotecario confirma.</li><li>Dentro de una transacción, el sistema crea el préstamo ACTIVO y marca el ejemplar PRESTADO.</li><li>El sistema muestra el comprobante.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>6a. El bibliotecario cancela: no se registran cambios.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>4a. Usuario no elegible: límite de libros (RN-02), título ya prestado (RN-11), multas o vencidos (RN-08) o cuenta bloqueada; el sistema muestra los motivos.</li><li>4b. El ejemplar está EN_REPARACION, PERDIDO, BAJA, PRESTADO o RESERVADO para otra persona (RN-15): el sistema no lo presta.</li><li>6b. Quien registra no es bibliotecario: el sistema rechaza la operación.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-01, RN-02, RN-08, RN-11, RN-15</td></tr><tr><th>Requisitos especiales</th><td>RNF-01; RNF-03 (transacción con <code>select_for_update()</code> sobre el ejemplar).</td></tr><tr><th>Relaciones</th><td>«include» CU-07.</td></tr><tr><th>Frecuencia / prioridad</th><td>Alta: decenas de veces al día. Prioridad alta.</td></tr></tbody></table></section>
+<section class="cu" id="cu-30"><h4>CU-30 · Gestionar reservas</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Bibliotecario</td></tr><tr><th>Actores secundarios</th><td>Usuario lector dueño de la reserva (recibe notificaciones)</td></tr><tr><th>Descripción</th><td>El bibliotecario consulta las reservas y la cola de cada título, entrega las reservas disponibles y cancela reservas con un motivo.</td></tr><tr><th>Disparador</th><td>El bibliotecario selecciona «Reservas» en el menú, o un usuario llega a recoger un libro reservado.</td></tr><tr><th>Precondiciones</th><td>El bibliotecario inició sesión.</td></tr><tr><th>Postcondiciones (éxito)</th><td>Según la acción: se muestran las reservas; o la reserva queda ATENDIDA y existe un préstamo ACTIVO; o la reserva queda CANCELADA y el usuario recibe el motivo.</td></tr><tr><th>Garantías mínimas</th><td>Las reservas, préstamos y ejemplares cambian juntos o no cambia ninguno; ninguna reserva se borra.</td></tr><tr><th>Flujo básico</th><td>—</td></tr><tr><th>Flujos alternativos</th><td><ul><li>2a. Cancelar una reserva: el bibliotecario elige una reserva PENDIENTE o DISPONIBLE y escribe el motivo (obligatorio). El sistema la cancela, notifica al usuario con el motivo y, si tenía ejemplar apartado, lo pasa a la siguiente reserva o lo deja DISPONIBLE (RN-12).</li><li>2b. No hay reservas con esos filtros: el sistema lo indica.</li><li>2c. Recoger una reserva: el usuario llega con una reserva DISPONIBLE; el sistema verifica que siga dentro del plazo (RN-06) y la elegibilidad (RN-08); el bibliotecario confirma y, dentro de una transacción, se crea el préstamo ACTIVO (RN-01), el ejemplar pasa a PRESTADO y la reserva queda ATENDIDA.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>2d. El motivo está vacío, solo tiene espacios o es demasiado largo: el sistema no cancela y pide corregirlo.</li><li>2e. La reserva ya está ATENDIDA, CANCELADA o EXPIRADA: no se puede cancelar.</li><li>2f. Al recoger, la reserva está PENDIENTE, expiró o el usuario tiene multas: el sistema no entrega el libro e indica el motivo.</li><li>2g. Quien realiza la acción no es bibliotecario: el sistema la rechaza.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-01, RN-06, RN-08, RN-12, RN-16</td></tr><tr><th>Requisitos especiales</th><td>RNF-01 (solo bibliotecario); RNF-03; RNF-05 (listado paginado). El motivo de cancelación se guarda en la notificación, porque la tabla <code>reserva</code> del esquema no tiene columna para él.</td></tr><tr><th>Relaciones</th><td>Ninguna formal; complementa CU-11, CU-12 y CU-23.</td></tr><tr><th>Frecuencia / prioridad</th><td>Media: varias veces al día. Prioridad media.</td></tr></tbody></table></section>
+<section class="cu" id="cu-31"><h4>CU-31 · Configurar políticas de préstamo</h4><table class="plantilla"><tbody><tr><th>Versión / autor / fecha</th><td>1.0 · Ricardo Godyla · 11/11/2026</td></tr><tr><th>Actor principal</th><td>Bibliotecario</td></tr><tr><th>Actores secundarios</th><td>Ninguno</td></tr><tr><th>Descripción</th><td>El bibliotecario modifica los parámetros de préstamo de estudiantes o de profesores (RN-01 a RN-06).</td></tr><tr><th>Disparador</th><td>El bibliotecario selecciona «Políticas de préstamo» en el menú.</td></tr><tr><th>Precondiciones</th><td><ul><li>El bibliotecario inició sesión.</li><li>Existen las dos políticas (ESTUDIANTE y PROFESOR), cargadas por la migración inicial.</li></ul></td></tr><tr><th>Postcondiciones (éxito)</th><td>La política tiene los valores nuevos y <code>actualizado_en</code> cambia. Los préstamos y solicitudes nuevos los usan desde ese momento.</td></tr><tr><th>Garantías mínimas</th><td>Si algún valor no es válido, la política no cambia.</td></tr><tr><th>Flujo básico</th><td><ol><li>El bibliotecario selecciona «Políticas de préstamo».</li><li>El sistema muestra las dos políticas con sus seis valores: días de préstamo, máximo de libros, renovaciones, multa por día, multa máxima y horas para recoger.</li><li>El bibliotecario edita una política y guarda.</li><li>El sistema valida los valores dentro de una transacción y bloquea la política mientras la actualiza.</li><li>El sistema guarda los cambios y muestra la confirmación.</li></ol></td></tr><tr><th>Flujos alternativos</th><td><ul><li>3a. El bibliotecario cancela la edición: no se registran cambios.</li></ul></td></tr><tr><th>Excepciones</th><td><ul><li>4a. Días de préstamo, máximo de libros u horas para recoger en 0: el sistema lo rechaza (deben ser al menos 1; las renovaciones sí pueden ser 0).</li><li>4b. Multa negativa, multa máxima menor que la multa por día, entero negativo o más de 2 decimales: el sistema muestra un mensaje por campo y no guarda nada.</li><li>4c. Se intenta cambiar el tipo de usuario o un campo que no existe: el sistema lo rechaza.</li><li>4d. Quien edita no es bibliotecario: el sistema rechaza la operación.</li></ul></td></tr><tr><th>Reglas de negocio</th><td>RN-01 a RN-06 (sus valores viven en esta tabla). Efecto en préstamos existentes: conservan su fecha de vencimiento, pero las renovaciones restantes y la multa se calculan con la política vigente.</td></tr><tr><th>Requisitos especiales</th><td>RNF-01; RNF-03; los CHECK <code>ck_politica_tipo</code> y <code>ck_politica_multas</code> del esquema, con mensajes en español (RNF-04).</td></tr><tr><th>Relaciones</th><td>Ninguna formal; afecta a CU-06, CU-10, CU-23, CU-24 y al cálculo de multas del paquete D.</td></tr><tr><th>Frecuencia / prioridad</th><td>Muy baja: al inicio de cada periodo escolar. Prioridad media.</td></tr></tbody></table></section>
+<h3 id="paquete-d">2.6 Paquete D · Multas y notificaciones <span class="responsable">Samanta</span></h3>
+<figure class="diagrama">
+  <img src="../uml/cu_D_multas.png" alt="Diagrama de casos de uso · Multas y notificaciones" data-pendiente="Pendiente (Samanta): exportar a docs/uml/cu_D_multas.png">
+  <figcaption>Diagrama de casos de uso · Multas y notificaciones</figcaption>
+</figure>
+<div class="pendiente"><strong>Pendiente (Samanta):</strong> descripción de cada caso de uso con la plantilla de la sección 8. Copia una de las tablas del paquete B (<code>&lt;section class="cu"&gt;…&lt;/section&gt;</code>) y reemplaza el texto.<ul class="lista-cu"><li><strong>CU-14</strong> Consultar mis multas</li><li><strong>CU-15</strong> Consultar notificaciones</li><li><strong>CU-25</strong> Registrar devolución</li><li><strong>CU-26</strong> Generar multa por retraso</li><li><strong>CU-27</strong> Registrar pérdida o daño de ejemplar</li><li><strong>CU-28</strong> Registrar pago de multa</li><li><strong>CU-29</strong> Condonar multa</li><li><strong>CU-34</strong> Marcar préstamos vencidos</li><li><strong>CU-35</strong> Expirar solicitudes y reservas no atendidas</li><li><strong>CU-36</strong> Enviar recordatorios de vencimiento</li></ul></div>
+
+<!-- ============================================================ 3 -->
+<h2 id="diseno">3. Diseño</h2>
+
+<h3 id="dominio">3.1 Clases de dominio</h3>
+<figure class="diagrama">
+  <img src="../uml/clases_dominio.png" alt="Diagrama de clases de dominio (análisis)" data-pendiente="Pendiente (todos): exportar a docs/uml/clases_dominio.png">
+  <figcaption>Diagrama de clases de dominio (análisis)</figcaption>
+</figure>
+
+<h3 id="clases-diseno">3.2 Clases de diseño por paquete</h3>
+<h4>Paquete A · Usuarios y reportes <span class="responsable">Alvaro</span></h4>
+<figure class="diagrama">
+  <img src="../uml/clases_A_cuentas_reportes.png" alt="Clases de diseño · Usuarios y reportes" data-pendiente="Pendiente (Alvaro): exportar a docs/uml/clases_A_cuentas_reportes.png">
+  <figcaption>Clases de diseño · Usuarios y reportes</figcaption>
+</figure>
+<h4>Paquete B · Administración del acervo <span class="responsable">Diego</span></h4>
+<figure class="diagrama">
+  <img src="../uml/clases_B_catalogo.png" alt="Clases de diseño · Administración del acervo" data-pendiente="Pendiente (Diego): exportar a docs/uml/clases_B_catalogo.png">
+  <figcaption>Clases de diseño · Administración del acervo</figcaption>
+</figure>
+<div class="spec">
+<p>Clases del modelo de <code>catalogo</code> y su servicio. Los nombres coinciden con el código.</p>
+<ul>
+<li><strong>Categoria</strong>: nombre {unique}, descripcion [0..1]</li>
+<li><strong>Editorial</strong>: nombre {unique}, pais [0..1]</li>
+<li><strong>Autor</strong>: nombre, apellidos, nacionalidad [0..1]</li>
+<li><strong>Libro</strong>: isbn {unique}, titulo, subtitulo [0..1], anio_publicacion [0..1], edicion [0..1], idioma, num_paginas [0..1], descripcion [0..1], portada [0..1], costo_reposicion, activo · <code>+ ejemplares_disponibles(): QuerySet&lt;Ejemplar&gt;</code></li>
+<li><strong>LibroAutor</strong> (clase de asociación Libro–Autor): orden · {uq_libro_autor}</li>
+<li><strong>Ejemplar</strong>: codigo_inventario {unique}, ubicacion [0..1], estado: EstadoEjemplar, fecha_adquisicion [0..1], observaciones [0..1] · <code>+ es_prestable(): Boolean</code> · <code>+ cambiar_estado(estado: EstadoEjemplar)</code></li>
+<li><strong>SugerenciaAdquisicion</strong>: titulo, autores, isbn [0..1], justificacion, estado: EstadoSugerencia, respuesta [0..1], fecha</li>
+<li><strong>«enumeration» EstadoEjemplar</strong>: DISPONIBLE, RESERVADO, PRESTADO, EN_REPARACION, PERDIDO, BAJA · <strong>«enumeration» EstadoSugerencia</strong>: PENDIENTE, APROBADA, RECHAZADA</li>
+<li><strong>«service» catalogo.services</strong>: buscar_libros(…), dar_de_baja_libro(libro), reactivar_libro(libro), responder_sugerencia(sugerencia, estado, respuesta)</li>
+</ul>
+<p>Asociaciones: Categoria 1 — 0..* Libro · Editorial 1 — 0..* Libro · Libro 1..* — 1..* Autor (vía LibroAutor) · Libro 1 — 0..* Ejemplar · Profesor 1 — 0..* SugerenciaAdquisicion.</p>
+</div>
+<h4>Paquete C · Préstamos y reservas <span class="responsable">Ricardo</span></h4>
+<figure class="diagrama">
+  <img src="../uml/clases_C_prestamos.png" alt="Clases de diseño · Préstamos y reservas" data-pendiente="Pendiente (Ricardo): exportar a docs/uml/clases_C_prestamos.png">
+  <figcaption>Clases de diseño · Préstamos y reservas</figcaption>
+</figure>
+<div class="spec">
+<p>Clases del modelo de <code>prestamos</code> y su servicio. Los nombres coinciden con el código.</p>
+<ul>
+<li><strong>PoliticaPrestamo</strong>: tipo_usuario: TipoUsuario {unique}, dias_prestamo, max_libros, max_renovaciones, multa_por_dia, multa_maxima, horas_para_recoger, actualizado_en · <code>+ para(usuario): PoliticaPrestamo</code> {static} · <code>+ clean()</code></li>
+<li><strong>Prestamo</strong>: estado: EstadoPrestamo, fecha_solicitud, fecha_limite_recoger [0..1], fecha_prestamo [0..1], fecha_vencimiento [0..1], fecha_devolucion [0..1], num_renovaciones, observaciones [0..1] · <code>+ renovaciones_restantes(): int</code> · <code>+ dias_retraso(fecha): int</code> · <code>+ calcular_multa(politica): Decimal</code> · <code>+ entregar(bibliotecario)</code> · <code>+ renovar()</code> · <code>+ marcar_vencido()</code> · <code>+ marcar_devuelto(bibliotecario, fecha)</code> · <code>+ marcar_perdido()</code> · <code>+ cancelar()</code> · <code>+ expirar()</code></li>
+<li><strong>Reserva</strong>: estado: EstadoReserva, fecha_reserva, fecha_expiracion [0..1] · <code>+ marcar_disponible(ejemplar)</code> · <code>+ atender()</code> · <code>+ cancelar()</code> · <code>+ expirar()</code></li>
+<li><strong>«enumeration» TipoUsuario</strong>: ESTUDIANTE, PROFESOR · <strong>«enumeration» EstadoPrestamo</strong>: SOLICITADO, ACTIVO, VENCIDO, DEVUELTO, CANCELADO, EXPIRADO, PERDIDO · <strong>«enumeration» EstadoReserva</strong>: PENDIENTE, DISPONIBLE, ATENDIDA, CANCELADA, EXPIRADA</li>
+<li><strong>«service» prestamos.services</strong>: verificar_elegibilidad(usuario, libro, excluir), solicitar_prestamo(usuario, libro), entregar_prestamo(prestamo, bibliotecario), prestar_en_mostrador(usuario, ejemplar, bibliotecario), cancelar_solicitud(prestamo, usuario), renovar_prestamo(prestamo, usuario), reservar_libro(usuario, libro), cancelar_reserva(reserva, usuario), recoger_reserva(reserva, bibliotecario), asignar_siguiente_reserva(ejemplar), cancelar_reserva_por_bibliotecario(reserva, bibliotecario, motivo), actualizar_politica(politica, bibliotecario, …)</li>
+</ul>
+<p>Asociaciones: Usuario 1 — 0..* Prestamo (usuario) · Usuario 0..1 — 0..* Prestamo (entregado_por, recibido_por) · Ejemplar 1 — 0..* Prestamo · Usuario 1 — 0..* Reserva · Libro 1 — 0..* Reserva · Ejemplar 0..1 — 0..1 Reserva (ejemplar_asignado) · Prestamo depende de PoliticaPrestamo.</p>
+<p>Las operaciones que cambian varios registros corren en <code>transaction.atomic()</code> con <code>select_for_update()</code>, bloqueando siempre en el orden usuario → préstamo → ejemplar → reserva (RNF-03).</p>
+</div>
+<h4>Paquete D · Multas y notificaciones <span class="responsable">Samanta</span></h4>
+<figure class="diagrama">
+  <img src="../uml/clases_D_multas.png" alt="Clases de diseño · Multas y notificaciones" data-pendiente="Pendiente (Samanta): exportar a docs/uml/clases_D_multas.png">
+  <figcaption>Clases de diseño · Multas y notificaciones</figcaption>
+</figure>
+
+<h3 id="secuencia">3.3 Diagramas de secuencia</h3>
+<figure class="diagrama">
+  <img src="../uml/seq_cu06.png" alt="Secuencia · CU-06 Solicitar préstamo (alt: usuario no elegible)" data-pendiente="Pendiente (Ricardo): exportar a docs/uml/seq_cu06.png">
+  <figcaption>Secuencia · CU-06 Solicitar préstamo (alt: usuario no elegible)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../uml/seq_cu10.png" alt="Secuencia · CU-10 Renovar préstamo" data-pendiente="Pendiente (Ricardo): exportar a docs/uml/seq_cu10.png">
+  <figcaption>Secuencia · CU-10 Renovar préstamo</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../uml/seq_cu11.png" alt="Secuencia · CU-11 Reservar libro no disponible" data-pendiente="Pendiente (Ricardo): exportar a docs/uml/seq_cu11.png">
+  <figcaption>Secuencia · CU-11 Reservar libro no disponible</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../uml/seq_cu25.png" alt="Secuencia · CU-25 Registrar devolución (opt: retraso)" data-pendiente="Pendiente (Samanta): exportar a docs/uml/seq_cu25.png">
+  <figcaption>Secuencia · CU-25 Registrar devolución (opt: retraso)</figcaption>
+</figure>
+
+<h3 id="actividades">3.4 Diagramas de actividades</h3>
+<figure class="diagrama">
+  <img src="../uml/act_prestamo_devolucion.png" alt="Actividades · Préstamo y devolución (carriles)" data-pendiente="Pendiente (Ricardo): exportar a docs/uml/act_prestamo_devolucion.png">
+  <figcaption>Actividades · Préstamo y devolución (carriles)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../uml/act_multas.png" alt="Actividades · Cálculo y cobro de multas" data-pendiente="Pendiente (Samanta): exportar a docs/uml/act_multas.png">
+  <figcaption>Actividades · Cálculo y cobro de multas</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../uml/act_reservas_fifo.png" alt="Actividades · Atención de reservas en cola FIFO" data-pendiente="Pendiente (Ricardo): exportar a docs/uml/act_reservas_fifo.png">
+  <figcaption>Actividades · Atención de reservas en cola FIFO</figcaption>
+</figure>
+
+<h3 id="estados">3.5 Diagramas de estados</h3>
+<figure class="diagrama">
+  <img src="../uml/estados_prestamo.png" alt="Estados · Préstamo" data-pendiente="Pendiente (Alvaro): exportar a docs/uml/estados_prestamo.png">
+  <figcaption>Estados · Préstamo</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../uml/estados_ejemplar.png" alt="Estados · Ejemplar" data-pendiente="Pendiente (Alvaro): exportar a docs/uml/estados_ejemplar.png">
+  <figcaption>Estados · Ejemplar</figcaption>
+</figure>
+
+<!-- ============================================================ 4 -->
+<h2 id="base-de-datos">4. Base de datos</h2>
+<p>Las tablas las generan las migraciones de Django y coinciden con el esquema de referencia del profesor (<code>docs/bd/esquema_bd_biblioteca.html</code>): mismos nombres de tablas y columnas, tipos, CHECK, índices y reglas <code>on_delete</code>. Se omiten las 9 tablas propias del framework (<code>auth_*</code>, <code>django_*</code> y <code>usuario_groups</code>/<code>usuario_user_permissions</code>).</p>
+
+<h3 id="er">4.1 Diagrama entidad-relación físico</h3>
+<figure class="diagrama">
+  <img src="../uml/er_fisico.png" alt="Diagrama ER físico (18 tablas del dominio)" data-pendiente="Pendiente (Diego): exportar a docs/uml/er_fisico.png">
+  <figcaption>Diagrama ER físico (18 tablas del dominio)</figcaption>
+</figure>
+
+<h3 id="diccionario">4.2 Diccionario de datos</h3>
+<p>Generado desde los modelos con <code>python manage.py diccionario_datos</code>; los tipos son los de MySQL.</p>
+<h4 class="tabla-bd" id="tabla-usuario"><code>usuario</code></h4>
+<p class="nota-tabla">Modelo: <code>cuentas.Usuario</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>password</code></td><td>varchar(128)</td><td>No</td><td></td><td></td><td>Contraseña</td></tr>
+<tr><td><code>last_login</code></td><td>datetime(6)</td><td>Sí</td><td></td><td></td><td>Último ingreso</td></tr>
+<tr><td><code>is_superuser</code></td><td>tinyint(1)</td><td>No</td><td></td><td>False</td><td>Es superusuario</td></tr>
+<tr><td><code>username</code></td><td>varchar(150)</td><td>No</td><td>UQ</td><td></td><td>Nombre de usuario</td></tr>
+<tr><td><code>first_name</code></td><td>varchar(150)</td><td>No</td><td></td><td></td><td>Nombre</td></tr>
+<tr><td><code>last_name</code></td><td>varchar(150)</td><td>No</td><td></td><td></td><td>Apellido</td></tr>
+<tr><td><code>is_staff</code></td><td>tinyint(1)</td><td>No</td><td></td><td>False</td><td>Es staff</td></tr>
+<tr><td><code>is_active</code></td><td>tinyint(1)</td><td>No</td><td></td><td>True</td><td>Activo</td></tr>
+<tr><td><code>date_joined</code></td><td>datetime(6)</td><td>No</td><td></td><td>now()</td><td>Fecha de creación</td></tr>
+<tr><td><code>email</code></td><td>varchar(254)</td><td>No</td><td>UQ</td><td></td><td>Email</td></tr>
+<tr><td><code>tipo_usuario</code></td><td>varchar(15)</td><td>No</td><td>Índice</td><td></td><td>Tipo usuario. Valores: ESTUDIANTE · PROFESOR · BIBLIOTECARIO</td></tr>
+<tr><td><code>telefono</code></td><td>varchar(20)</td><td>Sí</td><td></td><td></td><td>Telefono</td></tr>
+<tr><td><code>bloqueado</code></td><td>tinyint(1)</td><td>No</td><td></td><td>False</td><td>Bloqueado</td></tr>
+<tr><td><code>motivo_bloqueo</code></td><td>varchar(255)</td><td>Sí</td><td></td><td></td><td>Motivo bloqueo</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_usuario_tipo</code>: CHECK (tipo_usuario IN ('ESTUDIANTE', 'PROFESOR', 'BIBLIOTECARIO'))</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-carrera"><code>carrera</code></h4>
+<p class="nota-tabla">Modelo: <code>cuentas.Carrera</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>clave</code></td><td>varchar(10)</td><td>No</td><td>UQ</td><td></td><td>Clave</td></tr>
+<tr><td><code>nombre</code></td><td>varchar(120)</td><td>No</td><td></td><td></td><td>Nombre</td></tr>
+</tbody></table>
+<h4 class="tabla-bd" id="tabla-departamento"><code>departamento</code></h4>
+<p class="nota-tabla">Modelo: <code>cuentas.Departamento</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>nombre</code></td><td>varchar(120)</td><td>No</td><td>UQ</td><td></td><td>Nombre</td></tr>
+</tbody></table>
+<h4 class="tabla-bd" id="tabla-estudiante"><code>estudiante</code></h4>
+<p class="nota-tabla">Modelo: <code>cuentas.Estudiante</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>usuario_id</code></td><td>bigint</td><td>No</td><td>PK, FK → usuario</td><td></td><td>Usuario</td></tr>
+<tr><td><code>matricula</code></td><td>varchar(20)</td><td>No</td><td>UQ</td><td></td><td>Matricula</td></tr>
+<tr><td><code>semestre</code></td><td>smallint unsigned</td><td>No</td><td></td><td></td><td>Semestre</td></tr>
+<tr><td><code>carrera_id</code></td><td>bigint</td><td>No</td><td>FK → carrera</td><td></td><td>Carrera</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_estudiante_semestre</code>: CHECK (semestre &gt;= 1 AND semestre &lt;= 12)</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-profesor"><code>profesor</code></h4>
+<p class="nota-tabla">Modelo: <code>cuentas.Profesor</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>usuario_id</code></td><td>bigint</td><td>No</td><td>PK, FK → usuario</td><td></td><td>Usuario</td></tr>
+<tr><td><code>num_empleado</code></td><td>varchar(20)</td><td>No</td><td>UQ</td><td></td><td>Num empleado</td></tr>
+<tr><td><code>departamento_id</code></td><td>bigint</td><td>No</td><td>FK → departamento</td><td></td><td>Departamento</td></tr>
+</tbody></table>
+<h4 class="tabla-bd" id="tabla-categoria"><code>categoria</code></h4>
+<p class="nota-tabla">Clasificación temática de los libros (CU-04, CU-19).</p>
+<p class="nota-tabla">Modelo: <code>catalogo.Categoria</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>nombre</code></td><td>varchar(100)</td><td>No</td><td>UQ</td><td></td><td>Nombre</td></tr>
+<tr><td><code>descripcion</code></td><td>varchar(255)</td><td>Sí</td><td></td><td></td><td>Descripción</td></tr>
+</tbody></table>
+<h4 class="tabla-bd" id="tabla-editorial"><code>editorial</code></h4>
+<p class="nota-tabla">Editoriales de los libros del acervo (CU-19).</p>
+<p class="nota-tabla">Modelo: <code>catalogo.Editorial</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>nombre</code></td><td>varchar(150)</td><td>No</td><td>UQ</td><td></td><td>Nombre</td></tr>
+<tr><td><code>pais</code></td><td>varchar(60)</td><td>Sí</td><td></td><td></td><td>País</td></tr>
+</tbody></table>
+<h4 class="tabla-bd" id="tabla-autor"><code>autor</code></h4>
+<p class="nota-tabla">Autores. Un autor puede tener varios libros (ver LibroAutor).</p>
+<p class="nota-tabla">Modelo: <code>catalogo.Autor</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>nombre</code></td><td>varchar(100)</td><td>No</td><td></td><td></td><td>Nombre(s)</td></tr>
+<tr><td><code>apellidos</code></td><td>varchar(150)</td><td>No</td><td>Índice</td><td></td><td>Apellidos</td></tr>
+<tr><td><code>nacionalidad</code></td><td>varchar(60)</td><td>Sí</td><td></td><td></td><td>Nacionalidad</td></tr>
+</tbody></table>
+<h4 class="tabla-bd" id="tabla-libro"><code>libro</code></h4>
+<p class="nota-tabla">Título del catálogo. Las copias físicas son Ejemplar (CU-04, CU-05, CU-17).</p>
+<p class="nota-tabla">Modelo: <code>catalogo.Libro</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>isbn</code></td><td>varchar(13)</td><td>No</td><td>UQ</td><td></td><td>Isbn</td></tr>
+<tr><td><code>titulo</code></td><td>varchar(255)</td><td>No</td><td>Índice</td><td></td><td>Título</td></tr>
+<tr><td><code>subtitulo</code></td><td>varchar(255)</td><td>Sí</td><td></td><td></td><td>Subtítulo</td></tr>
+<tr><td><code>anio_publicacion</code></td><td>smallint unsigned</td><td>Sí</td><td></td><td></td><td>Año de publicación</td></tr>
+<tr><td><code>edicion</code></td><td>varchar(30)</td><td>Sí</td><td></td><td></td><td>Edición</td></tr>
+<tr><td><code>idioma</code></td><td>varchar(30)</td><td>No</td><td></td><td>'Español'</td><td>Idioma</td></tr>
+<tr><td><code>num_paginas</code></td><td>smallint unsigned</td><td>Sí</td><td></td><td></td><td>Número de páginas</td></tr>
+<tr><td><code>descripcion</code></td><td>longtext</td><td>Sí</td><td></td><td></td><td>Descripción</td></tr>
+<tr><td><code>portada</code></td><td>varchar(100)</td><td>Sí</td><td></td><td></td><td>Portada</td></tr>
+<tr><td><code>costo_reposicion</code></td><td>decimal(10,2)</td><td>No</td><td></td><td>0</td><td>Costo de reposición</td></tr>
+<tr><td><code>activo</code></td><td>tinyint(1)</td><td>No</td><td></td><td>True</td><td>Activo</td></tr>
+<tr><td><code>categoria_id</code></td><td>bigint</td><td>No</td><td>FK → categoria</td><td></td><td>Categoría</td></tr>
+<tr><td><code>editorial_id</code></td><td>bigint</td><td>No</td><td>FK → editorial</td><td></td><td>Editorial</td></tr>
+</tbody></table>
+<h4 class="tabla-bd" id="tabla-libro_autor"><code>libro_autor</code></h4>
+<p class="nota-tabla">Tabla puente libro ↔ autor; guarda el orden del autor en la portada.</p>
+<p class="nota-tabla">Modelo: <code>catalogo.LibroAutor</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>orden</code></td><td>smallint unsigned</td><td>No</td><td></td><td>1</td><td>Orden</td></tr>
+<tr><td><code>autor_id</code></td><td>bigint</td><td>No</td><td>FK → autor</td><td></td><td>Autor</td></tr>
+<tr><td><code>libro_id</code></td><td>bigint</td><td>No</td><td>FK → libro</td><td></td><td>Libro</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>uq_libro_autor</code>: UNIQUE (libro, autor)</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-ejemplar"><code>ejemplar</code></h4>
+<p class="nota-tabla">Copia física de un libro (CU-18). Su estado dice si se puede prestar.</p>
+<p class="nota-tabla">Modelo: <code>catalogo.Ejemplar</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>codigo_inventario</code></td><td>varchar(30)</td><td>No</td><td>UQ</td><td></td><td>Código de inventario</td></tr>
+<tr><td><code>ubicacion</code></td><td>varchar(50)</td><td>Sí</td><td></td><td></td><td>Ubicación</td></tr>
+<tr><td><code>estado</code></td><td>varchar(15)</td><td>No</td><td>Índice</td><td>Ejemplar.Estado.DISPONIBLE</td><td>Estado. Valores: DISPONIBLE · RESERVADO · PRESTADO · EN_REPARACION · PERDIDO · BAJA</td></tr>
+<tr><td><code>fecha_adquisicion</code></td><td>date</td><td>Sí</td><td></td><td></td><td>Fecha de adquisición</td></tr>
+<tr><td><code>observaciones</code></td><td>varchar(255)</td><td>Sí</td><td></td><td></td><td>Observaciones</td></tr>
+<tr><td><code>libro_id</code></td><td>bigint</td><td>No</td><td>FK → libro</td><td></td><td>Libro</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_ejemplar_estado</code>: CHECK (estado IN ('DISPONIBLE', 'RESERVADO', 'PRESTADO', 'EN_REPARACION', 'PERDIDO', 'BAJA'))</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-sugerencia_adquisicion"><code>sugerencia_adquisicion</code></h4>
+<p class="nota-tabla">Sugerencia de compra de un profesor y su respuesta (CU-16, CU-33).</p>
+<p class="nota-tabla">Modelo: <code>catalogo.SugerenciaAdquisicion</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>titulo</code></td><td>varchar(255)</td><td>No</td><td></td><td></td><td>Título</td></tr>
+<tr><td><code>autores</code></td><td>varchar(255)</td><td>No</td><td></td><td></td><td>Autores</td></tr>
+<tr><td><code>isbn</code></td><td>varchar(13)</td><td>Sí</td><td></td><td></td><td>Isbn</td></tr>
+<tr><td><code>justificacion</code></td><td>longtext</td><td>No</td><td></td><td></td><td>Justificación</td></tr>
+<tr><td><code>estado</code></td><td>varchar(10)</td><td>No</td><td></td><td>SugerenciaAdquisicion.Estado.PENDIENTE</td><td>Estado. Valores: PENDIENTE · APROBADA · RECHAZADA</td></tr>
+<tr><td><code>respuesta</code></td><td>varchar(255)</td><td>Sí</td><td></td><td></td><td>Respuesta</td></tr>
+<tr><td><code>fecha</code></td><td>datetime(6)</td><td>No</td><td></td><td>fecha y hora al crear</td><td>Fecha</td></tr>
+<tr><td><code>profesor_id</code></td><td>bigint</td><td>No</td><td>FK → profesor</td><td></td><td>Profesor</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_sugerencia_estado</code>: CHECK (estado IN ('PENDIENTE', 'APROBADA', 'RECHAZADA'))</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-politica_prestamo"><code>politica_prestamo</code></h4>
+<p class="nota-tabla">Parámetros de préstamo por tipo de usuario lector (RN-01 a RN-06).</p>
+<p class="nota-tabla">Modelo: <code>prestamos.PoliticaPrestamo</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>tipo_usuario</code></td><td>varchar(15)</td><td>No</td><td>UQ</td><td></td><td>Tipo de usuario. Valores: ESTUDIANTE · PROFESOR</td></tr>
+<tr><td><code>dias_prestamo</code></td><td>smallint unsigned</td><td>No</td><td></td><td></td><td>Días de préstamo</td></tr>
+<tr><td><code>max_libros</code></td><td>smallint unsigned</td><td>No</td><td></td><td></td><td>Máximo de libros</td></tr>
+<tr><td><code>max_renovaciones</code></td><td>smallint unsigned</td><td>No</td><td></td><td></td><td>Máximo de renovaciones</td></tr>
+<tr><td><code>multa_por_dia</code></td><td>decimal(8,2)</td><td>No</td><td></td><td></td><td>Multa por día</td></tr>
+<tr><td><code>multa_maxima</code></td><td>decimal(8,2)</td><td>No</td><td></td><td></td><td>Multa máxima</td></tr>
+<tr><td><code>horas_para_recoger</code></td><td>smallint unsigned</td><td>No</td><td></td><td></td><td>Horas para recoger</td></tr>
+<tr><td><code>actualizado_en</code></td><td>datetime(6)</td><td>No</td><td></td><td>fecha y hora al guardar</td><td>Actualizado en</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_politica_multas</code>: CHECK (multa_maxima &gt;= 0 AND multa_por_dia &gt;= 0)</li>
+<li><code>ck_politica_tipo</code>: CHECK (tipo_usuario IN ('ESTUDIANTE', 'PROFESOR'))</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-prestamo"><code>prestamo</code></h4>
+<p class="nota-tabla">Préstamo de un ejemplar a un usuario lector, de la solicitud a la devolución.</p>
+<p class="nota-tabla">Modelo: <code>prestamos.Prestamo</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>estado</code></td><td>varchar(12)</td><td>No</td><td>Índice</td><td>Prestamo.Estado.SOLICITADO</td><td>Estado. Valores: SOLICITADO · ACTIVO · VENCIDO · DEVUELTO · CANCELADO · EXPIRADO · PERDIDO</td></tr>
+<tr><td><code>fecha_solicitud</code></td><td>datetime(6)</td><td>No</td><td></td><td>now()</td><td>Fecha de solicitud</td></tr>
+<tr><td><code>fecha_limite_recoger</code></td><td>datetime(6)</td><td>Sí</td><td></td><td></td><td>Límite para recoger</td></tr>
+<tr><td><code>fecha_prestamo</code></td><td>datetime(6)</td><td>Sí</td><td></td><td></td><td>Fecha de préstamo</td></tr>
+<tr><td><code>fecha_vencimiento</code></td><td>date</td><td>Sí</td><td>Índice</td><td></td><td>Fecha de vencimiento</td></tr>
+<tr><td><code>fecha_devolucion</code></td><td>datetime(6)</td><td>Sí</td><td></td><td></td><td>Fecha de devolución</td></tr>
+<tr><td><code>num_renovaciones</code></td><td>smallint unsigned</td><td>No</td><td></td><td>0</td><td>Renovaciones</td></tr>
+<tr><td><code>observaciones</code></td><td>varchar(255)</td><td>Sí</td><td></td><td></td><td>Observaciones</td></tr>
+<tr><td><code>ejemplar_id</code></td><td>bigint</td><td>No</td><td>FK → ejemplar</td><td></td><td>Ejemplar</td></tr>
+<tr><td><code>entregado_por_id</code></td><td>bigint</td><td>Sí</td><td>FK → usuario</td><td></td><td>Entregado por</td></tr>
+<tr><td><code>recibido_por_id</code></td><td>bigint</td><td>Sí</td><td>FK → usuario</td><td></td><td>Recibido por</td></tr>
+<tr><td><code>usuario_id</code></td><td>bigint</td><td>No</td><td>FK → usuario</td><td></td><td>Usuario</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_prestamo_estado</code>: CHECK (estado IN ('SOLICITADO', 'ACTIVO', 'VENCIDO', 'DEVUELTO', 'CANCELADO', 'EXPIRADO', 'PERDIDO'))</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-reserva"><code>reserva</code></h4>
+<p class="nota-tabla">Reserva de un libro sin ejemplares disponibles; cola FIFO por fecha_reserva (RN-12).</p>
+<p class="nota-tabla">Modelo: <code>prestamos.Reserva</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>estado</code></td><td>varchar(12)</td><td>No</td><td>Índice</td><td>Reserva.Estado.PENDIENTE</td><td>Estado. Valores: PENDIENTE · DISPONIBLE · ATENDIDA · CANCELADA · EXPIRADA</td></tr>
+<tr><td><code>fecha_reserva</code></td><td>datetime(6)</td><td>No</td><td></td><td>now()</td><td>Fecha de reserva</td></tr>
+<tr><td><code>fecha_expiracion</code></td><td>datetime(6)</td><td>Sí</td><td></td><td></td><td>Fecha de expiración</td></tr>
+<tr><td><code>ejemplar_asignado_id</code></td><td>bigint</td><td>Sí</td><td>FK → ejemplar</td><td></td><td>Ejemplar asignado</td></tr>
+<tr><td><code>libro_id</code></td><td>bigint</td><td>No</td><td>FK → libro</td><td></td><td>Libro</td></tr>
+<tr><td><code>usuario_id</code></td><td>bigint</td><td>No</td><td>FK → usuario</td><td></td><td>Usuario</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_reserva_estado</code>: CHECK (estado IN ('PENDIENTE', 'DISPONIBLE', 'ATENDIDA', 'CANCELADA', 'EXPIRADA'))</li>
+</ul>
+<p class="nota-tabla">Índices compuestos:</p>
+<ul class="restricciones">
+<li><code>idx_reserva_libro_fecha</code>: (libro, fecha_reserva)</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-multa"><code>multa</code></h4>
+<p class="nota-tabla">Modelo: <code>multas.Multa</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>prestamo_id</code></td><td>bigint</td><td>No</td><td>FK → prestamo</td><td></td><td>Prestamo</td></tr>
+<tr><td><code>usuario_id</code></td><td>bigint</td><td>No</td><td>FK → usuario</td><td></td><td>Usuario</td></tr>
+<tr><td><code>motivo</code></td><td>varchar(10)</td><td>No</td><td></td><td></td><td>Motivo. Valores: RETRASO · DANIO · PERDIDA</td></tr>
+<tr><td><code>dias_retraso</code></td><td>smallint unsigned</td><td>No</td><td></td><td>0</td><td>Dias retraso</td></tr>
+<tr><td><code>monto</code></td><td>decimal(10,2)</td><td>No</td><td></td><td></td><td>Monto</td></tr>
+<tr><td><code>estado</code></td><td>varchar(10)</td><td>No</td><td>Índice</td><td>Multa.Estado.PENDIENTE</td><td>Estado. Valores: PENDIENTE · PAGADA · CONDONADA</td></tr>
+<tr><td><code>fecha_generacion</code></td><td>datetime(6)</td><td>No</td><td></td><td>now()</td><td>Fecha generacion</td></tr>
+<tr><td><code>justificacion_condonacion</code></td><td>varchar(255)</td><td>Sí</td><td></td><td></td><td>Justificacion condonacion</td></tr>
+<tr><td><code>condonada_por_id</code></td><td>bigint</td><td>Sí</td><td>FK → usuario</td><td></td><td>Condonada por</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_multa_monto</code>: CHECK (monto &gt; 0)</li>
+<li><code>ck_multa_motivo</code>: CHECK (motivo IN ('RETRASO', 'DANIO', 'PERDIDA'))</li>
+<li><code>ck_multa_estado</code>: CHECK (estado IN ('PENDIENTE', 'PAGADA', 'CONDONADA'))</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-pago"><code>pago</code></h4>
+<p class="nota-tabla">Modelo: <code>multas.Pago</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>multa_id</code></td><td>bigint</td><td>No</td><td>FK → multa</td><td></td><td>Multa</td></tr>
+<tr><td><code>monto</code></td><td>decimal(10,2)</td><td>No</td><td></td><td></td><td>Monto</td></tr>
+<tr><td><code>metodo</code></td><td>varchar(15)</td><td>No</td><td></td><td></td><td>Metodo. Valores: EFECTIVO · TARJETA · TRANSFERENCIA</td></tr>
+<tr><td><code>folio_recibo</code></td><td>varchar(30)</td><td>No</td><td>UQ</td><td></td><td>Folio recibo</td></tr>
+<tr><td><code>fecha_pago</code></td><td>datetime(6)</td><td>No</td><td></td><td>now()</td><td>Fecha pago</td></tr>
+<tr><td><code>registrado_por_id</code></td><td>bigint</td><td>No</td><td>FK → usuario</td><td></td><td>Registrado por</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_pago_monto</code>: CHECK (monto &gt; 0)</li>
+<li><code>ck_pago_metodo</code>: CHECK (metodo IN ('EFECTIVO', 'TARJETA', 'TRANSFERENCIA'))</li>
+</ul>
+<h4 class="tabla-bd" id="tabla-notificacion"><code>notificacion</code></h4>
+<p class="nota-tabla">Modelo: <code>notificaciones.Notificacion</code></p>
+<table class="dicc"><thead><tr><th>Columna</th><th>Tipo</th><th>Nulo</th><th>Llave</th><th>Valor por defecto</th><th>Descripción</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>bigint auto_increment</td><td>No</td><td>PK</td><td></td><td>Identificador</td></tr>
+<tr><td><code>usuario_id</code></td><td>bigint</td><td>No</td><td>FK → usuario</td><td></td><td>Usuario</td></tr>
+<tr><td><code>tipo</code></td><td>varchar(20)</td><td>No</td><td></td><td></td><td>Tipo. Valores: VENCE_PRONTO · VENCIDO · RESERVA_DISPONIBLE · MULTA · GENERAL</td></tr>
+<tr><td><code>mensaje</code></td><td>varchar(500)</td><td>No</td><td></td><td></td><td>Mensaje</td></tr>
+<tr><td><code>leida</code></td><td>tinyint(1)</td><td>No</td><td></td><td>False</td><td>Leida</td></tr>
+<tr><td><code>fecha</code></td><td>datetime(6)</td><td>No</td><td></td><td>now()</td><td>Fecha</td></tr>
+</tbody></table>
+<p class="nota-tabla">Restricciones:</p>
+<ul class="restricciones">
+<li><code>ck_notificacion_tipo</code>: CHECK (tipo IN ('VENCE_PRONTO', 'VENCIDO', 'RESERVA_DISPONIBLE', 'MULTA', 'GENERAL'))</li>
+</ul>
+
+<!-- ============================================================ 5 -->
+<h2 id="pantallas">5. Prototipo de pantallas</h2>
+<div class="pendiente"><strong>Pendiente (Alvaro):</strong> wireframes del sistema. Cada paquete le pasa su lista de pantallas; la del paquete B está abajo.</div>
+
+<h4>Paquete B · Administración del acervo <span class="responsable">Diego</span></h4>
+<table>
+  <thead><tr><th>Pantalla</th><th>Contenido</th><th>Ruta</th></tr></thead>
+  <tbody><tr><td><strong>Catálogo</strong></td><td>Búsqueda con filtros (texto, buscar en, categoría, editorial, solo disponibles) y tabla paginada con disponibles «n de m».</td><td><code>/catalogo/</code></td></tr><tr><td><strong>Detalle de libro</strong></td><td>Datos y portada. Lector: Solicitar préstamo o Reservar. Bibliotecario: editar, agregar ejemplar, dar de baja y tabla de ejemplares.</td><td><code>/catalogo/libros/&lt;id&gt;/</code></td></tr><tr><td><strong>Formulario de libro</strong></td><td>Alta y edición con autores, categoría, editorial y portada.</td><td><code>/catalogo/libros/nuevo/</code></td></tr><tr><td><strong>Formulario de ejemplar</strong></td><td>Código, estado (solo DISPONIBLE, EN_REPARACION o BAJA), ubicación y fecha.</td><td><code>/catalogo/libros/&lt;id&gt;/ejemplares/nuevo/</code></td></tr><tr><td><strong>Autores, editoriales y categorías</strong></td><td>Lista paginada con editar y eliminar, formulario y confirmación.</td><td><code>/catalogo/autores/</code></td></tr><tr><td><strong>Sugerir libro (profesor)</strong></td><td>Formulario y lista «Mis sugerencias» con su estado y respuesta.</td><td><code>/catalogo/sugerir/</code></td></tr><tr><td><strong>Sugerencias (bibliotecario)</strong></td><td>Bandeja con pendientes primero y pantalla para aprobar o rechazar.</td><td><code>/catalogo/sugerencias/</code></td></tr></tbody>
+</table>
+
+<h4>Paquete C · Préstamos y reservas <span class="responsable">Ricardo</span></h4>
+<table>
+  <thead><tr><th>Pantalla</th><th>Contenido</th><th>Ruta</th></tr></thead>
+  <tbody><tr><td><strong>Solicitar préstamo</strong></td><td>Resumen del libro, días de préstamo, fecha estimada de vencimiento y plazo para recoger; botón «Confirmar solicitud». Si no es elegible, muestra todos los motivos.</td><td><code>/prestamos/libro/&lt;id&gt;/solicitar/</code></td></tr><tr><td><strong>Reservar libro</strong></td><td>Confirmación de la reserva y lugar en la fila. Si hay ejemplares disponibles, ofrece solicitar el préstamo.</td><td><code>/prestamos/libro/&lt;id&gt;/reservar/</code></td></tr><tr><td><strong>Mis préstamos</strong></td><td>Préstamos vigentes e historial con estado, fechas y renovaciones restantes; botones «Renovar» y «Cancelar solicitud» (CU-09, CU-10, CU-08, CU-13).</td><td><code>/prestamos/mis-prestamos/</code></td></tr><tr><td><strong>Mis reservas</strong></td><td>Reservas con estado, lugar en la fila y fecha límite para recoger; botón «Cancelar» (CU-12).</td><td><code>/prestamos/mis-reservas/</code></td></tr><tr><td><strong>Solicitudes pendientes</strong></td><td>Bibliotecario: solicitudes SOLICITADO con usuario, libro, ejemplar y fecha límite; botón «Entregar» (CU-23).</td><td><code>/prestamos/solicitudes/</code></td></tr><tr><td><strong>Préstamo en mostrador</strong></td><td>Bibliotecario: usuario y código de inventario del ejemplar (CU-24).</td><td><code>/prestamos/mostrador/</code></td></tr><tr><td><strong>Reservas</strong></td><td>Bibliotecario: reservas filtradas por estado, cola FIFO por libro; botones «Entregar» (recoger reserva) y «Cancelar» con motivo (CU-30).</td><td><code>/prestamos/reservas/</code></td></tr><tr><td><strong>Políticas de préstamo</strong></td><td>Bibliotecario: tabla de políticas por tipo de usuario y formulario de edición (CU-31).</td><td><code>/prestamos/politicas/</code></td></tr></tbody>
+</table>
+
+<!-- ============================================================ 6 -->
+<h2 id="implementacion">6. Implementación</h2>
+
+<h3>6.1 Arquitectura</h3>
+<table>
+  <thead><tr><th>App</th><th>Responsabilidad</th><th>Paquete</th></tr></thead>
+  <tbody>
+    <tr><td><code>cuentas</code></td><td>Usuario, Estudiante, Profesor, Carrera, Departamento; inicio de sesión, roles y gestión de usuarios.</td><td>A</td></tr>
+    <tr><td><code>catalogo</code></td><td>Autor, Editorial, Categoria, Libro, LibroAutor, Ejemplar, SugerenciaAdquisicion; búsqueda, gestión del acervo y sugerencias.</td><td>B</td></tr>
+    <tr><td><code>prestamos</code></td><td>PoliticaPrestamo, Prestamo, Reserva; solicitud, entrega, renovación y reservas.</td><td>C</td></tr>
+    <tr><td><code>multas</code></td><td>Multa, Pago; devolución, multas, pagos y condonación.</td><td>D</td></tr>
+    <tr><td><code>notificaciones</code></td><td>Notificacion; avisos al usuario.</td><td>D</td></tr>
+    <tr><td><code>reportes</code></td><td>Panel de reportes para el bibliotecario.</td><td>A</td></tr>
+  </tbody>
+</table>
+<p>Cada app separa responsabilidades según MTV: <code>models.py</code> (datos y métodos de dominio), <code>services.py</code> (reglas de negocio, dentro de <code>transaction.atomic()</code> cuando modifican varios registros), <code>views.py</code> (vistas basadas en clases que solo orquestan) y <code>templates/&lt;app&gt;/</code> (plantillas que extienden <code>base.html</code>, con Bootstrap 5).</p>
+
+<h3>6.2 Cómo ejecutar</h3>
+<pre>cp .env.example .env            # llenar contraseñas y SECRET_KEY
+docker compose up -d            # MySQL 8.4
+python -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py cargar_datos_prueba
+python manage.py runserver</pre>
+
+<h3>6.3 Datos de prueba</h3>
+<p><code>python manage.py cargar_datos_prueba</code> crea 6 carreras, 5 departamentos, 2 bibliotecarios, 5 profesores, 20 estudiantes, 10 categorías, 14 editoriales, 66 autores, 50 libros, 118 ejemplares y 3 sugerencias. No duplica datos si se ejecuta de nuevo. Con <code>--libros 10000</code> agrega libros sintéticos para medir RNF-05. Cada app puede sumar sus datos con un módulo <code>datos_prueba.py</code> que exponga <code>cargar()</code>.</p>
+<table>
+  <thead><tr><th>Rol</th><th>Usuarios</th><th>Contraseña</th></tr></thead>
+  <tbody>
+    <tr><td>Bibliotecario</td><td><code>biblio1</code>, <code>biblio2</code></td><td rowspan="3"><code>biblioteca2026</code></td></tr>
+    <tr><td>Profesor</td><td><code>prof1</code> … <code>prof5</code></td></tr>
+    <tr><td>Estudiante</td><td><code>est01</code> … <code>est20</code></td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ 7 -->
+<h2 id="pruebas">7. Pruebas</h2>
+<p>Pruebas con <code>django.test.TestCase</code> en cada app (<code>python manage.py test</code>), cubriendo las reglas RN-01 a RN-11 (RNF-07).</p>
+<table>
+  <thead><tr><th>App</th><th>Qué se prueba</th><th>Pruebas</th></tr></thead>
+  <tbody>
+    <tr><td><code>catalogo</code></td><td>RN-15 (<code>es_prestable</code> con cada estado), contratos con préstamos, unicidad de ISBN y código de inventario, CHECK y PROTECT; búsqueda por cada criterio; permisos; baja lógica; sugerencias; datos de prueba.</td><td>34</td></tr>
+    <tr><td><code>cuentas</code></td><td><!-- Alvaro --></td><td></td></tr>
+    <tr><td><code>prestamos</code></td><td>Modelos y transiciones de estado; política por tipo de usuario y su validación; elegibilidad (RN-02, RN-08 con multas reales, RN-11, cuenta bloqueada); solicitar, entregar, mostrador, cancelar, renovar (RN-03, RN-09, RN-10), reservar y recoger con cola FIFO (RN-12); concurrencia con bloqueo de filas; vistas por rol (permisos, POST exitoso y rechazado); datos de prueba.</td><td>199</td></tr>
+    <tr><td><code>multas</code> / <code>notificaciones</code></td><td><!-- Samanta --></td><td></td></tr>
+    <tr><td><code>reportes</code></td><td><!-- Alvaro --></td><td></td></tr>
+  </tbody>
+</table>
+<div class="pendiente"><strong>Pendiente (cada paquete):</strong> qué prueba su app y cuántas pruebas tiene (<code>python manage.py test &lt;app&gt;</code>). Rendimiento: la búsqueda del catálogo con 10,000 libros responde en menos de 0.1 s (RNF-05 pide menos de 2 s).</div>
+
+<!-- ============================================================ 8 -->
+<h2 id="conclusiones">8. Conclusiones</h2>
+<div class="pendiente"><strong>Pendiente (todos):</strong> lecciones aprendidas, dificultades y trabajo futuro.</div>
+
+</main>
+<script>
+{
+  // Si el PNG de un diagrama todavía no existe, muestra qué falta y dónde va.
+  for (const img of document.querySelectorAll("img[data-pendiente]")) {
+    const marcar = () => {
+      const aviso = document.createElement("div");
+      aviso.className = "pendiente";
+      aviso.textContent = img.dataset.pendiente;
+      img.closest("figure").classList.add("sin-imagen");
+      img.after(aviso);
+      img.hidden = true;
+    };
+    if (img.complete && img.naturalWidth === 0) marcar();
+    else img.addEventListener("error", marcar, { once: true });
+  }
+}
+</script>
+</body>
+</html>
