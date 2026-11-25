@@ -1,8 +1,48 @@
 {% extends "base.html" %}
 
+{% block titulo %}Inicio · Biblioteca{% endblock %}
+
 {% block contenido %}
-<h1 class="h3">
-    Bienvenido, {{ user.get_full_name|default:user.username }}
-</h1>
-<p>Tu rol es: {{ user.get_tipo_usuario_display }}.</p>
+<section class="saludo">
+    <h1>Hola, {{ user.first_name|default:user.username }}</h1>
+    <p>¿Qué quieres leer hoy?</p>
+</section>
+
+{# Atajo directo a la búsqueda del catálogo (CU-04) #}
+<form class="ficha inicio-buscar" method="get" action="{% url 'catalogo:buscar' %}" role="search">
+    <label for="inicio-q">Busca por título, autor o ISBN</label>
+    <div class="buscador-principal">
+        <input class="form-control" type="search" id="inicio-q" name="q" autocomplete="off">
+        <button class="btn btn-primary" type="submit">Buscar</button>
+    </div>
+</form>
+
+<ul class="atajos">
+    <li>
+        <a href="{% url 'prestamos:mis_prestamos' %}">
+            <strong>Mis préstamos</strong>
+            <span>Fechas de vencimiento, renovaciones y solicitudes por recoger.</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'prestamos:mis_reservas' %}">
+            <strong>Mis reservas</strong>
+            <span>Tu lugar en la fila de los libros que esperas.</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'catalogo:buscar' %}?solo_disponibles=on">
+            <strong>Disponibles ahora</strong>
+            <span>Libros con al menos un ejemplar listo para préstamo.</span>
+        </a>
+    </li>
+    {% if user.tipo_usuario == "PROFESOR" %}
+        <li>
+            <a href="{% url 'catalogo:sugerir' %}">
+                <strong>Sugerir libro</strong>
+                <span>Pide que la biblioteca adquiera un título para tu materia.</span>
+            </a>
+        </li>
+    {% endif %}
+</ul>
 {% endblock %}
