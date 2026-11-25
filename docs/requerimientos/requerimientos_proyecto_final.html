@@ -523,6 +523,400 @@ LANGUAGE_CODE = "es-mx"</code></pre>
 </table>
 </div>
 
+<h3>CU-14 Consultar mis multas</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>CU-14 Consultar mis multas</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>v1.0 · J R  · 25/11/2026</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Estudiante o Profesor (Usuario lector)</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Ninguno</td></tr>
+    <tr><th scope="row">Descripción</th><td>El usuario lector consulta sus multas registradas, su estado y el saldo pendiente por pagar para conocer su situación en la biblioteca.</td></tr>
+    <tr><th scope="row">Disparador</th><td>El usuario selecciona «Mis multas» en el menú de navegación o en su perfil.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>El usuario inició sesión (CU-01).</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>Se muestra el listado de multas del usuario y su monto total adeudado actualizado.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>El usuario no puede consultar ni modificar multas de otros usuarios.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El usuario selecciona «Mis multas».</li>
+        <li>El sistema consulta las multas asociadas al usuario autenticado y calcula su saldo adeudado pendiente.</li>
+        <li>El sistema muestra la tabla de multas (motivo, días de retraso, monto, pagos registrados y estado) y el total adeudado.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>3a. El usuario no tiene multas registradas:</strong> el sistema muestra un mensaje indicando que no tiene multas y su saldo adeudado es $0.00.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>1a. Sesión no iniciada o expirada:</strong> el sistema redirige al inicio de sesión (CU-01).</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-08, RN-16</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-01, RNF-02, RNF-04, RNF-06</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Ninguna</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Media: varias veces por semana. Prioridad media.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>CU-15 Consultar notificaciones</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>CU-15 Consultar notificaciones</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>v1.0 · Samanta Ramos · 25/11/2026</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Estudiante o Profesor (Usuario lector)</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Ninguno</td></tr>
+    <tr><th scope="row">Descripción</th><td>El usuario lector revisa las notificaciones generadas por el sistema sobre vencimientos, multas o disponibilidad de reservas.</td></tr>
+    <tr><th scope="row">Disparador</th><td>El usuario selecciona el ícono o enlace de «Notificaciones» en la barra de navegación.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>El usuario inició sesión (CU-01).</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>El sistema muestra las notificaciones del usuario y actualiza el contador de no leídas al marcarse como leídas.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>Cada usuario solo accede a sus propias notificaciones.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El usuario abre la sección de «Notificaciones».</li>
+        <li>El sistema obtiene las notificaciones del usuario ordenadas por fecha descendente.</li>
+        <li>El sistema muestra el tipo, mensaje, fecha y estado de lectura de cada notificación.</li>
+        <li>El usuario marca una notificación como leída (o el sistema la marca al consultarla).</li>
+        <li>El sistema actualiza el estado a leída y refresca el contador de no leídas.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>2a. No hay notificaciones:</strong> el sistema muestra un mensaje indicando que no tiene notificaciones pendientes.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>1a. Sesión no iniciada o expirada:</strong> el sistema redirige al inicio de sesión (CU-01).</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>Ninguna</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-01, RNF-02, RNF-04, RNF-06</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Ninguna</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Media: varias veces por semana. Prioridad baja.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>CU-26 Generar multa por retraso</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>CU-26 Generar multa por retraso</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>v1.0 · Samanta Ramos · 25/11/2026</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Sistema (invocado desde CU-25)</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Bibliotecario, Usuario lector</td></tr>
+    <tr><th scope="row">Descripción</th><td>El sistema calcula el monto de multa por entrega tardía según la política del tipo de usuario y el tope máximo permitido, registrando la multa pendiente.</td></tr>
+    <tr><th scope="row">Disparador</th><td>Se registra la devolución de un préstamo con fecha posterior a su fecha de vencimiento (flujo alternativo 5a de CU-25).</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>Existe un préstamo devuelto con retraso positivo respecto a su fecha de vencimiento.</li>
+        <li>Existe una política de préstamo vigente para el tipo de usuario.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>Se registra una multa en estado <em>PENDIENTE</em> asociada al préstamo con los días de retraso y el monto calculado.</li>
+        <li>Se envía una notificación de multa al usuario.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>El monto calculado nunca excede el tope máximo de multa establecido por la política.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El sistema obtiene la fecha de devolución y la fecha de vencimiento del préstamo.</li>
+        <li>El sistema calcula los días naturales de retraso.</li>
+        <li>El sistema consulta la tarifa diaria y el monto máximo de multa de la política del usuario.</li>
+        <li>El sistema calcula el monto aplicando el tope máximo (RN-07).</li>
+        <li>El sistema guarda la multa en estado <em>PENDIENTE</em> dentro de la misma transacción de devolución.</li>
+        <li>El sistema notifica al usuario sobre la multa generada.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>4a. El cálculo supera el monto máximo:</strong> el sistema asigna el monto máximo configurado en la política y continúa en el paso 5.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>3a. No existe política configurada para el tipo de usuario:</strong> el sistema aborta la transacción y reporta el error de configuración.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-04, RN-05, RN-07, RN-16</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-03, RNF-06</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Extiende CU-25; es incluido/invocado en la devolución tardía.</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Media: ocurre cuando hay devoluciones tardías. Prioridad alta.</td></tr>
+  </tbody>
+</table>
+</div>
+
+
+<h3>CU-27 Registrar pérdida o daño de ejemplar</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>CU-27 Registrar pérdida o daño de ejemplar</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>v1.0 · Samanta Ramos · 25/11/2026</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Bibliotecario</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Usuario lector</td></tr>
+    <tr><th scope="row">Descripción</th><td>El bibliotecario registra la pérdida o el daño de un ejemplar, actualiza el estado del ejemplar y genera la multa correspondiente al costo de reposición.</td></tr>
+    <tr><th scope="row">Disparador</th><td>El bibliotecario reporta un ejemplar perdido o dañado durante una devolución o revisión.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>El bibliotecario inició sesión.</li>
+        <li>El ejemplar y el préstamo o registro asociado existen en el sistema.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>El ejemplar cambia a estado <em>PERDIDO</em> o <em>EN_REPARACION</em> según corresponda (RN-15).</li>
+        <li>Se genera una multa en estado <em>PENDIENTE</em> por el costo de reposición del libro (RN-13).</li>
+        <li>Se notifica al usuario.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>El cambio de estado del ejemplar y el registro de la multa se realizan de forma atómica; no se borran registros históricos.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El bibliotecario selecciona la opción de registrar pérdida o daño e identifica el ejemplar.</li>
+        <li>El sistema muestra los datos del ejemplar, el libro y su costo de reposición.</li>
+        <li>El bibliotecario indica si el caso es pérdida o daño y confirma el registro.</li>
+        <li>El sistema actualiza el estado del ejemplar a <em>PERDIDO</em> o <em>EN_REPARACION</em> y actualiza el préstamo si aplica.</li>
+        <li>El sistema genera la multa por el monto del costo de reposición en estado <em>PENDIENTE</em>.</li>
+        <li>El sistema notifica al usuario y muestra la confirmación.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>3a. El bibliotecario cancela la operación:</strong> el sistema no guarda cambios y regresa a la pantalla anterior.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>2a. El ejemplar no existe o ya se encuentra dado de baja:</strong> el sistema informa el error y no registra cambios.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-13, RN-15, RN-16</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-01, RNF-03, RNF-06</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Extiende CU-25.</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Baja: ocasional. Prioridad media.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>CU-28 Registrar pago de multa</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>CU-28 Registrar pago de multa</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>v1.0 · Samanta Ramos · 25/11/2026</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Bibliotecario</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Usuario lector</td></tr>
+    <tr><th scope="row">Descripción</th><td>El bibliotecario registra un pago parcial o total sobre una multa pendiente en mostrador, generando un folio y actualizando el estado de la multa cuando se cubre el monto.</td></tr>
+    <tr><th scope="row">Disparador</th><td>Un usuario acude a pagar una multa en el mostrador de la biblioteca.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>El bibliotecario inició sesión.</li>
+        <li>Existe una multa en estado <em>PENDIENTE</em> con saldo mayor a cero.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>Se registra un pago con folio único asociado a la multa y al bibliotecario que lo recibió.</li>
+        <li>Si el total pagado cubre el monto de la multa, su estado cambia a <em>PAGADA</em>.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>Los pagos registrados no se eliminan y la actualización del saldo/estado ocurre en una transacción atómica.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El bibliotecario selecciona una multa pendiente y captura el monto a pagar.</li>
+        <li>El sistema valida que el monto sea positivo y no exceda el saldo pendiente.</li>
+        <li>El sistema registra el pago con folio único dentro de una transacción.</li>
+        <li>Si la suma de pagos cubre el monto total de la multa, el sistema cambia la multa a <em>PAGADA</em>.</li>
+        <li>El sistema muestra el comprobante de pago con su folio y el saldo restante.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>4a. El pago es parcial y queda saldo pendiente:</strong> la multa permanece en estado <em>PENDIENTE</em> y el sistema muestra el nuevo saldo adeudado.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>2a. Monto menor o igual a cero o superior al saldo pendiente:</strong> el sistema rechaza el registro y muestra el motivo.</li>
+        <li><strong>1a. La multa ya está pagada o condonada:</strong> el sistema impide registrar nuevos pagos.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-08, RN-16</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-01, RNF-03, RNF-06</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Puede invocarse de forma opcional desde CU-25.</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Media: ocurre con regularidad. Prioridad alta.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>CU-29 Condonar multa</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>CU-29 Condonar multa</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>v1.0 · Samanta Ramos · 25/11/2026</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Bibliotecario</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Usuario lector</td></tr>
+    <tr><th scope="row">Descripción</th><td>El bibliotecario condona una multa pendiente registrando una justificación obligatoria y guardando quién realizó la condonación.</td></tr>
+    <tr><th scope="row">Disparador</th><td>El bibliotecario selecciona la opción de condonar una multa pendiente.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>El usuario autenticado tiene rol de bibliotecario.</li>
+        <li>Existe una multa en estado <em>PENDIENTE</em>.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>La multa cambia a estado <em>CONDONADA</em> con su justificación y el registro del bibliotecario que la condonó.</li>
+        <li>Se notifica al usuario.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>No se borra el registro de la multa y no se condona sin justificación.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El bibliotecario selecciona una multa en estado <em>PENDIENTE</em> y elige «Condonar».</li>
+        <li>El sistema solicita la justificación de la condonación.</li>
+        <li>El bibliotecario ingresa la justificación y confirma.</li>
+        <li>El sistema valida que la justificación no esté vacía y actualiza la multa a <em>CONDONADA</em> guardando el usuario responsable y la fecha.</li>
+        <li>El sistema notifica al usuario y muestra la confirmación.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>3a. El bibliotecario cancela la acción:</strong> el sistema no modifica la multa.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>4a. Justificación vacía o faltante:</strong> el sistema rechaza la condonación y solicita ingresar un motivo (RN-14).</li>
+        <li><strong>1a. Usuario sin permiso de bibliotecario o multa no pendiente:</strong> el sistema deniega la operación.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-14, RN-16</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-01, RNF-03, RNF-06</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Ninguna</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Baja: ocasional. Prioridad media.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>CU-34 Marcar préstamos vencidos</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>CU-34 Marcar préstamos vencidos</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>v1.0 · Samanta Ramos · 25/11/2026</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Reloj del sistema</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Usuario lector, Bibliotecario</td></tr>
+    <tr><th scope="row">Descripción</th><td>El proceso programado identifica los préstamos activos cuya fecha de vencimiento ya pasó y los actualiza a estado vencido.</td></tr>
+    <tr><th scope="row">Disparador</th><td>Ejecución programada del comando de vencimientos del sistema.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>Existen préstamos en estado <em>ACTIVO</em> en el sistema.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>Los préstamos activos con fecha de vencimiento superada pasan a estado <em>VENCIDO</em>.</li>
+        <li>Se notifica a los usuarios correspondientes sobre el vencimiento.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>Los préstamos que aún no vencen o ya fueron devueltos no se modifican.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El sistema consulta los préstamos en estado <em>ACTIVO</em> cuya fecha de vencimiento sea anterior a la fecha actual.</li>
+        <li>Para cada préstamo encontrado, el sistema cambia su estado a <em>VENCIDO</em>.</li>
+        <li>El sistema genera una notificación de préstamo vencido para el usuario.</li>
+        <li>El sistema registra el resumen de préstamos marcados como vencidos.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>1a. No hay préstamos vencidos por marcar:</strong> el sistema finaliza el proceso sin cambios y lo reporta en el resumen.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>2a. Error al actualizar un registro:</strong> el sistema revierte los cambios del lote afectado y reporta el error.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-01, RN-08, RN-16</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-03, RNF-06</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Ninguna</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Alta: ejecución diaria programada. Prioridad alta.</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>CU-35 Expirar solicitudes y reservas no atendidas</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>CU-35 Expirar solicitudes y reservas no atendidas</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>v1.0 · Samanta Ramos · 25/11/2026</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Reloj del sistema</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Usuario lector</td></tr>
+    <tr><th scope="row">Descripción</th><td>El proceso programado expira las solicitudes de préstamo y reservas no recogidas dentro del plazo establecido, liberando el ejemplar o asignándolo al siguiente usuario en espera.</td></tr>
+    <tr><th scope="row">Disparador</th><td>Ejecución programada del comando de vencimientos del sistema.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>Existen solicitudes de préstamo o reservas pendientes de recolección con plazo configurado (RN-06).</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>Las solicitudes y reservas fuera de plazo pasan a estado <em>EXPIRADO</em> / <em>EXPIRADA</em>.</li>
+        <li>El ejemplar queda disponible o se asigna a la siguiente reserva en cola FIFO (RN-12), notificando al usuario correspondiente.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>Las transiciones de estado y la asignación de ejemplares se ejecutan de forma atómica.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El sistema localiza las solicitudes y reservas cuyo plazo para recoger ha expirado.</li>
+        <li>El sistema marca cada una como expirada.</li>
+        <li>Para cada ejemplar liberado, el sistema verifica si existen reservas pendientes en orden FIFO (RN-12).</li>
+        <li>Si hay reserva pendiente, asigna el ejemplar al siguiente usuario y le notifica; si no, marca el ejemplar como <em>DISPONIBLE</em>.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>1a. No hay solicitudes ni reservas expiradas:</strong> el sistema concluye sin modificaciones.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>4a. Fallo al actualizar el estado o notificar:</strong> el sistema registra el error y evita dejar inconsistencias en el ejemplar.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-06, RN-12, RN-15</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-03, RNF-06</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Ninguna</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Alta: ejecución diaria programada. Prioridad alta.</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>CU-36 Enviar recordatorios de vencimiento</h3>
+<div class="table-wrap">
+<table class="uc">
+  <tbody>
+    <tr><th scope="row">ID y nombre</th><td>CU-36 Enviar recordatorios de vencimiento</td></tr>
+    <tr><th scope="row">Versión / autor / fecha</th><td>v1.0 · Samanta Ramos · 25/11/2026</td></tr>
+    <tr><th scope="row">Actor principal</th><td>Reloj del sistema</td></tr>
+    <tr><th scope="row">Actores secundarios</th><td>Usuario lector</td></tr>
+    <tr><th scope="row">Descripción</th><td>El proceso programado envía notificaciones de recordatorio a los usuarios cuyos préstamos activos están próximos a vencer.</td></tr>
+    <tr><th scope="row">Disparador</th><td>Ejecución programada del comando de vencimientos del sistema.</td></tr>
+    <tr><th scope="row">Precondiciones</th><td>
+      <ul>
+        <li>Existen préstamos en estado <em>ACTIVO</em> dentro de la ventana de días previa al vencimiento definida por el equipo.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Postcondiciones (éxito)</th><td>
+      <ul>
+        <li>Se registran notificaciones de tipo <em>VENCE_PRONTO</em> para los usuarios con préstamos próximos a vencer.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Garantías mínimas</th><td>El envío de recordatorios no altera el estado ni la fecha de vencimiento del préstamo.</td></tr>
+    <tr><th scope="row">Flujo básico</th><td>
+      <ol>
+        <li>El sistema consulta los préstamos activos cuya fecha de vencimiento está próxima según los días configurados.</li>
+        <li>Para cada préstamo identificado, el sistema genera una notificación de recordatorio para el usuario.</li>
+        <li>El sistema guarda el registro de las notificaciones enviadas.</li>
+      </ol></td></tr>
+    <tr><th scope="row">Flujos alternativos</th><td>
+      <ul>
+        <li><strong>1a. No hay préstamos próximos a vencer:</strong> el sistema finaliza sin generar notificaciones.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Excepciones</th><td>
+      <ul>
+        <li><strong>2a. Error al crear una notificación:</strong> el sistema registra el fallo y continúa con los demás préstamos pendientes.</li>
+      </ul></td></tr>
+    <tr><th scope="row">Reglas de negocio</th><td>RN-01</td></tr>
+    <tr><th scope="row">Requisitos especiales</th><td>RNF-06</td></tr>
+    <tr><th scope="row">Relaciones</th><td>Ninguna</td></tr>
+    <tr><th scope="row">Frecuencia / prioridad</th><td>Media: ejecución diaria programada. Prioridad baja.</td></tr>
+  </tbody>
+</table>
+</div>
 <!-- ============================================================ -->
 <h2 id="bd">10. Diseño de la base de datos (MySQL)</h2>
 <p>
