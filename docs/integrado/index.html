@@ -607,7 +607,30 @@ python manage.py runserver</pre>
 
 <!-- ============================================================ 8 -->
 <h2 id="conclusiones">8. Conclusiones</h2>
-<div class="pendiente"><strong>Pendiente (todos):</strong> lecciones aprendidas, dificultades y trabajo futuro.</div>
+<p>El proyecto entregó un sistema web funcional para administrar el acervo, los préstamos, las reservas y las multas de una biblioteca escolar, construido con Django 5.2 y MySQL 8.4 en contenedores Docker. El trabajo se dividió en cuatro paquetes (cuentas y reportes, catálogo, préstamos y reservas, multas y notificaciones) que se integran a través de funciones de servicio bien definidas, y el conjunto cuenta con 293 pruebas automatizadas que se ejecutan sobre la rama <code>develop</code>.</p>
+<h3>Lecciones aprendidas</h3>
+<ul>
+  <li><strong>Acordar los contratos entre paquetes al inicio.</strong> Funciones como <code>Libro.ejemplares_disponibles()</code>, <code>Ejemplar.es_prestable()</code>, <code>tiene_multas_pendientes()</code> y <code>verificar_elegibilidad()</code> permitieron que cada integrante avanzara en paralelo sin depender del código interno de los demás.</li>
+  <li><strong>Las reglas de negocio van en una capa de servicios.</strong> Concentrar la lógica en <code>services.py</code> y dejar las vistas delgadas hizo el código más fácil de probar y de explicar.</li>
+  <li><strong>Las reglas configurables evitan cambios de código.</strong> Guardar días de préstamo, límites y montos de multa en <code>PoliticaPrestamo</code> permite que el bibliotecario ajuste la operación sin programar.</li>
+  <li><strong>La concurrencia importa aunque el sistema sea pequeño.</strong> El uso de transacciones y <code>select_for_update</code> evitó que dos usuarios obtuvieran el mismo ejemplar.</li>
+  <li><strong>Git con ramas y Pull Requests</strong> dio orden al trabajo en equipo y dejó un historial claro de quién hizo cada cambio.</li>
+</ul>
+<h3>Dificultades</h3>
+<ul>
+  <li>Coordinar los tiempos de cuatro integrantes: algunos paquetes avanzaron más rápido que otros, y la integración final se concentró en los últimos días.</li>
+  <li>Configurar el entorno (Docker, MySQL, variables de entorno) de forma idéntica en todas las computadoras del equipo.</li>
+  <li>Resolver conflictos al combinar ramas que modificaban las mismas plantillas y archivos de URLs.</li>
+  <li>Mantener la documentación (casos de uso, diagramas UML y requerimientos) sincronizada con el código conforme éste cambiaba.</li>
+</ul>
+<h3>Trabajo futuro</h3>
+<ul>
+  <li>Completar la tarea programada que marca préstamos vencidos y expira solicitudes y reservas (CU-34 y CU-35), y el envío automático de recordatorios (CU-36).</li>
+  <li>Conectar el registro de devoluciones con la asignación automática del siguiente lector en la cola de reservas.</li>
+  <li>Terminar las pantallas de multas y notificaciones y ampliar sus pruebas.</li>
+  <li>Enviar notificaciones por correo electrónico además de las notificaciones dentro del sistema.</li>
+  <li>Publicar la versión estable en la rama <code>main</code> y desplegarla en un servidor de la escuela.</li>
+</ul>
 
 </main>
 <script>
