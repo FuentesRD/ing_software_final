@@ -129,8 +129,752 @@ ul.restricciones{font-size:13.5px;margin:4px 0 10px}
   <img src="../uml/cu_A_usuarios_reportes.png" alt="Diagrama de casos de uso · Usuarios y reportes" data-pendiente="Pendiente (Alvaro): exportar a docs/uml/cu_A_usuarios_reportes.png">
   <figcaption>Diagrama de casos de uso · Usuarios y reportes</figcaption>
 </figure>
-<div class="pendiente"><strong>Pendiente (Alvaro):</strong> descripción de cada caso de uso con la plantilla de la sección 8. Copia una de las tablas del paquete B (<code>&lt;section class="cu"&gt;…&lt;/section&gt;</code>) y reemplaza el texto.<ul class="lista-cu"><li><strong>CU-01</strong> Iniciar sesión</li><li><strong>CU-02</strong> Cerrar sesión</li><li><strong>CU-03</strong> Recuperar contraseña</li><li><strong>CU-20</strong> Gestionar usuarios</li><li><strong>CU-21</strong> Importar usuarios desde CSV</li><li><strong>CU-22</strong> Bloquear / desbloquear usuario</li><li><strong>CU-32</strong> Generar reportes</li></ul></div>
-<h3 id="paquete-b">2.4 Paquete B · Administración del acervo <span class="responsable">Diego</span></h3>
+
+<!-- ============================================================
+     PAQUETE A · FICHAS DE CASOS DE USO
+     Responsable: Alvaro
+     ============================================================ -->
+
+<section class="cu" id="cu-01">
+  <h4>CU-01 · Iniciar sesión</h4>
+  <table class="plantilla">
+    <tbody>
+      <tr>
+        <th>Versión / autor / fecha</th>
+        <td>1.0 · Alvaro · 25/11/2026</td>
+      </tr>
+      <tr>
+        <th>Actor principal</th>
+        <td>Usuario registrado (Estudiante, Profesor o Bibliotecario).</td>
+      </tr>
+      <tr>
+        <th>Actores secundarios</th>
+        <td>—</td>
+      </tr>
+      <tr>
+        <th>Descripción</th>
+        <td>El usuario accede al Sistema de Gestión de Biblioteca Escolar mediante su nombre de usuario y contraseña. Django verifica las credenciales y permite acceder a las funcionalidades correspondientes a su rol.</td>
+      </tr>
+      <tr>
+        <th>Disparador</th>
+        <td>El usuario abre la página de inicio de sesión o intenta acceder a una página protegida sin estar autenticado.</td>
+      </tr>
+      <tr>
+        <th>Precondiciones</th>
+        <td>
+          <ul>
+            <li>El usuario tiene una cuenta registrada en el sistema.</li>
+            <li>La cuenta está activa.</li>
+            <li>El servidor de Django y la base de datos están disponibles.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Postcondiciones (éxito)</th>
+        <td>
+          <ul>
+            <li>El usuario queda autenticado mediante una sesión de Django.</li>
+            <li>Puede acceder a las funcionalidades autorizadas para su rol.</li>
+            <li>Se muestra la página de inicio o el destino solicitado previamente.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Garantías mínimas</th>
+        <td>Si la autenticación falla, no se inicia ninguna sesión. Las credenciales incorrectas no permiten acceder a información protegida y se mantiene la integridad de la cuenta.</td>
+      </tr>
+      <tr>
+        <th>Flujo básico</th>
+        <td>
+          <ol>
+            <li>El usuario abre la ruta <code>/login/</code>.</li>
+            <li>El sistema muestra un formulario con nombre de usuario y contraseña.</li>
+            <li>El usuario introduce sus credenciales.</li>
+            <li>El usuario selecciona «Entrar».</li>
+            <li>Django verifica que las credenciales correspondan a una cuenta activa.</li>
+            <li>El sistema inicia una sesión autenticada.</li>
+            <li>El usuario accede a la página de inicio, donde se muestran las opciones correspondientes a su rol.</li>
+          </ol>
+        </td>
+      </tr>
+      <tr>
+        <th>Flujos alternativos</th>
+        <td>
+          <ul>
+            <li>2a. El usuario olvidó su contraseña: selecciona «¿Olvidaste tu contraseña?» y continúa con CU-03.</li>
+            <li>1a. El usuario intentó abrir una página protegida: después de autenticarse puede continuar hacia el destino solicitado mediante el parámetro <code>next</code>, si es válido.</li>
+            <li>7a. El usuario es bibliotecario: la página de inicio ofrece accesos a Mostrador, Solicitudes, Reservas y Reportes.</li>
+            <li>7b. El usuario es estudiante o profesor: la página de inicio ofrece las funciones de lector.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Excepciones</th>
+        <td>
+          <ul>
+            <li>5a. Nombre de usuario o contraseña incorrectos: se rechaza la autenticación y se informa al usuario.</li>
+            <li>5b. La cuenta está desactivada: Django no permite iniciar sesión.</li>
+            <li>4a. Faltan datos obligatorios: el formulario solicita completarlos.</li>
+            <li>5c. El servidor o la base de datos no están disponibles: la autenticación no puede completarse.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Reglas de negocio</th>
+        <td>Solo los usuarios registrados y activos pueden iniciar sesión. La cuenta bloqueada para operaciones de biblioteca se diferencia de la cuenta desactivada: el bloqueo restringe operaciones como solicitar préstamos, según las reglas de elegibilidad.</td>
+      </tr>
+      <tr>
+        <th>Requisitos especiales</th>
+        <td>Autenticación mediante <code>LoginView</code> de Django; contraseñas almacenadas mediante hashes; protección CSRF; sesiones de Django y control de acceso por rol (RNF-02).</td>
+      </tr>
+      <tr>
+        <th>Relaciones</th>
+        <td>Es una precondición de las operaciones protegidas del sistema. Se relaciona con CU-02 (Cerrar sesión) y CU-03 (Recuperar contraseña).</td>
+      </tr>
+      <tr>
+        <th>Frecuencia / prioridad</th>
+        <td>Muy alta: al comenzar una sesión de trabajo. Prioridad alta.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+
+<section class="cu" id="cu-02">
+  <h4>CU-02 · Cerrar sesión</h4>
+  <table class="plantilla">
+    <tbody>
+      <tr>
+        <th>Versión / autor / fecha</th>
+        <td>1.0 · Alvaro · 25/11/2026</td>
+      </tr>
+      <tr>
+        <th>Actor principal</th>
+        <td>Usuario autenticado (Estudiante, Profesor o Bibliotecario).</td>
+      </tr>
+      <tr>
+        <th>Actores secundarios</th>
+        <td>—</td>
+      </tr>
+      <tr>
+        <th>Descripción</th>
+        <td>El usuario termina voluntariamente su sesión para impedir que otra persona utilice su acceso autenticado desde el navegador.</td>
+      </tr>
+      <tr>
+        <th>Disparador</th>
+        <td>El usuario selecciona «Cerrar sesión» en el menú del sistema.</td>
+      </tr>
+      <tr>
+        <th>Precondiciones</th>
+        <td>
+          <ul>
+            <li>El usuario tiene una sesión autenticada activa.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Postcondiciones (éxito)</th>
+        <td>
+          <ul>
+            <li>La sesión autenticada termina.</li>
+            <li>El navegador deja de tener acceso autenticado a las páginas protegidas.</li>
+            <li>Los datos de la cuenta, préstamos y demás registros se conservan.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Garantías mínimas</th>
+        <td>El cierre de sesión no elimina usuarios ni modifica información académica, bibliográfica, financiera o de préstamos.</td>
+      </tr>
+      <tr>
+        <th>Flujo básico</th>
+        <td>
+          <ol>
+            <li>El usuario navega por una página del sistema.</li>
+            <li>Selecciona el botón «Cerrar sesión».</li>
+            <li>El navegador envía la solicitud de cierre de sesión.</li>
+            <li>Django invalida la sesión autenticada.</li>
+            <li>El sistema muestra el destino configurado para usuarios que han cerrado sesión.</li>
+          </ol>
+        </td>
+      </tr>
+      <tr>
+        <th>Flujos alternativos</th>
+        <td>
+          <ul>
+            <li>1a. El usuario cambia de sección antes de cerrar sesión: la opción sigue disponible en la navegación.</li>
+            <li>5a. El usuario desea volver a entrar: debe realizar nuevamente CU-01.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Excepciones</th>
+        <td>
+          <ul>
+            <li>3a. Se intenta utilizar una solicitud de cierre de sesión no permitida: Django rechaza el método o la solicitud según su configuración.</li>
+            <li>4a. La sesión ya expiró: el usuario deberá autenticarse nuevamente para acceder a páginas protegidas.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Reglas de negocio</th>
+        <td>La salida del sistema termina la autenticación, pero no altera el estado de los préstamos, reservas, multas ni usuarios registrados.</td>
+      </tr>
+      <tr>
+        <th>Requisitos especiales</th>
+        <td>Uso de <code>LogoutView</code> de Django; cierre mediante solicitud POST protegida con CSRF; protección de páginas mediante autenticación y permisos (RNF-02).</td>
+      </tr>
+      <tr>
+        <th>Relaciones</th>
+        <td>Complementa CU-01. Después del cierre de sesión, las funciones protegidas requieren autenticación nuevamente.</td>
+      </tr>
+      <tr>
+        <th>Frecuencia / prioridad</th>
+        <td>Alta: normalmente al terminar una sesión de trabajo. Prioridad alta.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+
+<section class="cu" id="cu-03">
+  <h4>CU-03 · Recuperar contraseña</h4>
+  <table class="plantilla">
+    <tbody>
+      <tr>
+        <th>Versión / autor / fecha</th>
+        <td>1.0 · Alvaro · 25/11/2026</td>
+      </tr>
+      <tr>
+        <th>Actor principal</th>
+        <td>Usuario registrado que necesita restablecer su contraseña.</td>
+      </tr>
+      <tr>
+        <th>Actores secundarios</th>
+        <td>Servicio de correo electrónico configurado en Django.</td>
+      </tr>
+      <tr>
+        <th>Descripción</th>
+        <td>El usuario solicita restablecer su contraseña mediante el correo electrónico asociado a su cuenta y utiliza un enlace temporal para establecer una nueva.</td>
+      </tr>
+      <tr>
+        <th>Disparador</th>
+        <td>El usuario selecciona «¿Olvidaste tu contraseña?» desde la pantalla de inicio de sesión.</td>
+      </tr>
+      <tr>
+        <th>Precondiciones</th>
+        <td>
+          <ul>
+            <li>El usuario dispone de una cuenta registrada.</li>
+            <li>La cuenta tiene una dirección de correo electrónico asociada.</li>
+            <li>El mecanismo de recuperación de Django está configurado.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Postcondiciones (éxito)</th>
+        <td>
+          <ul>
+            <li>La contraseña anterior se sustituye por una nueva.</li>
+            <li>La nueva contraseña queda almacenada mediante un hash seguro.</li>
+            <li>El usuario puede iniciar sesión con la nueva contraseña.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Garantías mínimas</th>
+        <td>Si el restablecimiento no se completa, la contraseña anterior no cambia. El sistema no revela la contraseña almacenada ni muestra información que permita recuperarla directamente.</td>
+      </tr>
+      <tr>
+        <th>Flujo básico</th>
+        <td>
+          <ol>
+            <li>El usuario abre <code>/recuperar/</code>.</li>
+            <li>El sistema solicita su dirección de correo electrónico.</li>
+            <li>El usuario introduce el correo asociado a su cuenta y envía la solicitud.</li>
+            <li>Django genera un enlace de restablecimiento mediante su mecanismo de tokens.</li>
+            <li>El sistema procesa el envío del mensaje mediante el backend de correo configurado.</li>
+            <li>El usuario accede al enlace de recuperación.</li>
+            <li>El sistema valida el token y presenta el formulario para una nueva contraseña.</li>
+            <li>El usuario introduce y confirma la nueva contraseña.</li>
+            <li>Django valida la contraseña y guarda el nuevo hash.</li>
+            <li>El sistema confirma el restablecimiento y permite regresar al inicio de sesión.</li>
+          </ol>
+        </td>
+      </tr>
+      <tr>
+        <th>Flujos alternativos</th>
+        <td>
+          <ul>
+            <li>5a. En el entorno de desarrollo, el backend de correo de consola muestra el enlace en la terminal en lugar de enviarlo a un buzón externo.</li>
+            <li>3a. El usuario solicita nuevamente la recuperación y recibe el procedimiento correspondiente a la nueva solicitud.</li>
+            <li>10a. Después de restablecer la contraseña, el usuario continúa con CU-01.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Excepciones</th>
+        <td>
+          <ul>
+            <li>3a. El formato del correo es inválido: el formulario solicita corregirlo.</li>
+            <li>3b. No existe una cuenta elegible asociada al correo: el sistema no revela innecesariamente si esa dirección está registrada.</li>
+            <li>7a. El enlace expiró, fue invalidado o ya no es válido: el sistema rechaza el restablecimiento.</li>
+            <li>9a. Las contraseñas no coinciden o incumplen las validaciones configuradas: el formulario muestra los errores.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Reglas de negocio</th>
+        <td>Solo un proceso de restablecimiento válido puede modificar la contraseña. La nueva contraseña debe cumplir las validaciones configuradas para las cuentas del sistema.</td>
+      </tr>
+      <tr>
+        <th>Requisitos especiales</th>
+        <td>Uso de <code>PasswordResetView</code>, <code>PasswordResetConfirmView</code> y las plantillas de recuperación de Django; tokens de restablecimiento, validación de contraseñas y almacenamiento de hashes. En desarrollo se utiliza el backend de correo de consola.</td>
+      </tr>
+      <tr>
+        <th>Relaciones</th>
+        <td>Se inicia desde CU-01 y permite que el usuario vuelva a autenticarse cuando finaliza el restablecimiento.</td>
+      </tr>
+      <tr>
+        <th>Frecuencia / prioridad</th>
+        <td>Baja: cuando un usuario olvida su contraseña. Prioridad alta por seguridad y continuidad del acceso.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+
+<section class="cu" id="cu-20">
+  <h4>CU-20 · Gestionar usuarios</h4>
+  <table class="plantilla">
+    <tbody>
+      <tr>
+        <th>Versión / autor / fecha</th>
+        <td>1.0 · Alvaro · 25/11/2026</td>
+      </tr>
+      <tr>
+        <th>Actor principal</th>
+        <td>Bibliotecario.</td>
+      </tr>
+      <tr>
+        <th>Actores secundarios</th>
+        <td>Estudiante o Profesor cuya información se administra.</td>
+      </tr>
+      <tr>
+        <th>Descripción</th>
+        <td>El bibliotecario consulta las cuentas registradas, crea usuarios, modifica sus datos y activa o desactiva cuentas. Las validaciones dependen del tipo de usuario.</td>
+      </tr>
+      <tr>
+        <th>Disparador</th>
+        <td>El bibliotecario selecciona «Usuarios» en el menú de administración.</td>
+      </tr>
+      <tr>
+        <th>Precondiciones</th>
+        <td>
+          <ul>
+            <li>El bibliotecario ha iniciado sesión.</li>
+            <li>Su cuenta está activa y tiene permisos de bibliotecario.</li>
+            <li>Para crear estudiantes o profesores, existen los registros académicos necesarios de carreras y departamentos.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Postcondiciones (éxito)</th>
+        <td>
+          <ul>
+            <li>Los datos del usuario se crean o actualizan correctamente.</li>
+            <li>Al desactivar una cuenta, <code>is_active</code> queda en falso; al reactivarla, vuelve a verdadero.</li>
+            <li>El listado refleja la información y el estado actual de las cuentas.</li>
+            <li>Se conserva el historial asociado a los usuarios.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Garantías mínimas</th>
+        <td>Los datos inválidos no se guardan. El sistema evita que un bibliotecario desactive su propia cuenta. La desactivación no elimina físicamente al usuario.</td>
+      </tr>
+      <tr>
+        <th>Flujo básico</th>
+        <td>
+          <ol>
+            <li>El bibliotecario abre la página <code>/usuarios/</code>.</li>
+            <li>El sistema muestra el listado ordenado por nombre de usuario, con 20 registros por página.</li>
+            <li>El bibliotecario selecciona «Crear usuario».</li>
+            <li>El sistema presenta el formulario de alta.</li>
+            <li>El bibliotecario introduce los datos generales y selecciona el rol correspondiente.</li>
+            <li>Si es estudiante, captura matrícula, semestre y carrera; si es profesor, número de empleado y departamento.</li>
+            <li>El bibliotecario selecciona «Guardar».</li>
+            <li>El sistema valida los campos obligatorios, formatos y restricciones de unicidad.</li>
+            <li>Si los datos son correctos, se registra el usuario y su información correspondiente.</li>
+            <li>El sistema regresa al listado de usuarios.</li>
+          </ol>
+        </td>
+      </tr>
+      <tr>
+        <th>Flujos alternativos</th>
+        <td>
+          <ul>
+            <li>3a. Consulta: el bibliotecario revisa el listado y sus estados sin modificar registros.</li>
+            <li>3b. Edición: selecciona «Editar», cambia los datos permitidos y guarda.</li>
+            <li>3c. Desactivación: selecciona «Desactivar» y confirma; el sistema cambia <code>is_active</code> a falso.</li>
+            <li>3d. Reactivación: selecciona la acción correspondiente para activar una cuenta inactiva.</li>
+            <li>2a. Existen más de 20 cuentas: el sistema permite navegar entre páginas.</li>
+            <li>3e. El bibliotecario selecciona «Importar CSV» y continúa con CU-21.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Excepciones</th>
+        <td>
+          <ul>
+            <li>8a. Nombre de usuario, correo o identificador académico duplicado: el sistema rechaza el registro y muestra errores de validación.</li>
+            <li>8b. Faltan datos obligatorios del estudiante o profesor: se señalan los campos.</li>
+            <li>3c-a. El bibliotecario intenta desactivar su propia cuenta: el sistema rechaza la operación.</li>
+            <li>3a-a. Un usuario sin permisos de bibliotecario intenta acceder: el sistema responde con acceso denegado (403).</li>
+            <li>3b-a. La cuenta solicitada ya no existe: el sistema informa que no se encontró.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Reglas de negocio</th>
+        <td>La información requerida depende del rol. Los estudiantes deben tener matrícula, semestre y carrera; los profesores, número de empleado y departamento. Las cuentas se desactivan sin borrarlas físicamente, y un bibliotecario no puede desactivarse a sí mismo.</td>
+      </tr>
+      <tr>
+        <th>Requisitos especiales</th>
+        <td>Uso de <code>BibliotecarioRequeridoMixin</code>, <code>ListView</code>, <code>CreateView</code> y <code>UpdateView</code>. Cambio de estado mediante <code>cambiar_estado_cuenta()</code> con <code>transaction.atomic()</code> y <code>select_for_update()</code>. Control de permisos (RNF-02) e integridad transaccional (RNF-03).</td>
+      </tr>
+      <tr>
+        <th>Relaciones</th>
+        <td>Requiere CU-01; se complementa con CU-21 (Importar usuarios) y CU-22 (Bloquear/desbloquear usuarios).</td>
+      </tr>
+      <tr>
+        <th>Frecuencia / prioridad</th>
+        <td>Media: altas, bajas lógicas y modificaciones durante el periodo académico. Prioridad alta.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+
+<section class="cu" id="cu-21">
+  <h4>CU-21 · Importar usuarios desde CSV</h4>
+  <table class="plantilla">
+    <tbody>
+      <tr>
+        <th>Versión / autor / fecha</th>
+        <td>1.0 · Alvaro · 25/11/2026</td>
+      </tr>
+      <tr>
+        <th>Actor principal</th>
+        <td>Bibliotecario.</td>
+      </tr>
+      <tr>
+        <th>Actores secundarios</th>
+        <td>—</td>
+      </tr>
+      <tr>
+        <th>Descripción</th>
+        <td>El bibliotecario registra múltiples usuarios a partir de un archivo CSV. El sistema revisa la estructura del archivo y valida cada fila utilizando las mismas reglas del formulario de creación de usuarios.</td>
+      </tr>
+      <tr>
+        <th>Disparador</th>
+        <td>El bibliotecario selecciona «Importar CSV» desde la administración de usuarios.</td>
+      </tr>
+      <tr>
+        <th>Precondiciones</th>
+        <td>
+          <ul>
+            <li>El bibliotecario inició sesión y tiene permisos de administración.</li>
+            <li>Dispone de un archivo CSV con la estructura solicitada.</li>
+            <li>Las carreras y los departamentos referenciados están registrados cuando corresponda.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Postcondiciones (éxito)</th>
+        <td>
+          <ul>
+            <li>Todos los usuarios válidos del archivo quedan registrados.</li>
+            <li>El sistema informa cuántos usuarios se importaron.</li>
+            <li>Las cuentas aparecen en el listado de administración.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Garantías mínimas</th>
+        <td>La importación es atómica: si alguna fila contiene errores, se revierte la operación y no se realiza una importación parcial.</td>
+      </tr>
+      <tr>
+        <th>Flujo básico</th>
+        <td>
+          <ol>
+            <li>El bibliotecario accede a <code>/usuarios/importar/</code>.</li>
+            <li>El sistema muestra el formulario para seleccionar un archivo CSV.</li>
+            <li>El bibliotecario selecciona el archivo y confirma la importación.</li>
+            <li>El sistema lee el archivo y comprueba su codificación, encabezados y estructura.</li>
+            <li>El sistema recorre las filas del archivo.</li>
+            <li>Para cada fila, utiliza las validaciones de <code>CrearUsuarioForm</code>.</li>
+            <li>El sistema comprueba campos obligatorios, tipos de usuario, relaciones académicas y restricciones de unicidad.</li>
+            <li>Si todas las filas son válidas, guarda los registros dentro de una transacción.</li>
+            <li>El sistema presenta la cantidad de usuarios importados.</li>
+            <li>El bibliotecario regresa al listado de usuarios.</li>
+          </ol>
+        </td>
+      </tr>
+      <tr>
+        <th>Flujos alternativos</th>
+        <td>
+          <ul>
+            <li>3a. El bibliotecario decide cancelar la operación y regresa al listado sin realizar cambios.</li>
+            <li>6a. El archivo contiene estudiantes y profesores: se aplican los campos y validaciones específicos de cada rol.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Excepciones</th>
+        <td>
+          <ul>
+            <li>4a. Codificación inválida o archivo que no cumple el formato esperado: se muestra un error.</li>
+            <li>4b. Faltan columnas o los encabezados no tienen la estructura requerida: se rechaza el archivo.</li>
+            <li>7a. Una fila tiene datos inválidos: el sistema identifica la fila y los campos con errores.</li>
+            <li>7b. Existen usuarios o identificadores duplicados: el sistema informa los errores.</li>
+            <li>8a. Hay una o varias filas inválidas: se revierte toda la importación.</li>
+            <li>1a. Un usuario sin permisos de bibliotecario intenta importar: se rechaza el acceso.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Reglas de negocio</th>
+        <td>Las cuentas importadas deben cumplir las mismas reglas que las creadas manualmente. La importación es completa o se cancela; no deben persistir registros parciales cuando existen errores.</td>
+      </tr>
+      <tr>
+        <th>Requisitos especiales</th>
+        <td>Lectura y validación de archivos CSV en UTF-8, verificación de columnas, reutilización de <code>CrearUsuarioForm</code> y ejecución mediante <code>importar_usuarios_csv()</code> dentro de <code>transaction.atomic()</code> (RNF-03). Acceso restringido al bibliotecario (RNF-02).</td>
+      </tr>
+      <tr>
+        <th>Relaciones</th>
+        <td>Especialización operativa de CU-20: permite crear varias cuentas en una misma operación.</td>
+      </tr>
+      <tr>
+        <th>Frecuencia / prioridad</th>
+        <td>Baja a media: especialmente al inicio de periodos escolares o al incorporar grupos de usuarios. Prioridad alta.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+
+<section class="cu" id="cu-22">
+  <h4>CU-22 · Bloquear y desbloquear usuario</h4>
+  <table class="plantilla">
+    <tbody>
+      <tr>
+        <th>Versión / autor / fecha</th>
+        <td>1.0 · Alvaro · 25/11/2026</td>
+      </tr>
+      <tr>
+        <th>Actor principal</th>
+        <td>Bibliotecario.</td>
+      </tr>
+      <tr>
+        <th>Actores secundarios</th>
+        <td>Usuario cuya cuenta es bloqueada o desbloqueada.</td>
+      </tr>
+      <tr>
+        <th>Descripción</th>
+        <td>El bibliotecario restringe determinadas operaciones de un usuario mediante un bloqueo con motivo obligatorio y puede retirar posteriormente esa restricción.</td>
+      </tr>
+      <tr>
+        <th>Disparador</th>
+        <td>El bibliotecario selecciona «Bloquear» o «Desbloquear» en la administración de usuarios.</td>
+      </tr>
+      <tr>
+        <th>Precondiciones</th>
+        <td>
+          <ul>
+            <li>El bibliotecario está autenticado y autorizado.</li>
+            <li>El usuario que se desea administrar existe.</li>
+            <li>Para desbloquear, la cuenta se encuentra bloqueada.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Postcondiciones (éxito)</th>
+        <td>
+          <ul>
+            <li>Al bloquear, <code>bloqueado</code> queda en verdadero y se conserva el motivo registrado.</li>
+            <li>Al desbloquear, <code>bloqueado</code> queda en falso y se retira el motivo del bloqueo actual.</li>
+            <li>El estado actualizado aparece en la administración de usuarios.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Garantías mínimas</th>
+        <td>Un bloqueo sin motivo válido no se registra. Si ocurre un error, el estado anterior de la cuenta se conserva.</td>
+      </tr>
+      <tr>
+        <th>Flujo básico</th>
+        <td>
+          <ol>
+            <li>El bibliotecario accede a la lista de usuarios.</li>
+            <li>Localiza la cuenta que desea bloquear.</li>
+            <li>Selecciona la opción «Bloquear».</li>
+            <li>El sistema muestra un formulario para capturar el motivo.</li>
+            <li>El bibliotecario escribe la justificación.</li>
+            <li>El bibliotecario confirma la operación.</li>
+            <li>El servicio <code>cambiar_bloqueo_cuenta()</code> valida los permisos y el motivo.</li>
+            <li>El sistema bloquea el registro del usuario durante la transacción y actualiza su estado.</li>
+            <li>El sistema confirma el bloqueo y regresa al listado.</li>
+          </ol>
+        </td>
+      </tr>
+      <tr>
+        <th>Flujos alternativos</th>
+        <td>
+          <ul>
+            <li>3a. Desbloquear: el bibliotecario selecciona «Desbloquear» en una cuenta bloqueada y confirma la operación; el sistema retira el bloqueo.</li>
+            <li>6a. El bibliotecario cancela antes de confirmar: el sistema no modifica la cuenta.</li>
+            <li>9a. El usuario consulta su cuenta después del bloqueo: puede permanecer autenticado, pero las operaciones restringidas por las reglas de elegibilidad no están disponibles.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Excepciones</th>
+        <td>
+          <ul>
+            <li>5a. El motivo está vacío o contiene únicamente espacios: se rechaza el bloqueo.</li>
+            <li>5b. El motivo no cumple las restricciones del formulario: se solicita corregirlo.</li>
+            <li>7a. Un usuario sin permisos de bibliotecario intenta realizar la operación: se rechaza el acceso.</li>
+            <li>2a. La cuenta ya no existe: el sistema informa que no fue encontrada.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Reglas de negocio</th>
+        <td>El motivo del bloqueo es obligatorio. Una cuenta bloqueada se diferencia de una cuenta desactivada: el bloqueo impide operaciones como solicitar préstamos, mientras que la desactivación impide iniciar sesión.</td>
+      </tr>
+      <tr>
+        <th>Requisitos especiales</th>
+        <td>Uso de <code>BloquearUsuarioForm</code>, <code>BloquearUsuarioView</code>, <code>DesbloquearUsuarioView</code> y <code>cambiar_bloqueo_cuenta()</code>. Control de permisos (RNF-02) y transacciones mediante <code>transaction.atomic()</code> y <code>select_for_update()</code> (RNF-03).</td>
+      </tr>
+      <tr>
+        <th>Relaciones</th>
+        <td>Se inicia desde CU-20 y afecta las verificaciones de elegibilidad de CU-07.</td>
+      </tr>
+      <tr>
+        <th>Frecuencia / prioridad</th>
+        <td>Baja: cuando se requiere restringir o restablecer las operaciones de una cuenta. Prioridad alta.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+
+<section class="cu" id="cu-32">
+  <h4>CU-32 · Generar reportes</h4>
+  <table class="plantilla">
+    <tbody>
+      <tr>
+        <th>Versión / autor / fecha</th>
+        <td>1.0 · Alvaro · 25/11/2026</td>
+      </tr>
+      <tr>
+        <th>Actor principal</th>
+        <td>Bibliotecario.</td>
+      </tr>
+      <tr>
+        <th>Actores secundarios</th>
+        <td>—</td>
+      </tr>
+      <tr>
+        <th>Descripción</th>
+        <td>El bibliotecario consulta información estadística y operativa del sistema mediante cinco reportes: préstamos por periodo, libros más solicitados, préstamos vencidos, multas cobradas y multas pendientes.</td>
+      </tr>
+      <tr>
+        <th>Disparador</th>
+        <td>El bibliotecario selecciona «Reportes» en el menú de administración.</td>
+      </tr>
+      <tr>
+        <th>Precondiciones</th>
+        <td>
+          <ul>
+            <li>El bibliotecario inició sesión y tiene permisos de administración.</li>
+            <li>La base de datos está disponible para consultas.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Postcondiciones (éxito)</th>
+        <td>
+          <ul>
+            <li>El sistema presenta los cinco reportes con la información que corresponde a cada consulta.</li>
+            <li>Se muestran los totales calculados para las multas cobradas y pendientes.</li>
+            <li>Los resultados extensos se presentan mediante paginación.</li>
+            <li>La consulta no modifica registros de la base de datos.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Garantías mínimas</th>
+        <td>La generación de reportes es una operación de consulta. No modifica préstamos, usuarios, ejemplares, reservas, multas ni pagos.</td>
+      </tr>
+      <tr>
+        <th>Flujo básico</th>
+        <td>
+          <ol>
+            <li>El bibliotecario abre la ruta <code>/reportes/</code>.</li>
+            <li>El sistema muestra el panel de reportes con los filtros de fechas.</li>
+            <li>El bibliotecario captura o selecciona el periodo que desea consultar.</li>
+            <li>El sistema valida los datos del formulario.</li>
+            <li>El sistema consulta los préstamos registrados en el periodo seleccionado.</li>
+            <li>El sistema agrupa y cuenta las solicitudes por libro para obtener los títulos más solicitados.</li>
+            <li>El sistema obtiene los préstamos vencidos conforme a sus estados y fechas de vencimiento.</li>
+            <li>El sistema consulta las multas cobradas y las multas pendientes, y calcula los totales correspondientes.</li>
+            <li>El sistema muestra los cinco reportes con sus resultados, totales y tablas paginadas.</li>
+          </ol>
+        </td>
+      </tr>
+      <tr>
+        <th>Flujos alternativos</th>
+        <td>
+          <ul>
+            <li>3a. El bibliotecario no proporciona fechas: el sistema utiliza el comportamiento predeterminado del filtro.</li>
+            <li>3b. El bibliotecario cambia el periodo: se vuelven a consultar los datos con los nuevos filtros.</li>
+            <li>9a. Una consulta devuelve más de 20 resultados: el sistema permite navegar mediante páginas.</li>
+            <li>9b. No existen datos para uno de los reportes: se presenta un resultado vacío o un total de cero, según corresponda.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Excepciones</th>
+        <td>
+          <ul>
+            <li>4a. Los datos del filtro tienen un formato inválido: el formulario muestra el error y solicita corregirlos.</li>
+            <li>1a. Un estudiante o profesor intenta acceder al panel: el sistema rechaza el acceso (403).</li>
+            <li>5a. La base de datos no está disponible: no es posible completar las consultas y el sistema debe informar del fallo sin alterar los registros.</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Reglas de negocio</th>
+        <td>Los reportes deben reflejar los registros reales de préstamos y multas. Los préstamos vencidos se identifican considerando su estado, la fecha de vencimiento y la ausencia de devolución. Las multas cobradas y pendientes se contabilizan según los criterios implementados en los servicios.</td>
+      </tr>
+      <tr>
+        <th>Requisitos especiales</th>
+        <td>Uso de <code>PanelReportesView</code>, <code>FiltroReporteForm</code> y funciones de consulta de <code>reportes/services.py</code>. Consultas agregadas mediante el ORM de Django, filtros por periodo, paginación de 20 registros y acceso restringido a bibliotecarios (RNF-02).</td>
+      </tr>
+      <tr>
+        <th>Relaciones</th>
+        <td>Consulta información generada por CU-06, CU-23 y CU-24, así como los registros del paquete D relacionados con multas y pagos.</td>
+      </tr>
+      <tr>
+        <th>Frecuencia / prioridad</th>
+        <td>Media: durante el seguimiento operativo y las revisiones periódicas de la biblioteca. Prioridad alta.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
 <figure class="diagrama">
   <img src="../uml/cu_B_acervo.png" alt="Diagrama de casos de uso · Administración del acervo" data-pendiente="Pendiente (Diego): exportar a docs/uml/cu_B_acervo.png">
   <figcaption>Diagrama de casos de uso · Administración del acervo</figcaption>
@@ -181,6 +925,12 @@ ul.restricciones{font-size:13.5px;margin:4px 0 10px}
 <figure class="diagrama">
   <img src="../uml/clases_A_cuentas_reportes.png" alt="Clases de diseño · Usuarios y reportes" data-pendiente="Pendiente (Alvaro): exportar a docs/uml/clases_A_cuentas_reportes.png">
   <figcaption>Clases de diseño · Usuarios y reportes</figcaption>
+</figure>
+<h4>Clases de diseño · Reportes</h4>
+<figure class="diagrama">
+  <img src="../uml/clases_A_reportes.png"
+       alt="Diagrama de clases de diseño · Reportes">
+  <figcaption>Clases de diseño · Reportes</figcaption>
 </figure>
 <h4>Paquete B · Administración del acervo <span class="responsable">Diego</span></h4>
 <figure class="diagrama">
