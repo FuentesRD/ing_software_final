@@ -1,68 +1,95 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %}{{ libro.titulo }} · Biblioteca{% endblock %}
 
 {% block contenido %}
-<p><a href="{% url 'catalogo:buscar' %}">← Volver al catálogo</a></p>
+<a class="volver" href="{% url 'catalogo:buscar' %}">Volver al catálogo</a>
 
-<div class="row g-4">
-    <div class="col-md-3">
-        {% if libro.portada %}
-            <img src="{{ libro.portada.url }}" alt="Portada de {{ libro.titulo }}" class="img-fluid rounded border">
-        {% else %}
-            <div class="border rounded bg-white text-muted d-flex align-items-center justify-content-center" style="aspect-ratio: 2 / 3;">
-                Sin portada
+<div class="detalle">
+    {# Columna lateral: portada y préstamo #}
+    <aside class="detalle-lateral">
+        {% with primer_autor=autores.0 %}
+        <div
+            class="portada"
+            data-tono="{{ libro.pk|stringformat:'d'|slice:'-1:' }}"
+            {% if not libro.portada %}
+                data-isbn="{{ libro.isbn }}"
+                data-titulo="{{ libro.titulo }}"
+                data-autor="{{ primer_autor.apellidos|default:'' }}"
+            {% endif %}
+        >
+            <div class="portada-texto" aria-hidden="true">
+                <span class="titulo-libro">{{ libro.titulo }}</span>
+                <small>{{ primer_autor.apellidos|default:"" }}</small>
             </div>
-        {% endif %}
-    </div>
+            {% if libro.portada %}
+                <img src="{{ libro.portada.url }}" alt="Portada de {{ libro.titulo }}">
+            {% endif %}
+        </div>
+        {% endwith %}
 
-    <div class="col-md-9">
-        <h1 class="h3 mb-1">
-            {{ libro.titulo }}
-            {% if not libro.activo %}<span class="badge text-bg-secondary align-middle">Baja</span>{% endif %}
-        </h1>
-        {% if libro.subtitulo %}<p class="lead mb-1">{{ libro.subtitulo }}</p>{% endif %}
-        <p class="text-muted">{{ autores|join:"; " }}</p>
-
-        <dl class="row">
-            <dt class="col-sm-3">ISBN</dt><dd class="col-sm-9 font-monospace">{{ libro.isbn }}</dd>
-            <dt class="col-sm-3">Categoría</dt><dd class="col-sm-9">{{ libro.categoria }}</dd>
-            <dt class="col-sm-3">Editorial</dt><dd class="col-sm-9">{{ libro.editorial }}</dd>
-            <dt class="col-sm-3">Año</dt><dd class="col-sm-9">{{ libro.anio_publicacion|default:"—" }}</dd>
-            <dt class="col-sm-3">Edición</dt><dd class="col-sm-9">{{ libro.edicion|default:"—" }}</dd>
-            <dt class="col-sm-3">Idioma</dt><dd class="col-sm-9">{{ libro.idioma }}</dd>
-            <dt class="col-sm-3">Páginas</dt><dd class="col-sm-9">{{ libro.num_paginas|default:"—" }}</dd>
-        </dl>
-        {% if libro.descripcion %}<p>{{ libro.descripcion|linebreaksbr }}</p>{% endif %}
-
-        <div class="card card-body mb-3">
+        <div class="ficha ficha-lisa prestamo-caja">
+            {% if not libro.activo %}
+                <p><span class="badge text-bg-secondary">Dado de baja</span></p>
+            {% endif %}
             {% if disponibles %}
-                <p class="mb-2"><strong>{{ disponibles }}</strong> ejemplar{{ disponibles|pluralize:"es" }} disponible{{ disponibles|pluralize }}.</p>
+                <p class="disponibilidad si">
+                    {{ disponibles }} ejemplar{{ disponibles|pluralize:"es" }} disponible{{ disponibles|pluralize }}
+                </p>
             {% else %}
-                <p class="mb-2">No hay ejemplares disponibles en este momento.</p>
+                <p class="disponibilidad">No hay ejemplares disponibles en este momento.</p>
             {% endif %}
 
             {% if es_lector and libro.activo %}
-                <div class="d-flex gap-2">
-                    {% if disponibles %}
-                        {% if url_solicitar %}
-                            <a class="btn btn-primary" href="{{ url_solicitar }}">Solicitar préstamo</a>
-                        {% else %}
-                            <button class="btn btn-primary" type="button" disabled>Solicitar préstamo</button>
-                        {% endif %}
+                {% if disponibles %}
+                    {% if url_solicitar %}
+                        <a class="btn btn-primary" href="{{ url_solicitar }}">Solicitar préstamo</a>
                     {% else %}
-                        {% if url_reservar %}
-                            <a class="btn btn-outline-primary" href="{{ url_reservar }}">Reservar</a>
-                        {% else %}
-                            <button class="btn btn-outline-primary" type="button" disabled>Reservar</button>
-                        {% endif %}
+                        <button class="btn btn-primary" type="button" disabled>Solicitar préstamo</button>
                     {% endif %}
-                </div>
+                {% else %}
+                    {% if url_reservar %}
+                        <a class="btn btn-outline-primary" href="{{ url_reservar }}">Reservar</a>
+                    {% else %}
+                        <button class="btn btn-outline-primary" type="button" disabled>Reservar</button>
+                    {% endif %}
+                {% endif %}
             {% endif %}
         </div>
+    </aside>
+
+    {# Ficha catalográfica #}
+    <div>
+        <article class="ficha ficha-catalografica">
+            <header class="ficha-cabeza">
+                <div>
+                    <h1>{{ libro.titulo }}</h1>
+                    {% if libro.subtitulo %}<p class="subtitulo">{{ libro.subtitulo }}</p>{% endif %}
+                    <p class="autores">{{ autores|join:"; " }}</p>
+                </div>
+                <div class="ficha-isbn">
+                    ISBN
+                    <span class="codigo">{{ libro.isbn }}</span>
+                </div>
+            </header>
+
+            <dl class="renglones">
+                <dt>Editorial</dt><dd>{{ libro.editorial }}</dd>
+                <dt>Año</dt><dd>{{ libro.anio_publicacion|default:"—" }}</dd>
+                <dt>Edición</dt><dd>{{ libro.edicion|default:"—" }}</dd>
+                <dt>Categoría</dt><dd>{{ libro.categoria }}</dd>
+                <dt>Idioma</dt><dd>{{ libro.idioma }}</dd>
+                <dt>Páginas</dt><dd>{{ libro.num_paginas|default:"—" }}</dd>
+            </dl>
+
+            {% if libro.descripcion %}
+                <p class="ficha-descripcion">{{ libro.descripcion|linebreaksbr }}</p>
+            {% endif %}
+        </article>
 
         {% if es_bibliotecario %}
-            <div class="d-flex flex-wrap gap-2 mb-4">
+            <div class="acciones-bibliotecario">
                 <a class="btn btn-outline-primary" href="{% url 'catalogo:libro_editar' libro.pk %}">Editar libro</a>
                 <a class="btn btn-outline-primary" href="{% url 'catalogo:ejemplar_crear' libro.pk %}">Agregar ejemplar</a>
                 <form method="post" action="{% url 'catalogo:libro_baja' libro.pk %}" class="m-0">
@@ -78,24 +105,32 @@
 
             <h2 class="h5">Ejemplares</h2>
             <div class="table-responsive">
-                <table class="table table-sm align-middle">
+                <table class="table align-middle">
                     <thead>
                         <tr>
                             <th scope="col">Código</th>
                             <th scope="col">Estado</th>
                             <th scope="col">Ubicación</th>
                             <th scope="col">Adquisición</th>
-                            <th scope="col"></th>
+                            <th scope="col"><span class="visually-hidden">Acciones</span></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for ejemplar in ejemplares %}
                             <tr>
-                                <td class="font-monospace">{{ ejemplar.codigo_inventario }}</td>
-                                <td>{{ ejemplar.get_estado_display }}</td>
-                                <td>{{ ejemplar.ubicacion|default:"—" }}</td>
-                                <td>{{ ejemplar.fecha_adquisicion|default:"—" }}</td>
-                                <td><a href="{% url 'catalogo:ejemplar_editar' ejemplar.pk %}">Editar</a></td>
+                                <td class="codigo">{{ ejemplar.codigo_inventario }}</td>
+                                <td>
+                                    <span class="badge {% if ejemplar.estado == 'DISPONIBLE' %}text-bg-success{% elif ejemplar.estado == 'EN_REPARACION' %}text-bg-warning{% elif ejemplar.estado == 'PERDIDO' or ejemplar.estado == 'BAJA' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">
+                                        {{ ejemplar.get_estado_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if ejemplar.ubicacion %}
+                                        <span class="etiqueta-lomo">{{ ejemplar.ubicacion }}</span>
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td>{{ ejemplar.fecha_adquisicion|date:"d/m/Y"|default:"—" }}</td>
+                                <td class="text-end"><a href="{% url 'catalogo:ejemplar_editar' ejemplar.pk %}">Editar</a></td>
                             </tr>
                         {% empty %}
                             <tr><td colspan="5" class="text-muted">Este libro aún no tiene ejemplares.</td></tr>
@@ -106,4 +141,8 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/portadas.js' %}" defer></script>
 {% endblock %}

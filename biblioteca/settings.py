@@ -133,6 +133,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Carpeta static/ de la raíz: estilos y scripts compartidos por todas las apps.
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
