@@ -18,31 +18,46 @@
 </form>
 
 <ul class="atajos">
+    
+{% if user.tipo_usuario == "BIBLIOTECARIO" %}
+    <li>
+        <a href="{% url 'prestamos:mostrador' %}">
+            <strong>Mostrador</strong>
+            <span>Registrar préstamos directamente.</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'prestamos:solicitudes' %}">
+            <strong>Solicitudes</strong>
+            <span>Gestionar los préstamos solicitados.</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'prestamos:reservas' %}">
+            <strong>Reservas</strong>
+            <span>Administrar las reservas.</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'reportes:panel' %}">
+            <strong>Reportes</strong>
+            <span>Consultar los reportes de la biblioteca.</span>
+        </a>
+    </li>
+{% else %}
     <li>
         <a href="{% url 'prestamos:mis_prestamos' %}">
             <strong>Mis préstamos</strong>
-            <span>Fechas de vencimiento, renovaciones y solicitudes por recoger.</span>
+            <span>Fechas de vencimiento y renovaciones.</span>
         </a>
     </li>
     <li>
         <a href="{% url 'prestamos:mis_reservas' %}">
             <strong>Mis reservas</strong>
-            <span>Tu lugar en la fila de los libros que esperas.</span>
+            <span>Tu lugar en la fila de reservas.</span>
         </a>
     </li>
-    <li>
-        <a href="{% url 'catalogo:buscar' %}?solo_disponibles=on">
-            <strong>Disponibles ahora</strong>
-            <span>Libros con al menos un ejemplar listo para préstamo.</span>
-        </a>
-    </li>
-    {% if user.tipo_usuario == "PROFESOR" %}
-        <li>
-            <a href="{% url 'catalogo:sugerir' %}">
-                <strong>Sugerir libro</strong>
-                <span>Pide que la biblioteca adquiera un título para tu materia.</span>
-            </a>
-        </li>
-    {% endif %}
+{% endif %}
+
 </ul>
 {% endblock %}

@@ -82,13 +82,24 @@
                 </h2>
                 <p class="libro-autores">{{ libro.autores.all|join:"; " }}</p>
 
+                <p class="small text-muted mb-1">
+                    {{ libro.categoria }} · {{ libro.editorial }}
+                </p>
+
+                <p class="small text-muted mb-2">
+                    ISBN: <span class="font-monospace">{{ libro.isbn }}</span>
+                </p>
+
+
                 <div>
                     {% if not libro.activo %}
                         <span class="badge text-bg-secondary">Dado de baja</span>
                     {% elif libro.disponibles %}
                         <span class="disponibilidad si">{{ libro.disponibles }} de {{ libro.total_ejemplares }} disponible{{ libro.disponibles|pluralize }}</span>
                     {% else %}
-                        <span class="disponibilidad">Sin ejemplares libres</span>
+                        <span class="disponibilidad">
+                            0 de {{ libro.total_ejemplares }} disponibles
+                        </span>
                     {% endif %}
                 </div>
             </li>
