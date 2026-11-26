@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block titulo %}Devoluciones · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Registrar devolución</h1>
+<p class="text-muted">Préstamos activos y vencidos. Al devolver, se calcula la multa por retraso y el ejemplar pasa a la siguiente reserva o queda disponible.</p>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-sm-9">
+        <label class="form-label" for="q">Buscar</label>
+        <input class="form-control" type="search" id="q" name="q" value="{{ q }}" placeholder="Lector, código de inventario o título">
+    </div>
+    <div class="col-sm-3">
+        <button class="btn btn-primary w-100" type="submit">Buscar</button>
+    </div>
+</form>
+
+{% if prestamos %}
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Préstamo</th>
+                <th scope="col">Lector</th>
+                <th scope="col">Libro</th>
+                <th scope="col">Ejemplar</th>
+                <th scope="col">Vence</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prestamo in prestamos %}
+                <tr>
+                    <td>{{ prestamo.pk }}</td>
+                    <td>{{ prestamo.usuario.get_full_name|default:prestamo.usuario.username }}</td>
+                    <td>{{ prestamo.ejemplar.libro }}</td>
+                    <td>{{ prestamo.ejemplar.codigo_inventario }}</td>
+                    <td>{{ prestamo.fecha_vencimiento|date:"d/m/Y"|default:"—" }}</td>
+                    <td>
+                        {% if prestamo.estado == "VENCIDO" %}<span class="badge text-bg-danger">Vencido</span>{% else %}<span class="badge text-bg-primary">Activo</span>{% endif %}
+                    </td>
+                    <td class="text-nowrap">
+                        <form method="post" action="{% url 'multas:registrar_devolucion' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="prestamo_id" value="{{ prestamo.pk }}">
+                            <button type="submit" class="btn btn-sm btn-primary">Registrar devolución</button>
+                        </form>
+                        <a class="btn btn-sm btn-outline-danger" href="{% url 'multas:registrar_perdida_danio_prestamo' prestamo.pk %}">Pérdida o daño</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "prestamos/paginacion.html" %}
+{% else %}
+    <p class="text-muted">No hay préstamos activos ni vencidos{% if q %} que coincidan con «{{ q }}»{% endif %}.</p>
+{% endif %}
+{% endblock %}

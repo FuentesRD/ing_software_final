@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block titulo %}Notificaciones · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Notificaciones</h1>
+
+{% if sin_leer %}
+<form method="post" action="{% url 'notificaciones:marcar_leidas' %}" class="mb-3">
+    {% csrf_token %}
+    <button class="btn btn-sm btn-outline-primary" type="submit">Marcar {{ sin_leer }} como leída{{ sin_leer|pluralize }}</button>
+</form>
+{% endif %}
+
+{% if notificaciones %}
+<ul class="list-group mb-3">
+    {% for notificacion in notificaciones %}
+        <li class="list-group-item{% if not notificacion.leida %} list-group-item-light fw-semibold{% endif %}">
+            <div class="d-flex justify-content-between flex-wrap gap-2">
+                <span class="badge text-bg-{% if notificacion.tipo == 'VENCIDO' or notificacion.tipo == 'MULTA' %}danger{% elif notificacion.tipo == 'VENCE_PRONTO' %}warning{% elif notificacion.tipo == 'RESERVA_DISPONIBLE' %}success{% else %}secondary{% endif %}">
+                    {% if notificacion.tipo == "VENCE_PRONTO" %}Vence pronto{% elif notificacion.tipo == "VENCIDO" %}Vencido{% elif notificacion.tipo == "RESERVA_DISPONIBLE" %}Reserva disponible{% elif notificacion.tipo == "MULTA" %}Multa{% else %}Aviso{% endif %}
+                </span>
+                <small class="text-muted">{{ notificacion.fecha|date:"d/m/Y H:i" }}</small>
+            </div>
+            <p class="mb-0 mt-1">{{ notificacion.mensaje }}</p>
+        </li>
+    {% endfor %}
+</ul>
+{% include "prestamos/paginacion.html" %}
+{% else %}
+    <p class="text-muted">No tienes notificaciones.</p>
+{% endif %}
+{% endblock %}

@@ -5,6 +5,7 @@ from multas import views
 app_name = "multas"
 
 urlpatterns = [
+    path("", views.MultasListaView.as_view(), name="lista"),
     path("mis-multas/", views.mis_multas, name="mis_multas"),
     path("devolucion/", views.RegistrarDevolucionView.as_view(), name="registrar_devolucion"),
     path("devolucion/<int:prestamo_id>/", views.RegistrarDevolucionView.as_view(), name="registrar_devolucion_prestamo"),
