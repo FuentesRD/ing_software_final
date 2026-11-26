@@ -1,8 +1,63 @@
 {% extends "base.html" %}
 
+{% block titulo %}Inicio · Biblioteca{% endblock %}
+
 {% block contenido %}
-<h1 class="h3">
-    Bienvenido, {{ user.get_full_name|default:user.username }}
-</h1>
-<p>Tu rol es: {{ user.get_tipo_usuario_display }}.</p>
+<section class="saludo">
+    <h1>Hola, {{ user.first_name|default:user.username }}</h1>
+    <p>¿Qué quieres leer hoy?</p>
+</section>
+
+{# Atajo directo a la búsqueda del catálogo (CU-04) #}
+<form class="ficha inicio-buscar" method="get" action="{% url 'catalogo:buscar' %}" role="search">
+    <label for="inicio-q">Busca por título, autor o ISBN</label>
+    <div class="buscador-principal">
+        <input class="form-control" type="search" id="inicio-q" name="q" autocomplete="off">
+        <button class="btn btn-primary" type="submit">Buscar</button>
+    </div>
+</form>
+
+<ul class="atajos">
+    
+{% if user.tipo_usuario == "BIBLIOTECARIO" %}
+    <li>
+        <a href="{% url 'prestamos:mostrador' %}">
+            <strong>Mostrador</strong>
+            <span>Registrar préstamos directamente.</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'prestamos:solicitudes' %}">
+            <strong>Solicitudes</strong>
+            <span>Gestionar los préstamos solicitados.</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'prestamos:reservas' %}">
+            <strong>Reservas</strong>
+            <span>Administrar las reservas.</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'reportes:panel' %}">
+            <strong>Reportes</strong>
+            <span>Consultar los reportes de la biblioteca.</span>
+        </a>
+    </li>
+{% else %}
+    <li>
+        <a href="{% url 'prestamos:mis_prestamos' %}">
+            <strong>Mis préstamos</strong>
+            <span>Fechas de vencimiento y renovaciones.</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'prestamos:mis_reservas' %}">
+            <strong>Mis reservas</strong>
+            <span>Tu lugar en la fila de reservas.</span>
+        </a>
+    </li>
+{% endif %}
+
+</ul>
 {% endblock %}

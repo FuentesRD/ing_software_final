@@ -1,35 +1,48 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, UpdateView
 
-from .forms import CrearUsuarioForm, EditarUsuarioForm
-from .mixins import BibliotecarioRequeridoMixin
-from .models import Usuario
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import Http404
-from django.shortcuts import redirect
-from django.views.generic import DetailView
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    FormView,
+    ListView,
+    UpdateView,
+)
 
-from .services import cambiar_estado_cuenta
-from django.shortcuts import get_object_or_404
-from django.views.generic import FormView
-
-from .forms import BloquearUsuarioForm
-from .services import cambiar_bloqueo_cuenta
-
-from .forms import ImportarUsuariosForm
+from .forms import (
+    BloquearUsuarioForm,
+    CrearUsuarioForm,
+    EditarUsuarioForm,
+    ImportarUsuariosForm,
+)
 from .importacion import importar_usuarios_csv
+from .mixins import BibliotecarioRequeridoMixin
+from .models import Usuario
+from .services import cambiar_bloqueo_cuenta, cambiar_estado_cuenta
 
+
+# ============================================================
+# PÁGINA DE INICIO
+# ============================================================
 
 @login_required
 def inicio(request):
-    if request.user.tipo_usuario == Usuario.TipoUsuario.BIBLIOTECARIO:
-        return redirect("cuentas:usuarios_lista")
+    """
+    Muestra la página de inicio a todos los usuarios autenticados.
 
+    Los accesos disponibles dependen del rol y se controlan
+    desde templates/cuentas/inicio.html.
+    """
     return render(request, "cuentas/inicio.html")
 
+
+# ============================================================
+# LISTADO DE USUARIOS
+# ============================================================
 
 class ListaUsuariosView(BibliotecarioRequeridoMixin, ListView):
     model = Usuario
@@ -39,17 +52,30 @@ class ListaUsuariosView(BibliotecarioRequeridoMixin, ListView):
     ordering = ["username"]
 
 
+# ============================================================
+# CREAR USUARIO
+# ============================================================
+
 class CrearUsuarioView(BibliotecarioRequeridoMixin, CreateView):
     form_class = CrearUsuarioForm
     template_name = "cuentas/usuario_formulario.html"
     success_url = reverse_lazy("cuentas:usuarios_lista")
 
 
+# ============================================================
+# EDITAR USUARIO
+# ============================================================
+
 class EditarUsuarioView(BibliotecarioRequeridoMixin, UpdateView):
     model = Usuario
     form_class = EditarUsuarioForm
     template_name = "cuentas/usuario_editar.html"
     success_url = reverse_lazy("cuentas:usuarios_lista")
+
+
+# ============================================================
+# ACTIVAR / DESACTIVAR USUARIO
+# ============================================================
 
 class CambiarEstadoUsuarioView(
     BibliotecarioRequeridoMixin,
@@ -73,7 +99,10 @@ class CambiarEstadoUsuarioView(
         except Usuario.DoesNotExist:
             raise Http404("El usuario ya no existe.")
         else:
-            messages.success(request, "Estado de la cuenta actualizado.")
+            messages.success(
+                request,
+                "Estado de la cuenta actualizado.",
+            )
 
         return redirect("cuentas:usuarios_lista")
 
@@ -81,6 +110,11 @@ class CambiarEstadoUsuarioView(
         contexto = super().get_context_data(**kwargs)
         contexto["activar"] = self.kwargs["activar"]
         return contexto
+
+
+# ============================================================
+# BLOQUEAR USUARIO
+# ============================================================
 
 class BloquearUsuarioView(BibliotecarioRequeridoMixin, FormView):
     form_class = BloquearUsuarioForm
@@ -96,7 +130,10 @@ class BloquearUsuarioView(BibliotecarioRequeridoMixin, FormView):
         return contexto
 
     def form_valid(self, form):
-        cuenta = get_object_or_404(Usuario, pk=self.kwargs["pk"])
+        cuenta = get_object_or_404(
+            Usuario,
+            pk=self.kwargs["pk"],
+        )
 
         try:
             cambiar_bloqueo_cuenta(
@@ -111,8 +148,16 @@ class BloquearUsuarioView(BibliotecarioRequeridoMixin, FormView):
         except Usuario.DoesNotExist:
             raise Http404("El usuario ya no existe.")
 
-        messages.success(self.request, "Usuario bloqueado.")
+        messages.success(
+            self.request,
+            "Usuario bloqueado.",
+        )
         return super().form_valid(form)
+
+
+# ============================================================
+# DESBLOQUEAR USUARIO
+# ============================================================
 
 class DesbloquearUsuarioView(
     BibliotecarioRequeridoMixin,
@@ -136,9 +181,17 @@ class DesbloquearUsuarioView(
         except Usuario.DoesNotExist:
             raise Http404("El usuario ya no existe.")
         else:
-            messages.success(request, "Usuario desbloqueado.")
+            messages.success(
+                request,
+                "Usuario desbloqueado.",
+            )
 
         return redirect("cuentas:usuarios_lista")
+
+
+# ============================================================
+# IMPORTAR USUARIOS DESDE CSV
+# ============================================================
 
 class ImportarUsuariosView(BibliotecarioRequeridoMixin, FormView):
     form_class = ImportarUsuariosForm
