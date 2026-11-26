@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block titulo %}Condonar multa · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Condonar multa {{ multa.pk }}</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Lector</dt><dd class="col-sm-9">{{ multa.usuario.get_full_name|default:multa.usuario.username }}</dd>
+    <dt class="col-sm-3">Motivo</dt><dd class="col-sm-9">{% include "multas/_motivo.html" %}</dd>
+    <dt class="col-sm-3">Monto</dt><dd class="col-sm-9">${{ multa.monto }} (saldo ${{ saldo }})</dd>
+    <dt class="col-sm-3">Estado</dt><dd class="col-sm-9">{% include "multas/_estado.html" %}</dd>
+</dl>
+
+{% if multa.estado == "PENDIENTE" %}
+<form method="post" class="ficha" style="max-width: 32rem">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label" for="justificacion">Justificación</label>
+        <textarea class="form-control" id="justificacion" name="justificacion" rows="3" maxlength="255" required></textarea>
+        <div class="form-text">RN-14: es obligatoria y queda registrada con tu usuario.</div>
+    </div>
+    <button class="btn btn-warning" type="submit">Condonar multa</button>
+    <a class="btn btn-outline-secondary" href="{% url 'multas:lista' %}">Cancelar</a>
+</form>
+{% else %}
+    <p class="text-muted">Esta multa ya no está pendiente.
+        {% if multa.justificacion_condonacion %}Justificación: {{ multa.justificacion_condonacion }}{% endif %}
+    </p>
+    <a href="{% url 'multas:lista' %}">← Volver a multas</a>
+{% endif %}
+{% endblock %}

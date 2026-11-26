@@ -47,6 +47,10 @@
                        {% if vista == "prestamos:solicitudes" %}aria-current="page"{% endif %}>Solicitudes</a>
                     <a class="menu-enlace" href="{% url 'prestamos:reservas' %}"
                        {% if vista == "prestamos:reservas" %}aria-current="page"{% endif %}>Reservas</a>
+                    <a class="menu-enlace" href="{% url 'multas:registrar_devolucion' %}"
+                       {% if "devolucion" in vista or "perdida" in vista %}aria-current="page"{% endif %}>Devoluciones</a>
+                    <a class="menu-enlace" href="{% url 'multas:lista' %}"
+                       {% if app == "multas" and "devolucion" not in vista and "perdida" not in vista %}aria-current="page"{% endif %}>Multas</a>
                 </div>
                 <div class="menu-grupo">
                     <p class="menu-titulo">Acervo</p>
@@ -74,6 +78,10 @@
                        {% if vista == "prestamos:mis_prestamos" %}aria-current="page"{% endif %}>Mis préstamos</a>
                     <a class="menu-enlace" href="{% url 'prestamos:mis_reservas' %}"
                        {% if vista == "prestamos:mis_reservas" %}aria-current="page"{% endif %}>Mis reservas</a>
+                    <a class="menu-enlace" href="{% url 'multas:mis_multas' %}"
+                       {% if vista == "multas:mis_multas" %}aria-current="page"{% endif %}>Mis multas</a>
+                    <a class="menu-enlace" href="{% url 'notificaciones:mis_notificaciones' %}"
+                       {% if app == "notificaciones" %}aria-current="page"{% endif %}>Notificaciones</a>
                     {% if user.tipo_usuario == "PROFESOR" %}
                         <a class="menu-enlace" href="{% url 'catalogo:sugerir' %}"
                            {% if vista == "catalogo:sugerir" %}aria-current="page"{% endif %}>Sugerir libro</a>

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis multas · Biblioteca{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Mis multas</h1>
+
+<p class="lead">
+    Monto adeudado: <strong>${{ total_adeudado }}</strong>
+</p>
+{% if total_adeudado > 0 %}
+    <div class="alert alert-warning" role="alert">
+        Mientras tengas multas pendientes no podrás solicitar, renovar ni reservar libros. Pásalas a pagar con el bibliotecario.
+    </div>
+{% endif %}
+
+{% if multas %}
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Libro</th>
+                <th scope="col">Motivo</th>
+                <th scope="col">Monto</th>
+                <th scope="col">Pagado</th>
+                <th scope="col">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for multa in multas %}
+                <tr>
+                    <td>{{ multa.fecha_generacion|date:"d/m/Y" }}</td>
+                    <td>{{ multa.prestamo.ejemplar.libro }}</td>
+                    <td>{% include "multas/_motivo.html" %}</td>
+                    <td>${{ multa.monto }}</td>
+                    <td>${{ multa.pagado }}</td>
+                    <td>
+                        {% include "multas/_estado.html" %}
+                        {% if multa.estado == "CONDONADA" and multa.justificacion_condonacion %}
+                            <div class="small text-muted">{{ multa.justificacion_condonacion }}</div>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "prestamos/paginacion.html" %}
+{% else %}
+    <p class="text-muted">No tienes multas.</p>
+{% endif %}
+{% endblock %}

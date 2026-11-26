@@ -1,0 +1,1 @@
+{% if multa.motivo == "RETRASO" %}Retraso{% if multa.dias_retraso %} ({{ multa.dias_retraso }} día{{ multa.dias_retraso|pluralize }}){% endif %}{% elif multa.motivo == "DANIO" %}Daño{% elif multa.motivo == "PERDIDA" %}Pérdida{% else %}{{ multa.motivo }}{% endif %}
