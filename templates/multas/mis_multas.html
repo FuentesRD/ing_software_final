@@ -10,7 +10,7 @@
 </p>
 {% if total_adeudado > 0 %}
     <div class="alert alert-warning" role="alert">
-        Mientras tengas multas pendientes no podrás solicitar, renovar ni reservar libros. Pásalas a pagar con el bibliotecario.
+        Mientras tengas multas pendientes no podrás solicitar, renovar ni reservar libros. Págalas con el bibliotecario.
     </div>
 {% endif %}
 
@@ -34,7 +34,7 @@
                     <td>{{ multa.prestamo.ejemplar.libro }}</td>
                     <td>{% include "multas/_motivo.html" %}</td>
                     <td>${{ multa.monto }}</td>
-                    <td>${{ multa.pagado }}</td>
+                    <td>${{ multa.pagado|floatformat:2 }}</td>
                     <td>
                         {% include "multas/_estado.html" %}
                         {% if multa.estado == "CONDONADA" and multa.justificacion_condonacion %}

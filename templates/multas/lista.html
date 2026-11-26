@@ -47,7 +47,7 @@
                     <td>{{ multa.prestamo.ejemplar.libro }}</td>
                     <td>{% include "multas/_motivo.html" %}</td>
                     <td>${{ multa.monto }}</td>
-                    <td>${{ multa.pagado }}</td>
+                    <td>${{ multa.pagado|floatformat:2 }}</td>
                     <td>{% include "multas/_estado.html" %}</td>
                     <td class="text-nowrap">
                         {% if multa.estado == "PENDIENTE" %}

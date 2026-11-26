@@ -87,7 +87,7 @@ ul.restricciones{font-size:13.5px;margin:4px 0 10px}
       <tr><td>Samanta</td><td>D · Multas y notificaciones</td></tr>
     </tbody>
   </table>
-  <p class="sub" style="font-size:15px;margin-top:20px">Profesor: <!-- nombre --> · Entrega: diciembre de 2026</p>
+  <p class="sub" style="font-size:15px;margin-top:20px">Profesor: Bárbaro Jorge Ferro Castro · Entrega: diciembre de 2026</p>
 </header>
 
 <!-- ============================================================ ÍNDICE -->
@@ -109,14 +109,97 @@ ul.restricciones{font-size:13.5px;margin:4px 0 10px}
 <h2 id="introduccion">1. Introducción y alcance</h2>
 <p>El sistema administra la biblioteca escolar: catálogo y ejemplares, préstamos y reservas, multas y pagos, notificaciones a los usuarios y reportes para el bibliotecario. Lo usan tres tipos de usuario: estudiantes y profesores (usuarios lectores, con políticas de préstamo distintas) y bibliotecarios.</p>
 <p>Está construido con <strong>Django 5.2</strong> siguiendo el patrón <strong>MTV</strong> (modelo, plantilla, vista), sobre <strong>MySQL 8.4</strong> en Docker. Las reglas de negocio viven en servicios y métodos de modelo; las vistas solo orquestan.</p>
-<div class="pendiente"><strong>Pendiente (todos):</strong> ajustar la introducción si quieren agregar objetivos o limitaciones del proyecto.</div>
+<h4>Objetivo</h4>
+<p>Automatizar la operación de la biblioteca escolar con una aplicación web en Django y MySQL, recorriendo el ciclo completo de ingeniería de software: especificación de requerimientos, modelado UML, diseño de la base de datos, implementación y pruebas.</p>
+<h4>Dentro del alcance</h4>
+<ul>
+  <li>Consulta del catálogo y búsqueda de libros con su disponibilidad.</li>
+  <li>Solicitud de préstamos en línea por estudiantes y profesores, con periodos distintos para cada tipo de usuario.</li>
+  <li>Entrega y devolución de ejemplares registradas por el bibliotecario.</li>
+  <li>Cálculo automático de multas por entrega tardía, pagos parciales y condonación.</li>
+  <li>Reservas de libros sin ejemplares disponibles, atendidas en orden de llegada.</li>
+  <li>Administración del acervo, de los usuarios (incluida la carga CSV), de las políticas de préstamo, reportes y notificaciones.</li>
+  <li>Un proceso programado (<code>procesar_vencimientos</code>) que marca préstamos vencidos, expira solicitudes y reservas y envía recordatorios.</li>
+</ul>
+<h4>Fuera del alcance</h4>
+<ul>
+  <li>Cobro de multas en línea: el pago se registra en el mostrador.</li>
+  <li>Préstamo de material digital y préstamo interbibliotecario.</li>
+  <li>Integración con el sistema escolar real: los usuarios se dan de alta en el propio sistema o por carga CSV.</li>
+  <li>Notificaciones por correo electrónico: solo se envían dentro de la aplicación.</li>
+</ul>
 
 <!-- ============================================================ 2 -->
 <h2 id="especificacion">2. Especificación</h2>
 
 <h3 id="requerimientos">2.1 Requerimientos</h3>
-<p>Los requerimientos funcionales (RF), no funcionales (RNF) y reglas de negocio (RN) completos están en <code>docs/requerimientos/requerimientos_proyecto_final.html</code>.</p>
-<div class="pendiente"><strong>Pendiente (todos):</strong> decidir si se copian aquí las tablas de RF, RNF y RN o se anexan como referencia.</div>
+<p>Tomados del documento de requerimientos del curso (<code>docs/requerimientos/requerimientos_proyecto_final.html</code>).</p>
+<h4>Requerimientos funcionales</h4>
+
+<table>
+  <thead><tr><th>ID</th><th>Requerimiento</th><th>Prioridad</th></tr></thead>
+  <tbody>
+    <tr><td>RF-01</td><td>El sistema permitirá autenticarse con usuario y contraseña, y restringirá las funciones según el rol (estudiante, profesor, bibliotecario).</td><td>Alta</td></tr>
+    <tr><td>RF-02</td><td>El sistema permitirá buscar libros por título, autor, ISBN, categoría y editorial, y mostrará la disponibilidad de ejemplares.</td><td>Alta</td></tr>
+    <tr><td>RF-03</td><td>El estudiante y el profesor podrán solicitar en línea el préstamo de un libro disponible.</td><td>Alta</td></tr>
+    <tr><td>RF-04</td><td>El sistema calculará la fecha de vencimiento según el tipo de usuario (RN-01).</td><td>Alta</td></tr>
+    <tr><td>RF-05</td><td>El bibliotecario registrará la entrega física del ejemplar y su devolución.</td><td>Alta</td></tr>
+    <tr><td>RF-06</td><td>Al registrar una devolución tardía, el sistema generará automáticamente la multa correspondiente (RN-07).</td><td>Alta</td></tr>
+    <tr><td>RF-07</td><td>El usuario lector podrá consultar sus préstamos activos, su historial y sus multas.</td><td>Alta</td></tr>
+    <tr><td>RF-08</td><td>El usuario lector podrá renovar un préstamo respetando RN-03 y RN-09.</td><td>Media</td></tr>
+    <tr><td>RF-09</td><td>El usuario lector podrá reservar un libro sin ejemplares disponibles y cancelar su reserva.</td><td>Media</td></tr>
+    <tr><td>RF-10</td><td>El bibliotecario podrá dar de alta, modificar, consultar y dar de baja libros, ejemplares, autores, editoriales y categorías.</td><td>Alta</td></tr>
+    <tr><td>RF-11</td><td>El bibliotecario podrá administrar usuarios (alta, edición, bloqueo y carga masiva desde CSV).</td><td>Alta</td></tr>
+    <tr><td>RF-12</td><td>El bibliotecario podrá registrar el pago de una multa o condonarla con justificación.</td><td>Alta</td></tr>
+    <tr><td>RF-13</td><td>El bibliotecario podrá configurar las políticas de préstamo por tipo de usuario.</td><td>Media</td></tr>
+    <tr><td>RF-14</td><td>El sistema generará reportes: préstamos por periodo, libros más solicitados, préstamos vencidos, multas cobradas y pendientes.</td><td>Media</td></tr>
+    <tr><td>RF-15</td><td>El sistema enviará notificaciones (dentro de la aplicación y opcionalmente por correo) de vencimiento próximo, préstamo vencido y reserva disponible.</td><td>Baja</td></tr>
+    <tr><td>RF-16</td><td>El profesor podrá enviar sugerencias de adquisición de libros, que el bibliotecario aprobará o rechazará.</td><td>Baja</td></tr>
+    <tr><td>RF-17</td><td>Un proceso programado (comando de Django) marcará préstamos vencidos y expirará solicitudes y reservas no atendidas.</td><td>Media</td></tr>
+  </tbody>
+</table>
+<h4>Requerimientos no funcionales</h4>
+
+<table>
+  <thead><tr><th>ID</th><th>Categoría</th><th>Requerimiento</th></tr></thead>
+  <tbody>
+    <tr><td>RNF-01</td><td>Seguridad</td><td>Contraseñas almacenadas con el hash de Django; protección CSRF activa; vistas protegidas con <code>@login_required</code> y verificación de rol.</td></tr>
+    <tr><td>RNF-02</td><td>Seguridad</td><td>Un usuario solo puede ver sus propios préstamos y multas; el bibliotecario puede ver todos.</td></tr>
+    <tr><td>RNF-03</td><td>Integridad</td><td>Las operaciones de préstamo, devolución y multa se ejecutan dentro de transacciones (<code>transaction.atomic</code>) para evitar prestar dos veces el mismo ejemplar.</td></tr>
+    <tr><td>RNF-04</td><td>Usabilidad</td><td>Interfaz en español, adaptable a dispositivos móviles; mensajes de error claros.</td></tr>
+    <tr><td>RNF-05</td><td>Rendimiento</td><td>Las búsquedas del catálogo responden en menos de 2 segundos con 10,000 libros; listados paginados.</td></tr>
+    <tr><td>RNF-06</td><td>Mantenibilidad</td><td>Código organizado en apps de Django, siguiendo PEP 8; reglas de negocio en modelos o servicios, no en plantillas.</td></tr>
+    <tr><td>RNF-07</td><td>Calidad</td><td>Pruebas automatizadas que cubran al menos las reglas RN-01 a RN-11.</td></tr>
+    <tr><td>RNF-08</td><td>Portabilidad</td><td>El proyecto se instala siguiendo el <code>README.md</code> con <code>requirements.txt</code>, migraciones y datos de prueba (<em>fixtures</em> o script de carga).</td></tr>
+  </tbody>
+</table>
+<h4>Reglas de negocio</h4>
+<p>Los valores numéricos son los predeterminados y deben poder modificarse desde el sistema (tabla <code>politica_prestamo</code>), sin cambiar código.</p>
+
+<table>
+  <thead><tr><th>ID</th><th>Regla</th><th>Estudiante</th><th>Profesor</th></tr></thead>
+  <tbody>
+    <tr><td>RN-01</td><td>Días de préstamo (naturales)</td><td>7 días</td><td>30 días</td></tr>
+    <tr><td>RN-02</td><td>Máximo de libros prestados simultáneamente</td><td>3</td><td>10</td></tr>
+    <tr><td>RN-03</td><td>Renovaciones permitidas por préstamo</td><td>1</td><td>2</td></tr>
+    <tr><td>RN-04</td><td>Multa por día de retraso, por ejemplar</td><td>$10.00 MXN</td><td>$10.00 MXN</td></tr>
+    <tr><td>RN-05</td><td>Multa máxima por préstamo (por retraso)</td><td>$300.00 MXN</td><td>$300.00 MXN</td></tr>
+    <tr><td>RN-06</td><td>Horas para recoger un libro solicitado o reservado antes de que la solicitud expire</td><td>48 h</td><td>48 h</td></tr>
+  </tbody>
+</table>
+
+<ul>
+  <li><strong>RN-07.</strong> La multa por retraso se calcula como <code>monto = min(días_retraso × multa_por_día, multa_máxima)</code>, donde <code>días_retraso = fecha_devolución − fecha_vencimiento</code> (si es positivo).</li>
+  <li><strong>RN-08.</strong> Un usuario con multas en estado <em>PENDIENTE</em> o con algún préstamo vencido <strong>no puede</strong> solicitar, renovar ni reservar libros hasta regularizar su situación.</li>
+  <li><strong>RN-09.</strong> No se puede renovar un préstamo vencido ni un préstamo de un libro que tenga reservas pendientes de otros usuarios.</li>
+  <li><strong>RN-10.</strong> La renovación extiende la fecha de vencimiento por el número de días de préstamo del tipo de usuario, contados a partir de la fecha de renovación.</li>
+  <li><strong>RN-11.</strong> Un usuario no puede tener dos préstamos activos del mismo título.</li>
+  <li><strong>RN-12.</strong> Las reservas se atienden en orden de llegada (FIFO). Al devolverse un ejemplar de un libro reservado, éste se aparta para el primer usuario en la cola y se le notifica.</li>
+  <li><strong>RN-13.</strong> En caso de pérdida o daño del ejemplar, el bibliotecario registra una multa adicional cuyo monto es el costo de reposición del libro.</li>
+  <li><strong>RN-14.</strong> Solo el bibliotecario puede condonar una multa, y debe registrar una justificación.</li>
+  <li><strong>RN-15.</strong> Un ejemplar con estado <em>EN_REPARACION</em>, <em>PERDIDO</em> o <em>BAJA</em> no puede prestarse.</li>
+  <li><strong>RN-16.</strong> Los registros de préstamos y multas no se eliminan físicamente; se conservan para el historial y los reportes.</li>
+</ul>
 
 <h3 id="cu-general">2.2 Diagrama general de casos de uso</h3>
 <figure class="diagrama">
@@ -984,6 +1067,19 @@ ul.restricciones{font-size:13.5px;margin:4px 0 10px}
   <img src="../uml/clases_D_multas.png" alt="Clases de diseño · Multas y notificaciones" data-pendiente="Pendiente (Samanta): exportar a docs/uml/clases_D_multas.png">
   <figcaption>Clases de diseño · Multas y notificaciones</figcaption>
 </figure>
+<div class="spec">
+<p>Clases del modelo de <code>multas</code> y <code>notificaciones</code> y sus servicios. Los nombres coinciden con el código.</p>
+<ul>
+<li><strong>Multa</strong>: motivo: MotivoMulta, dias_retraso, monto {&gt; 0}, estado: EstadoMulta, fecha_generacion, justificacion_condonacion [0..1] · {ck_multa_monto, ck_multa_motivo, ck_multa_estado}</li>
+<li><strong>Pago</strong>: monto {&gt; 0}, metodo: MetodoPago, folio_recibo {unique}, fecha_pago · {ck_pago_monto, ck_pago_metodo}</li>
+<li><strong>Notificacion</strong>: tipo: TipoNotificacion, mensaje [≤ 500], leida, fecha · {ck_notificacion_tipo}</li>
+<li><strong>«enumeration» MotivoMulta</strong>: RETRASO, DANIO, PERDIDA · <strong>«enumeration» EstadoMulta</strong>: PENDIENTE, PAGADA, CONDONADA · <strong>«enumeration» MetodoPago</strong>: EFECTIVO, TARJETA, TRANSFERENCIA · <strong>«enumeration» TipoNotificacion</strong>: VENCE_PRONTO, VENCIDO, RESERVA_DISPONIBLE, MULTA, GENERAL</li>
+<li><strong>«service» multas.services</strong>: tiene_multas_pendientes(usuario), monto_adeudado(usuario), registrar_devolucion(prestamo, bibliotecario), registrar_perdida_o_danio(prestamo, motivo, costo, bibliotecario), registrar_pago(multa, monto, metodo, folio, bibliotecario), condonar_multa(multa, justificacion, bibliotecario), saldo_de(multa)</li>
+<li><strong>«service» notificaciones.services</strong>: notificar(usuario, tipo, mensaje), notificaciones_sin_leer(usuario), marcar_todas_leidas(usuario)</li>
+<li><strong>Comando</strong> <code>procesar_vencimientos</code> (en <code>prestamos/management/commands/</code>): marcar_vencidos(), expirar_solicitudes(), expirar_reservas(), enviar_recordatorios(dias_aviso)</li>
+</ul>
+<p>Asociaciones: Prestamo 1 — 0..* Multa · Usuario 1 — 0..* Multa (usuario) · Usuario 0..1 — 0..* Multa (condonada_por) · Multa 1 — 0..* Pago · Usuario 1 — 0..* Pago (registrado_por) · Usuario 1 — 0..* Notificacion. La devolución libera el ejemplar con los contratos <code>asignar_siguiente_reserva()</code> (C) y <code>Ejemplar.cambiar_estado()</code> (B).</p>
+</div>
 
 <h3 id="secuencia">3.3 Diagramas de secuencia</h3>
 <figure class="diagrama">
@@ -1009,7 +1105,7 @@ ul.restricciones{font-size:13.5px;margin:4px 0 10px}
   <figcaption>Actividades · Préstamo y devolución (carriles)</figcaption>
 </figure>
 <figure class="diagrama">
-  <img src="../uml/act_multas.png" alt="Actividades · Cálculo y cobro de multas" data-pendiente="Pendiente (Samanta): exportar a docs/uml/act_multas.png">
+  <img src="../uml/act_multas.png" style="max-height:880px" alt="Actividades · Cálculo y cobro de multas" data-pendiente="Pendiente (Samanta): exportar a docs/uml/act_multas.png">
   <figcaption>Actividades · Cálculo y cobro de multas</figcaption>
 </figure>
 <figure class="diagrama">
@@ -1299,7 +1395,21 @@ ul.restricciones{font-size:13.5px;margin:4px 0 10px}
 
 <!-- ============================================================ 5 -->
 <h2 id="pantallas">5. Prototipo de pantallas</h2>
-<div class="pendiente"><strong>Pendiente (Alvaro):</strong> wireframes del sistema. Cada paquete le pasa su lista de pantallas; la del paquete B está abajo.</div>
+<p>Las tablas listan las pantallas de cada paquete con su contenido y su ruta. Al final se muestran capturas del sistema funcionando con los datos de prueba (<code>cargar_datos_prueba</code>), que sirven como prototipo final de las pantallas.</p>
+
+<h4>Paquete A · Usuarios y reportes <span class="responsable">Alvaro</span></h4>
+<table>
+  <thead><tr><th>Pantalla</th><th>Contenido</th><th>Ruta</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Iniciar sesión</strong></td><td>Usuario y contraseña; enlace «¿Olvidaste tu contraseña?».</td><td><code>/login/</code></td></tr>
+    <tr><td><strong>Recuperar contraseña</strong></td><td>Correo para recibir el enlace; pantalla de nueva contraseña.</td><td><code>/recuperar/</code></td></tr>
+    <tr><td><strong>Inicio</strong></td><td>Accesos directos según el rol.</td><td><code>/</code></td></tr>
+    <tr><td><strong>Usuarios</strong></td><td>Lista paginada con rol, estado y bloqueo; crear, editar, bloquear o desbloquear y desactivar.</td><td><code>/usuarios/</code></td></tr>
+    <tr><td><strong>Importar usuarios</strong></td><td>Carga de archivo CSV con resumen de filas creadas y errores.</td><td><code>/usuarios/importar/</code></td></tr>
+    <tr><td><strong>Reportes</strong></td><td>Filtro por periodo y cinco reportes: préstamos por periodo, libros más solicitados, vencidos, multas cobradas y pendientes.</td><td><code>/reportes/</code></td></tr>
+  </tbody>
+</table>
+
 
 <h4>Paquete B · Administración del acervo <span class="responsable">Diego</span></h4>
 <table>
@@ -1312,6 +1422,70 @@ ul.restricciones{font-size:13.5px;margin:4px 0 10px}
   <thead><tr><th>Pantalla</th><th>Contenido</th><th>Ruta</th></tr></thead>
   <tbody><tr><td><strong>Solicitar préstamo</strong></td><td>Resumen del libro, días de préstamo, fecha estimada de vencimiento y plazo para recoger; botón «Confirmar solicitud». Si no es elegible, muestra todos los motivos.</td><td><code>/prestamos/libro/&lt;id&gt;/solicitar/</code></td></tr><tr><td><strong>Reservar libro</strong></td><td>Confirmación de la reserva y lugar en la fila. Si hay ejemplares disponibles, ofrece solicitar el préstamo.</td><td><code>/prestamos/libro/&lt;id&gt;/reservar/</code></td></tr><tr><td><strong>Mis préstamos</strong></td><td>Préstamos vigentes e historial con estado, fechas y renovaciones restantes; botones «Renovar» y «Cancelar solicitud» (CU-09, CU-10, CU-08, CU-13).</td><td><code>/prestamos/mis-prestamos/</code></td></tr><tr><td><strong>Mis reservas</strong></td><td>Reservas con estado, lugar en la fila y fecha límite para recoger; botón «Cancelar» (CU-12).</td><td><code>/prestamos/mis-reservas/</code></td></tr><tr><td><strong>Solicitudes pendientes</strong></td><td>Bibliotecario: solicitudes SOLICITADO con usuario, libro, ejemplar y fecha límite; botón «Entregar» (CU-23).</td><td><code>/prestamos/solicitudes/</code></td></tr><tr><td><strong>Préstamo en mostrador</strong></td><td>Bibliotecario: usuario y código de inventario del ejemplar (CU-24).</td><td><code>/prestamos/mostrador/</code></td></tr><tr><td><strong>Reservas</strong></td><td>Bibliotecario: reservas filtradas por estado, cola FIFO por libro; botones «Entregar» (recoger reserva) y «Cancelar» con motivo (CU-30).</td><td><code>/prestamos/reservas/</code></td></tr><tr><td><strong>Políticas de préstamo</strong></td><td>Bibliotecario: tabla de políticas por tipo de usuario y formulario de edición (CU-31).</td><td><code>/prestamos/politicas/</code></td></tr></tbody>
 </table>
+
+<h4>Paquete D · Multas y notificaciones <span class="responsable">Samanta</span></h4>
+<table>
+  <thead><tr><th>Pantalla</th><th>Contenido</th><th>Ruta</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Mis multas</strong></td><td>Monto adeudado, aviso de RN-08 y tabla paginada con fecha, libro, motivo, monto, pagado y estado.</td><td><code>/multas/mis-multas/</code></td></tr>
+    <tr><td><strong>Notificaciones</strong></td><td>Avisos del usuario por tipo, con las no leídas resaltadas y botón «Marcar como leídas».</td><td><code>/notificaciones/</code></td></tr>
+    <tr><td><strong>Devoluciones</strong></td><td>Préstamos activos y vencidos con búsqueda; botones «Registrar devolución» y «Pérdida o daño».</td><td><code>/multas/devolucion/</code></td></tr>
+    <tr><td><strong>Pérdida o daño</strong></td><td>Motivo y costo de reposición (propone el del libro).</td><td><code>/multas/perdida-danio/&lt;id&gt;/</code></td></tr>
+    <tr><td><strong>Multas</strong></td><td>Lista con filtro por estado y búsqueda por lector; acciones de pago y condonación.</td><td><code>/multas/</code></td></tr>
+    <tr><td><strong>Registrar pago</strong></td><td>Saldo, pagos anteriores y formulario de monto, método y folio.</td><td><code>/multas/&lt;id&gt;/pagar/</code></td></tr>
+    <tr><td><strong>Condonar multa</strong></td><td>Datos de la multa y justificación obligatoria.</td><td><code>/multas/&lt;id&gt;/condonar/</code></td></tr>
+  </tbody>
+</table>
+
+<h4>Capturas del sistema</h4>
+<figure class="diagrama">
+  <img src="../pantallas/01_login.png" alt="Inicio de sesión (CU-01)">
+  <figcaption>Inicio de sesión (CU-01)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/02_catalogo.png" alt="Catálogo con búsqueda y filtros (CU-04)">
+  <figcaption>Catálogo con búsqueda y filtros (CU-04)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/03_detalle.png" alt="Detalle de libro con «Solicitar préstamo» (CU-05, CU-06)">
+  <figcaption>Detalle de libro con «Solicitar préstamo» (CU-05, CU-06)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/04_mis_prestamos.png" alt="Mis préstamos del lector (CU-09, CU-13)">
+  <figcaption>Mis préstamos del lector (CU-09, CU-13)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/05_mis_multas.png" alt="Mis multas con el monto adeudado (CU-14)">
+  <figcaption>Mis multas con el monto adeudado (CU-14)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/06_notificaciones.png" alt="Notificaciones del lector (CU-15)">
+  <figcaption>Notificaciones del lector (CU-15)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/07_solicitudes.png" alt="Solicitudes pendientes del bibliotecario (CU-23)">
+  <figcaption>Solicitudes pendientes del bibliotecario (CU-23)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/08_devoluciones.png" alt="Registrar devolución (CU-25, CU-27)">
+  <figcaption>Registrar devolución (CU-25, CU-27)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/09_multas.png" alt="Multas: pago y condonación (CU-28, CU-29)">
+  <figcaption>Multas: pago y condonación (CU-28, CU-29)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/10_usuarios.png" alt="Gestión de usuarios (CU-20 a CU-22)">
+  <figcaption>Gestión de usuarios (CU-20 a CU-22)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/11_reportes.png" alt="Panel de reportes (CU-32)">
+  <figcaption>Panel de reportes (CU-32)</figcaption>
+</figure>
+<figure class="diagrama">
+  <img src="../pantallas/12_politicas.png" alt="Políticas de préstamo (CU-31)">
+  <figcaption>Políticas de préstamo (CU-31)</figcaption>
+</figure>
 
 <!-- ============================================================ 6 -->
 <h2 id="implementacion">6. Implementación</h2>
@@ -1337,7 +1511,9 @@ python -m venv .venv &amp;&amp; source .venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py cargar_datos_prueba
-python manage.py runserver</pre>
+python manage.py runserver
+python manage.py test                    # 324 pruebas
+python manage.py procesar_vencimientos   # tarea diaria: CU-34, CU-35, CU-36</pre>
 
 <h3>6.3 Datos de prueba</h3>
 <p><code>python manage.py cargar_datos_prueba</code> crea 6 carreras, 5 departamentos, 2 bibliotecarios, 5 profesores, 20 estudiantes, 10 categorías, 14 editoriales, 66 autores, 50 libros, 118 ejemplares y 3 sugerencias. No duplica datos si se ejecuta de nuevo. Con <code>--libros 10000</code> agrega libros sintéticos para medir RNF-05. Cada app puede sumar sus datos con un módulo <code>datos_prueba.py</code> que exponga <code>cargar()</code>.</p>
@@ -1357,17 +1533,18 @@ python manage.py runserver</pre>
   <thead><tr><th>App</th><th>Qué se prueba</th><th>Pruebas</th></tr></thead>
   <tbody>
     <tr><td><code>catalogo</code></td><td>RN-15 (<code>es_prestable</code> con cada estado), contratos con préstamos, unicidad de ISBN y código de inventario, CHECK y PROTECT; búsqueda por cada criterio; permisos; baja lógica; sugerencias; datos de prueba.</td><td>34</td></tr>
-    <tr><td><code>cuentas</code></td><td><!-- Alvaro --></td><td></td></tr>
-    <tr><td><code>prestamos</code></td><td>Modelos y transiciones de estado; política por tipo de usuario y su validación; elegibilidad (RN-02, RN-08 con multas reales, RN-11, cuenta bloqueada); solicitar, entregar, mostrador, cancelar, renovar (RN-03, RN-09, RN-10), reservar y recoger con cola FIFO (RN-12); concurrencia con bloqueo de filas; vistas por rol (permisos, POST exitoso y rechazado); datos de prueba.</td><td>199</td></tr>
-    <tr><td><code>multas</code> / <code>notificaciones</code></td><td><!-- Samanta --></td><td></td></tr>
-    <tr><td><code>reportes</code></td><td><!-- Alvaro --></td><td></td></tr>
+    <tr><td><code>cuentas</code></td><td>Modelos de usuario, estudiante y profesor (clave compartida, semestre, matrícula única, PROTECT); inicio y cierre de sesión; recuperación de contraseña; permisos por rol; gestión, bloqueo y desbloqueo de usuarios; importación CSV con validación de filas; formularios.</td><td>41</td></tr>
+    <tr><td><code>prestamos</code></td><td>Modelos y transiciones de estado; política por tipo de usuario y su validación; elegibilidad (RN-02, RN-08 con multas reales, RN-11, cuenta bloqueada); solicitar, entregar, mostrador, cancelar, renovar (RN-03, RN-09, RN-10), reservar y recoger con cola FIFO (RN-12); concurrencia con bloqueo de filas; vistas por rol (permisos, POST exitoso y rechazado); datos de prueba; comando <code>procesar_vencimientos</code> (CU-34 a CU-36).</td><td>206</td></tr>
+    <tr><td><code>multas</code> / <code>notificaciones</code></td><td>Devolución con multa por retraso en sus casos límite (0, 1, varios días y tope de $300) y cola de reservas al devolver (RN-12); pérdida y daño (RN-13, RN-15); pagos parciales y totales; condonación con justificación (RN-14); permisos de las pantallas (RNF-02); notificaciones propias y marcar como leídas.</td><td>21 + 5</td></tr>
+    <tr><td><code>reportes</code></td><td>Consultas de los cinco reportes (límites del periodo, agrupación por título, vencidos, multas cobradas por fecha de pago y pendientes descontando abonos), validación del periodo y acceso solo para el bibliotecario.</td><td>17</td></tr>
+    <tr><th colspan="2">Total</th><th>324</th></tr>
   </tbody>
 </table>
-<div class="pendiente"><strong>Pendiente (cada paquete):</strong> qué prueba su app y cuántas pruebas tiene (<code>python manage.py test &lt;app&gt;</code>). Rendimiento: la búsqueda del catálogo con 10,000 libros responde en menos de 0.1 s (RNF-05 pide menos de 2 s).</div>
+<p>Las 324 pruebas pasan sobre MySQL 8.4 (<code>python manage.py test</code>). Rendimiento: la búsqueda del catálogo con 10,000 libros responde en menos de 0.1 s; RNF-05 pide menos de 2 s.</p>
 
 <!-- ============================================================ 8 -->
 <h2 id="conclusiones">8. Conclusiones</h2>
-<p>El proyecto entregó un sistema web funcional para administrar el acervo, los préstamos, las reservas y las multas de una biblioteca escolar, construido con Django 5.2 y MySQL 8.4 en contenedores Docker. El trabajo se dividió en cuatro paquetes (cuentas y reportes, catálogo, préstamos y reservas, multas y notificaciones) que se integran a través de funciones de servicio bien definidas, y el conjunto cuenta con 293 pruebas automatizadas que se ejecutan sobre la rama <code>develop</code>.</p>
+<p>El proyecto entregó un sistema web funcional para administrar el acervo, los préstamos, las reservas y las multas de una biblioteca escolar, construido con Django 5.2 y MySQL 8.4 en contenedores Docker. El trabajo se dividió en cuatro paquetes (cuentas y reportes, catálogo, préstamos y reservas, multas y notificaciones) que se integran a través de funciones de servicio bien definidas, y el conjunto cuenta con 324 pruebas automatizadas que pasan sobre la rama <code>develop</code>. Los 36 casos de uso del catálogo están descritos con la plantilla del curso y los artefactos de diseño cubren los cuatro paquetes.</p>
 <h3>Lecciones aprendidas</h3>
 <ul>
   <li><strong>Acordar los contratos entre paquetes al inicio.</strong> Funciones como <code>Libro.ejemplares_disponibles()</code>, <code>Ejemplar.es_prestable()</code>, <code>tiene_multas_pendientes()</code> y <code>verificar_elegibilidad()</code> permitieron que cada integrante avanzara en paralelo sin depender del código interno de los demás.</li>
@@ -1385,10 +1562,9 @@ python manage.py runserver</pre>
 </ul>
 <h3>Trabajo futuro</h3>
 <ul>
-  <li>Completar la tarea programada que marca préstamos vencidos y expira solicitudes y reservas (CU-34 y CU-35), y el envío automático de recordatorios (CU-36).</li>
-  <li>Conectar el registro de devoluciones con la asignación automática del siguiente lector en la cola de reservas.</li>
-  <li>Terminar las pantallas de multas y notificaciones y ampliar sus pruebas.</li>
-  <li>Enviar notificaciones por correo electrónico además de las notificaciones dentro del sistema.</li>
+  <li>Enviar las notificaciones también por correo electrónico (RF-15 lo deja como opcional).</li>
+  <li>Programar <code>procesar_vencimientos</code> en el servidor (cron o el programador de tareas de Windows) para que corra solo cada día.</li>
+  <li>Agregar el pago en línea de multas con una pasarela, hoy fuera del alcance.</li>
   <li>Publicar la versión estable en la rama <code>main</code> y desplegarla en un servidor de la escuela.</li>
 </ul>
 
